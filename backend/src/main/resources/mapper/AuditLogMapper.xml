@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.novel.mapper.AuditLogMapper">
+
+    <select id="findByUserId" resultType="com.novel.entity.AuditLog">
+        SELECT * FROM audit_logs
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findByAction" resultType="com.novel.entity.AuditLog">
+        SELECT * FROM audit_logs
+        WHERE action = #{action}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findByDateRange" resultType="com.novel.entity.AuditLog">
+        SELECT * FROM audit_logs
+        WHERE created_at BETWEEN #{startDate} AND #{endDate}
+        ORDER BY created_at DESC
+    </select>
+
+    <delete id="deleteOldLogs">
+        DELETE FROM audit_logs
+        WHERE created_at &lt; #{beforeDate}
+    </delete>
+
+</mapper>

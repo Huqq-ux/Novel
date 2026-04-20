@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>实验三：表单验证</title>
+  <style>
+    body { font-family: "Microsoft YaHei", sans-serif; padding: 20px; }
+    .header-box { background-color: #e1f3d8; border: 1px solid #67c23a; padding: 10px;
+      margin-bottom: 20px; text-align: center; font-weight: bold; color: #333; }
+    .form-container { max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: inline-block; width: 100px; text-align: right; margin-right: 10px; }
+    .form-group input { width: 250px; padding: 5px; }
+    .btn-submit { margin-left: 110px; padding: 8px 20px; background-color: #409EFF;
+      color: white; border: none; cursor: pointer; }
+    .btn-submit:hover { background-color: #66b1ff; }
+  </style>
+</head>
+<body>
+
+<div class="header-box">
+  学号：2307020218 &nbsp;&nbsp; 姓名：张松泉
+</div>
+
+<div class="form-container">
+  <h2 style="text-align: center;">用户注册</h2>
+  <form id="regForm" onsubmit="return validateForm()">
+    <div class="form-group">
+      <label>登录账号:</label>
+      <input type="text" id="username" placeholder="字母开头，仅含字母数字">
+    </div>
+    <div class="form-group">
+      <label>密码:</label>
+      <input type="password" id="password" placeholder="8位以上，含特殊字符">
+    </div>
+    <div class="form-group">
+      <label>确认密码:</label>
+      <input type="password" id="confirmPassword">
+    </div>
+    <div class="form-group">
+      <label>姓名:</label>
+      <input type="text" id="realname">
+    </div>
+    <div class="form-group">
+      <label>身份证号:</label>
+      <input type="text" id="idcard" placeholder="18位身份证">
+    </div>
+    <div class="form-group">
+      <label>出生年月日:</label>
+      <input type="text" id="birthday" placeholder="yyyy-mm-dd">
+    </div>
+    <div class="form-group">
+      <label>住址:</label>
+      <input type="text" id="address">
+    </div>
+    <div class="form-group">
+      <label>邮编:</label>
+      <input type="text" id="zipcode" placeholder="6位数字">
+    </div>
+    <div class="form-group">
+      <label>E-mail:</label>
+      <input type="text" id="email">
+    </div>
+
+    <button type="submit" class="btn-submit">提交注册</button>
+  </form>
+</div>
+
+<script>
+  function getVal(id) { return document.getElementById(id).value.trim(); }
+  function focusId(id) { document.getElementById(id).focus(); }
+
+  function validateForm() {
+    let username = getVal('username');
+    let password = getVal('password');
+    let confirmPassword = getVal('confirmPassword');
+    let idcard = getVal('idcard');
+    let birthday = getVal('birthday');
+    let zipcode = getVal('zipcode');
+    let email = getVal('email');
+
+    let userReg = /^[a-zA-Z][a-zA-Z0-9]*$/;
+    if (!userReg.test(username)) {
+      alert("登录账号必须是字母开头，且只能包含字母和数字！");
+      focusId('username');
+      return false;
+    }
+
+    if (password.length < 8) {
+      alert("密码长度必须在 8 位以上！");
+      focusId('password');
+      return false;
+    }
+    let specialCharReg = /[^a-zA-Z0-9]/;
+    if (!specialCharReg.test(password)) {
+      alert("密码必须包含字母和数字之外的特殊字符！");
+      focusId('password');
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      alert("两次输入的密码不一致！");
+      focusId('confirmPassword');
+      return false;
+    }
+
+    let idReg = /^\d{17}[\dXx]$/;
+    if (!idReg.test(idcard)) {
+      alert("身份证号码必须是 18 位，最后一位可以是数字或 X！");
+      focusId('idcard');
+      return false;
+    }
+
+    let dateReg = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateReg.test(birthday)) {
+      alert("出生年月日格式必须为 yyyy-mm-dd！");
+      focusId('birthday');
+      return false;
+    }
+
+    let idBirthPart = idcard.substring(6, 14);
+    let formBirthPart = birthday.replace(/-/g, "");
+
+    if (idBirthPart !== formBirthPart) {
+      alert("身份证号码中的出生日期与填写的出生年月日不一致！");
+      focusId('idcard');
+      return false;
+    }
+
+    let zipReg = /^\d{6}$/;
+    if (!zipReg.test(zipcode)) {
+      alert("邮编必须是 6 位数字！");
+      focusId('zipcode');
+      return false;
+    }
+
+    let emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailReg.test(email)) {
+      alert("E-mail 格式不正确！");
+      focusId('email');
+      return false;
+    }
+
+    alert("验证通过，提交成功！");
+    return true;
+  }
+</script>
+</body>
+</html>
