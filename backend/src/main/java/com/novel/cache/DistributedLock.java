@@ -1,4 +1,4 @@
-package com.novel.module.common.cache;
+package com.novel.cache;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class DistributedLock {
     private static final long DEFAULT_WAIT_TIME = 5000;
     private static final long DEFAULT_RETRY_INTERVAL = 100;
 
-    private static final String UNLOCK_SCRIPT = 
+    private static final String UNLOCK_SCRIPT =
         "if redis.call('get', KEYS[1]) == ARGV[1] then " +
         "return redis.call('del', KEYS[1]) " +
         "else return 0 end";
@@ -36,12 +36,10 @@ public class DistributedLock {
     public String tryLock(String key, long expireTime, TimeUnit unit) {
         String lockKey = LOCK_PREFIX + key;
         String lockValue = UUID.randomUUID().toString();
-        
         try {
             boolean acquired = Boolean.TRUE.equals(
                 redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, expireTime, unit)
             );
-            
             if (acquired) {
                 log.debug("Lock acquired: {}", lockKey);
                 return lockValue;
@@ -58,19 +56,16 @@ public class DistributedLock {
         String lockValue = UUID.randomUUID().toString();
         long startTime = System.currentTimeMillis();
         long waitMillis = unit.toMillis(waitTime);
-        long expireMillis = unit.toMillis(expireTime);
 
         while (System.currentTimeMillis() - startTime < waitMillis) {
             try {
                 boolean acquired = Boolean.TRUE.equals(
-                    redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, expireTime, TimeUnit.MILLISECONDS)
+                    redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, expireTime, unit)
                 );
-
                 if (acquired) {
                     log.debug("Lock acquired with wait: {}", lockKey);
                     return lockValue;
                 }
-
                 Thread.sleep(DEFAULT_RETRY_INTERVAL);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -81,14 +76,12 @@ public class DistributedLock {
                 return null;
             }
         }
-
         log.warn("Lock acquisition timeout: {}", lockKey);
         return null;
     }
 
     public boolean unlock(String key, String lockValue) {
         String lockKey = LOCK_PREFIX + key;
-        
         try {
             DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(UNLOCK_SCRIPT, Long.class);
             Long result = redisTemplate.execute(
@@ -96,7 +89,6 @@ public class DistributedLock {
                 Collections.singletonList(lockKey),
                 lockValue
             );
-
             boolean success = result != null && result > 0;
             if (success) {
                 log.debug("Lock released: {}", lockKey);

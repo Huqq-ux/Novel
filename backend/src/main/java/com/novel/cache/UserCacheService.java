@@ -1,9 +1,6 @@
-package com.novel.module.user.cache;
+package com.novel.cache;
 
 import com.novel.entity.User;
-import com.novel.module.common.cache.CacheConstants;
-import com.novel.module.common.cache.CacheProtectionService;
-import com.novel.module.common.cache.CacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +71,7 @@ public class UserCacheService {
     public boolean deductCoins(Long userId, Integer amount, Supplier<Boolean> deductOperation) {
         String lockKey = "coin:deduct:" + userId;
         String lockValue = cacheService.getOrLoad(lockKey, String.class, () -> null);
-        
+
         if (lockValue != null) {
             log.warn("Coin deduction already in progress for user: {}", userId);
             return false;

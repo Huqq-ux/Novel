@@ -1,4 +1,4 @@
-package com.novel.module.common.cache;
+package com.novel.cache;
 
 import java.util.concurrent.TimeUnit;
 

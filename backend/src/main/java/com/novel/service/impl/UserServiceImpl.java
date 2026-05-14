@@ -2,7 +2,7 @@ package com.novel.service.impl;
 
 import com.novel.entity.User;
 import com.novel.mapper.UserMapper;
-import com.novel.module.user.cache.UserCacheService;
+import com.novel.cache.UserCacheService;
 import com.novel.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;

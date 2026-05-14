@@ -1,9 +1,6 @@
-package com.novel.module.content.cache;
+package com.novel.cache;
 
 import com.novel.entity.Chapter;
-import com.novel.module.common.cache.CacheConstants;
-import com.novel.module.common.cache.CacheProtectionService;
-import com.novel.module.common.cache.CacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
