@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { List, Card, Button, Grid, Tag } from 'antd-mobile'
-import { bookApi } from '../services/api'
+import { List, Card, Button, Grid, Tag, Input, SearchBar } from 'antd-mobile'
+import { bookApi, aiApi } from '../services/api'
 import type { Book } from '../types'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -13,6 +13,11 @@ export default function Discover() {
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
+
+  const [showAIRecommend, setShowAIRecommend] = useState(false)
+  const [aiInput, setAiInput] = useState('')
+  const [aiAnswer, setAiAnswer] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
 
   const categories = [
     { id: '技术', name: '技术', icon: '💻' },
@@ -82,9 +87,6 @@ export default function Discover() {
     setSelectedCategory(null)
   }
 
-  /**
-   * 返回分类列表
-   */
   const handleBack = () => {
     setSelectedCategory(null)
     setSelectedSort(null)
@@ -93,9 +95,22 @@ export default function Discover() {
     setHasMore(true)
   }
 
-  /**
-   * 获取当前显示的标题
-   */
+  const handleAIRecommend = async () => {
+    if ((!aiInput.trim() && !selectedCategory) || aiLoading) return
+    setAiLoading(true)
+    setShowAIRecommend(true)
+    try {
+      const userId = parseInt(localStorage.getItem('userId') || '0') || undefined
+      const message = aiInput.trim() || `推荐${selectedCategory}类的小说`
+      const result = await aiApi.recommend(message, undefined, userId) as any
+      setAiAnswer(result?.response || '抱歉，AI推荐暂时不可用。')
+    } catch {
+      setAiAnswer('抱歉，AI推荐暂时不可用，请稍后再试。')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
   const getTitle = () => {
     if (selectedCategory) {
       const category = categories.find(c => c.id === selectedCategory)
@@ -123,6 +138,99 @@ export default function Discover() {
 
       {!selectedCategory && !selectedSort && (
         <>
+          <SearchBar
+            placeholder="搜索书名或作者"
+            onSearch={(val) => navigate(`/search?keyword=${encodeURIComponent(val)}`)}
+            onFocus={() => navigate('/search')}
+            style={{ marginBottom: '12px' }}
+          />
+
+          <Card
+            style={{
+              marginBottom: '16px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: '#fff',
+              border: 'none',
+            }}
+          >
+            <div style={{ padding: '4px 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                <span style={{ fontSize: '24px' }}>✨</span>
+                <span style={{ fontSize: '16px', fontWeight: 600 }}>AI智能推荐</span>
+              </div>
+              <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '12px' }}>
+                告诉我你的阅读偏好，AI为你量身推荐好书
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Input
+                  placeholder="如：推荐科幻小说、类似三体的书..."
+                  value={aiInput}
+                  onChange={setAiInput}
+                  onEnterPress={handleAIRecommend}
+                  style={{
+                    flex: 1,
+                    '--background': 'rgba(255,255,255,0.2)',
+                    '--color': '#fff',
+                    '--placeholder-color': 'rgba(255,255,255,0.7)',
+                    '--border-radius': '8px',
+                  } as any}
+                />
+                <Button
+                  size="small"
+                  style={{
+                    background: 'rgba(255,255,255,0.25)',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    borderRadius: '8px',
+                  }}
+                  onClick={handleAIRecommend}
+                  loading={aiLoading}
+                >
+                  推荐
+                </Button>
+              </div>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+                {['推荐科幻小说', '最近热门文学', '类似斗破苍穹', '适合睡前阅读'].map(q => (
+                  <span
+                    key={q}
+                    onClick={() => { setAiInput(q) }}
+                    style={{
+                      padding: '3px 10px',
+                      borderRadius: '12px',
+                      background: 'rgba(255,255,255,0.2)',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {q}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          {showAIRecommend && (
+            <Card
+              style={{
+                marginBottom: '16px',
+                borderLeft: '3px solid #764ba2',
+                background: 'linear-gradient(135deg, #f9f7ff 0%, #fff 100%)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                <span style={{ fontSize: '16px' }}>🤖</span>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#764ba2' }}>AI推荐结果</span>
+              </div>
+              {aiLoading ? (
+                <div style={{ color: '#999', fontSize: '13px' }}>AI正在为您精选推荐...</div>
+              ) : (
+                <div style={{ fontSize: '13px', lineHeight: '1.7', whiteSpace: 'pre-wrap', color: '#333' }}>
+                  {aiAnswer}
+                </div>
+              )}
+            </Card>
+          )}
+
           <Card title="分类浏览" style={{ marginBottom: '16px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
               {categories.map((category) => (

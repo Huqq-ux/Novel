@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(npx skills *)",
+      "Bash(git ls-remote *)",
+      "Bash(git clone *)",
+      "Bash(SKILLS_CLONE_TIMEOUT_MS=600000 npx skills *)",
+      "Bash(git config *)",
+      "Bash(ssh -T git@github.com)",
+      "Bash(nslookup github.com)",
+      "Bash(curl -sI https://github.com)",
+      "Bash(mvn compile *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npx tsc *)",
+      "Bash(python -m py_compile app/config.py)",
+      "Bash(python -m py_compile app/core/llm.py)",
+      "Bash(python -m py_compile app/api/chat.py)"
+    ]
+  },
+  "language": "chinese"
+}

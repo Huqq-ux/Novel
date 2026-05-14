@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { InfiniteScroll, Grid, Card, Tag, PullToRefresh } from 'antd-mobile'
+import { InfiniteScroll, Grid, Card, Tag, PullToRefresh, SearchBar } from 'antd-mobile'
 import { bookApi } from '../services/api'
 import type { Book } from '../types'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
@@ -72,6 +72,13 @@ export default function Home() {
   return (
     <div style={{ padding: '12px', paddingBottom: '60px' }}>
       <PullToRefresh onRefresh={handleRefresh}>
+        <SearchBar
+          placeholder="搜索书名或作者"
+          onSearch={(val) => navigate(`/search?keyword=${encodeURIComponent(val)}`)}
+          onFocus={() => navigate('/search')}
+          style={{ marginBottom: '12px' }}
+        />
+
         <div
           onClick={() => navigate('/paid-books')}
           style={{

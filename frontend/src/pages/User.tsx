@@ -186,7 +186,6 @@ export default function User() {
     { icon: '🔔', title: '消息通知', desc: '系统消息', path: '/notifications' },
     { icon: '⚙️', title: '设置', desc: '应用设置', path: '/settings' },
     { icon: '❓', title: '帮助与反馈', desc: '常见问题', path: '/help-feedback' },
-    { icon: '📞', title: '联系客服', desc: '在线客服', path: '/customer-service' },
   ]
 
   const adminMenuItems = [
