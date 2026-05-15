@@ -128,6 +128,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/books/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/ratings/**").permitAll()
                 .requestMatchers("/error").permitAll()
+                .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/coin/packages").permitAll()
                 .anyRequest().authenticated()

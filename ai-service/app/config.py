@@ -7,8 +7,8 @@ load_dotenv()
 class Settings:
     # DeepSeek API
     DEEPSEEK_API_KEY: str = os.environ.get("DEEPSEEK_API_KEY", "")
-    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
-    DEEPSEEK_MODEL: str = "deepseek-v4-pro"
+    DEEPSEEK_BASE_URL: str = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+    DEEPSEEK_MODEL: str = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-pro")
 
     # Database
     DB_HOST: str = os.environ.get("DB_HOST", "localhost")
@@ -18,7 +18,7 @@ class Settings:
     DB_PASSWORD: str = os.environ.get("DB_PASSWORD", "123456")
 
     # Redis
-    REDIS_HOST: str = os.environ.get("REDIS_HOST", "192.168.159.128")
+    REDIS_HOST: str = os.environ.get("REDIS_HOST", "redis")
     REDIS_PORT: int = int(os.environ.get("REDIS_PORT", "6379"))
     REDIS_PASSWORD: str = os.environ.get("REDIS_PASSWORD", "123456")
     REDIS_DB: int = 0
@@ -28,6 +28,9 @@ class Settings:
 
     # ChromaDB
     CHROMA_PERSIST_DIR: str = os.path.join(os.path.dirname(__file__), "chroma_data")
+
+    # BGE Model (pre-downloaded via ModelScope in Docker, or online via HuggingFace)
+    BGE_MODEL_PATH: str = os.environ.get("BGE_MODEL_PATH", "BAAI/bge-small-zh-v1.5")
 
     @property
     def DATABASE_URL(self) -> str:

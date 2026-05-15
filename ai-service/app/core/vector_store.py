@@ -23,7 +23,7 @@ class VectorStore:
         self._client = chromadb.PersistentClient(path=settings.CHROMA_PERSIST_DIR)
 
         self._embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name="BAAI/bge-small-zh-v1.5",
+            model_name=settings.BGE_MODEL_PATH,
         )
 
         self._collection = self._client.get_or_create_collection(
