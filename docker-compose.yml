@@ -47,11 +47,11 @@ services:
       - novel-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD", "curl", "-f", "--connect-timeout", "3", "--max-time", "5", "http://localhost:8080/actuator/health"]
       interval: 15s
-      timeout: 5s
+      timeout: 10s
       retries: 10
-      start_period: 40s
+      start_period: 60s
 
   # ========== FastAPI AI 服务 ==========
   ai-service:
@@ -86,11 +86,11 @@ services:
       - novel-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:8001/docs || exit 1"]
+      test: ["CMD", "curl", "-f", "--connect-timeout", "3", "--max-time", "5", "http://localhost:8001/api/ai/admin/health"]
       interval: 15s
-      timeout: 5s
+      timeout: 10s
       retries: 10
-      start_period: 60s
+      start_period: 90s
 
   # ========== MySQL 8.0 ==========
   mysql:
