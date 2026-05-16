@@ -155,7 +155,7 @@ export default function Reader() {
           localStorage.setItem('user', JSON.stringify(user))
         }
         
-        setUnlockStatus({ ...unlockStatus, needUnlock: false, unlocked: true })
+        setUnlockStatus({ needUnlock: false, isFree: unlockStatus!.isFree, price: unlockStatus!.price, unlocked: true })
         loadBookAndChapter()
       } else {
         Toast.show(response?.message || '解锁失败')

@@ -13,12 +13,6 @@ interface Message {
 
 type AIModule = 'customer_service' | 'recommend' | 'search'
 
-const MODULE_LABELS: Record<AIModule, string> = {
-  customer_service: 'AI客服',
-  recommend: '智能推荐',
-  search: '智能搜索',
-}
-
 const MODULE_PLACEHOLDERS: Record<AIModule, string> = {
   customer_service: '请描述您遇到的问题...',
   recommend: '告诉我您想看什么类型的书...',

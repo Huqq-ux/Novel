@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Toast, Dialog, Tabs } from 'antd-mobile'
+import { Button, Toast, Dialog } from 'antd-mobile'
 import { authorBookApi } from '../services/api'
 import ImageUploader from '../components/ImageUploader'
 
@@ -226,12 +226,6 @@ export default function AuthorBooks() {
       price: chapter.price || 10,
       isFree: chapter.isFree,
     })
-  }
-
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return ''
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('zh-CN')
   }
 
   return (

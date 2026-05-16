@@ -11,6 +11,9 @@ export interface Book {
   rating: number
   updateTime: string
   isFinished: boolean
+  totalWords?: number
+  priceType?: number
+  freeChapterCount?: number
 }
 
 export interface Chapter {
@@ -20,6 +23,8 @@ export interface Chapter {
   content: string
   order: number
   wordCount: number
+  isFree?: number
+  price?: number
 }
 
 export interface BookshelfItem {

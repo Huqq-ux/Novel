@@ -18,6 +18,7 @@ interface Book {
   collectCount: number
   rating: number
   isFinished: boolean
+  createTime?: string
 }
 
 const categories = ['全部', '玄幻', '仙侠', '都市', '历史', '科幻', '游戏', '悬疑', '言情', '其他']

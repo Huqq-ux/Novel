@@ -44,7 +44,7 @@ export default function AuthorAuditNew() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [pendingRes, allRes]: any[] = await Promise.all([
+      const [, allRes]: any[] = await Promise.all([
         authorApi.getPendingApplications(),
         authorApi.getAllApplications(),
       ])

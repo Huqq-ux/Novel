@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, List, Button, Empty, Tag, Dialog } from 'antd-mobile'
+import { List, Button, Empty, Tag, Dialog } from 'antd-mobile'
 import { LeftOutline } from 'antd-mobile-icons'
 import { notificationApi } from '../services/api'
 
