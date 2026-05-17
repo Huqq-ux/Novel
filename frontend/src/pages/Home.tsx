@@ -1,8 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
-import { InfiniteScroll, Grid, Card, Tag, PullToRefresh, SearchBar } from 'antd-mobile'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
+import { Bell } from 'lucide-react'
 import { bookApi } from '../services/api'
 import type { Book } from '../types'
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
+import SearchBar from '../components/SearchBar'
+import BookCover from '../components/BookCover'
+import InfiniteScroll from '../components/InfiniteScroll'
+import PullToRefresh from '../components/PullToRefresh'
+import styles from './Home.module.css'
+
+const CATEGORIES = [
+  { id: '科幻', name: '科幻', icon: '🚀' },
+  { id: '文学', name: '文学', icon: '📚' },
+  { id: '悬疑', name: '悬疑', icon: '🔍' },
+  { id: '奇幻', name: '奇幻', icon: '🧙' },
+  { id: '言情', name: '言情', icon: '💕' },
+]
 
 export default function Home() {
   const [books, setBooks] = useState<Book[]>([])
@@ -15,31 +28,20 @@ export default function Home() {
   const category = searchParams.get('category')
   const sort = searchParams.get('sort')
 
-  const fetchBooks = useCallback(async (pageNum: number, categoryParam: string | null, sortParam: string | null, append: boolean = false) => {
+  const fetchBooks = useCallback(async (pageNum: number, cat: string | null, s: string | null, append: boolean) => {
     if (loading) return
     setLoading(true)
     try {
       const params: any = { page: pageNum, size: 10 }
-      if (categoryParam) {
-        params.category = categoryParam
-      }
-      if (sortParam === 'hot') {
-        params.sort = 'clickCount'
-      } else if (sortParam === 'new') {
-        params.sort = 'createTime'
-      } else if (sortParam === 'rating') {
-        params.sort = 'rating'
-      } else if (sortParam === 'finish') {
-        params.isFinished = true
-      }
-      
+      if (cat) params.category = cat
+      if (s === 'hot') params.sort = 'clickCount'
+      else if (s === 'new') params.sort = 'createTime'
+      else if (s === 'rating') params.sort = 'rating'
+      else if (s === 'finish') params.isFinished = true
+
       const res: any = await bookApi.getBooks(params)
-      if (res && res.code === 200 && res.data && res.data.records) {
-        if (append) {
-          setBooks(prev => [...prev, ...res.data.records])
-        } else {
-          setBooks(res.data.records)
-        }
+      if (res?.code === 200 && res.data?.records) {
+        setBooks(prev => append ? [...prev, ...res.data.records] : res.data.records)
         setHasMore(res.data.records.length >= 10)
       }
     } catch (error) {
@@ -57,8 +59,6 @@ export default function Home() {
 
   const handleRefresh = async () => {
     setPage(1)
-    setBooks([])
-    setHasMore(true)
     await fetchBooks(1, category, sort, false)
   }
 
@@ -70,112 +70,82 @@ export default function Home() {
   }, [category, sort])
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <PullToRefresh onRefresh={handleRefresh}>
-        <SearchBar
-          placeholder="搜索书名或作者"
-          onSearch={(val) => navigate(`/search?keyword=${encodeURIComponent(val)}`)}
-          onFocus={() => navigate('/search')}
-          style={{ marginBottom: '12px' }}
-        />
-
-        <div
-          onClick={() => navigate('/paid-books')}
-          style={{
-            background: 'linear-gradient(135deg, #ff9500 0%, #ff6b00 100%)',
-            borderRadius: '12px',
-            padding: '16px',
-            marginBottom: '16px',
-            color: '#fff',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>
-              💰 付费书籍专区
-            </div>
-            <div style={{ fontSize: '13px', opacity: 0.9 }}>
-              精选优质付费内容，开启精彩阅读之旅
-            </div>
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className={styles.page}>
+        <div className={styles.header}>
+          <div className={styles.brand}>
+            <h1>梧桐书院</h1>
+            <p>好书如挚友，终身不相忘</p>
           </div>
-          <div style={{ fontSize: '24px' }}>→</div>
+          <div className={styles.notifyBtn} onClick={() => navigate('/notifications')}>
+            <Bell size={18} color="var(--color-text-tertiary)" />
+            <span className={styles.notifyDot} />
+          </div>
         </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px' }}>
-            {category ? `${category}分类` : '热门推荐'}
-          </h2>
-          {books.length === 0 && !loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#999' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
-              <div>暂无书籍数据</div>
-            </div>
-          ) : (
-            <>
-              <Grid columns={2} gap={12}>
-                {books.map((book) => (
-                  <Grid.Item key={book.id}>
-                    <Card
-                      onClick={() => navigate(`/book/${book.id}`, { state: { from: location.pathname + location.search } })}
-                      style={{ padding: '8px' }}
-                    >
-                      <div style={{ position: 'relative' }}>
-                        <img
-                          src={book.cover || 'https://placehold.co/150x200/eee/999?text=Book'}
-                          alt={book.title}
-                          style={{
-                            width: '100%',
-                            height: '160px',
-                            objectFit: 'cover',
-                            borderRadius: '4px',
-                          }}
-                        />
-                        {book.isFinished && (
-                          <Tag
-                            color="success"
-                            style={{
-                              position: 'absolute',
-                              top: '4px',
-                              right: '4px',
-                              fontSize: '10px',
-                            }}
-                          >
-                            完结
-                          </Tag>
-                        )}
-                      </div>
-                      <div style={{ marginTop: '8px' }}>
-                        <div
-                          className="text-ellipsis"
-                          style={{ fontSize: '14px', fontWeight: 'bold' }}
-                        >
-                          {book.title}
-                        </div>
-                        <div
-                          className="text-ellipsis"
-                          style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}
-                        >
-                          {book.author}
-                        </div>
-                        <div
-                          className="text-ellipsis-2"
-                          style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}
-                        >
-                          {book.description}
-                        </div>
-                      </div>
-                    </Card>
-                  </Grid.Item>
-                ))}
-              </Grid>
-              <InfiniteScroll loadMore={loadMore} hasMore={hasMore} />
-            </>
-          )}
+        <div className={styles.searchWrap}>
+          <SearchBar
+            onSearch={val => navigate(`/search?keyword=${encodeURIComponent(val)}`)}
+            onFocus={() => navigate('/search')}
+          />
         </div>
-      </PullToRefresh>
-    </div>
+
+        <div className={styles.heroBanner} onClick={() => navigate('/paid-books')}>
+          <div className={styles.heroBadge}>Editor's Pick · 今日推荐</div>
+          <div className={styles.heroTitle}>精选付费书籍专区</div>
+          <div className={styles.heroDesc}>精选优质付费内容，开启精彩阅读之旅</div>
+          <div className={styles.heroAction}>立即探索 →</div>
+        </div>
+
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionTitle}>分类浏览</span>
+          <span className={styles.sectionMore}>全部 →</span>
+        </div>
+        <div className={styles.categories}>
+          {CATEGORIES.map(cat => (
+            <div key={cat.id} className={styles.categoryItem}
+              onClick={() => navigate(`/home?category=${cat.id}`)}>
+              <div className={styles.categoryIcon}>{cat.icon}</div>
+              <div className={styles.categoryName}>{cat.name}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionTitle}>
+            {category ? `${category}分类` : '🔥 热门推荐'}
+          </span>
+        </div>
+
+        {books.length === 0 && !loading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-placeholder)' }}>
+            <div style={{ fontSize: '48px', marginBottom: '12px' }}>📚</div>
+            <div>暂无书籍数据</div>
+          </div>
+        ) : (
+          <InfiniteScroll loadMore={loadMore} hasMore={hasMore} loading={loading}>
+            <div className={styles.bookGrid}>
+              {books.map(book => (
+                <div
+                  key={book.id}
+                  className={styles.bookCard}
+                  onClick={() => navigate(`/book/${book.id}`, { state: { from: location.pathname + location.search } })}
+                >
+                  <div className={styles.bookCoverWrap}>
+                    <BookCover src={book.cover} alt={book.title} height="130px" />
+                    {book.isFinished && <span className={styles.finishedBadge}>完结</span>}
+                  </div>
+                  <div className={styles.bookInfo}>
+                    <div className={`${styles.bookTitle} text-ellipsis`}>{book.title}</div>
+                    <div className={`${styles.bookAuthor} text-ellipsis`}>{book.author}</div>
+                    <div className={styles.bookMeta}>⭐ {book.rating || '新书'}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </InfiniteScroll>
+        )}
+      </div>
+    </PullToRefresh>
   )
 }

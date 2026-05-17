@@ -1,0 +1,207 @@
+.page {
+  padding: var(--space-md);
+  padding-bottom: 60px;
+}
+
+.header {
+  padding: var(--space-lg) var(--space-md) var(--space-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand h1 {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  letter-spacing: 1px;
+}
+
+.brand p {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-placeholder);
+  margin-top: 2px;
+}
+
+.notifyBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.notifyDot {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-danger);
+  border-radius: var(--radius-full);
+}
+
+.searchWrap {
+  padding: var(--space-sm) var(--space-md) var(--space-lg);
+}
+
+.heroBanner {
+  margin: 0 var(--space-md) var(--space-lg);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #8b7355 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl) var(--space-xl);
+  color: var(--color-text-inverse);
+  box-shadow: 0 4px 16px rgba(139, 115, 85, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.heroBadge {
+  font-size: 10px;
+  opacity: 0.8;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.heroDesc {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.heroAction {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 18px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
+.sectionMore {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-placeholder);
+}
+
+.categories {
+  display: flex;
+  gap: var(--space-sm);
+  padding: 0 var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.categoryItem {
+  flex: 1;
+  text-align: center;
+}
+
+.categoryIcon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-surface));
+  border-radius: var(--radius-lg);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.categoryName {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.bookGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  padding: 0 var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.bookCard {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.bookCard:active {
+  transform: scale(0.97);
+}
+
+.bookCoverWrap {
+  position: relative;
+  height: 130px;
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-surface));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.finishedBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 8px;
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-sm);
+  font-size: 9px;
+}
+
+.bookInfo {
+  padding: var(--space-sm);
+}
+
+.bookTitle {
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
+.bookAuthor {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+.bookMeta {
+  margin-top: 6px;
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+}
