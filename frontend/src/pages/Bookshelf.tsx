@@ -1,13 +1,28 @@
-import { useEffect } from 'react'
-import { List, Card, Button, Empty } from 'antd-mobile'
+import { useState, useEffect } from 'react'
 import { useBookshelfStore } from '../store/bookshelf'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { bookshelfApi } from '../services/api'
+import { Trash2 } from 'lucide-react'
+import Card from '../components/Card'
+import Button from '../components/Button'
+import Tag from '../components/Tag'
+import Empty from '../components/Empty'
+import BookCover from '../components/BookCover'
+import styles from './Bookshelf.module.css'
+
+type FilterKey = 'all' | 'reading' | 'finished'
+
+const FILTERS: { key: FilterKey; label: string; activeColor: 'primary' | 'accent' | 'default' }[] = [
+  { key: 'all', label: '全部', activeColor: 'primary' },
+  { key: 'reading', label: '阅读中', activeColor: 'primary' },
+  { key: 'finished', label: '已读完', activeColor: 'accent' },
+]
 
 export default function Bookshelf() {
   const { bookshelf, removeFromBookshelf, setBookshelf } = useBookshelfStore()
   const navigate = useNavigate()
   const location = useLocation()
+  const [filter, setFilter] = useState<FilterKey>('all')
 
   useEffect(() => {
     loadBookshelf()
@@ -66,82 +81,122 @@ export default function Bookshelf() {
     return date.toLocaleDateString('zh-CN')
   }
 
-  // @ts-ignore
+  const filteredBooks = bookshelf.filter((item) => {
+    if (filter === 'all') return true
+    const isFinished = item.book?.isFinished || item.progress >= 100
+    if (filter === 'reading') return !isFinished
+    return isFinished
+  })
+
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>
-          我的书架
-        </h2>
+    <div className={styles.page}>
+      <div className={styles.headerSection}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>我的书架</h2>
+          <span className={styles.count}>{bookshelf.length} 本</span>
+        </div>
+        <div className={styles.filters}>
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              className={styles.filterBtn}
+              onClick={() => setFilter(f.key)}
+            >
+              <Tag color={filter === f.key ? f.activeColor : 'default'}>
+                {f.label}
+              </Tag>
+            </button>
+          ))}
+        </div>
       </div>
-      {bookshelf.length === 0 ? (
-        <div style={{ padding: '40px 0', textAlign: 'center' }}>
+
+      {filteredBooks.length === 0 ? (
+        <div className={styles.empty}>
           <Empty
-            description="书架空空如也"
-            style={{ paddingBottom: '20px' }}
+            description={
+              bookshelf.length === 0 ? '书架空空如也' : '没有符合条件的书籍'
+            }
+            action={
+              bookshelf.length === 0 ? (
+                <Button variant="primary" size="sm" onClick={() => navigate('/discover')}>
+                  去发现
+                </Button>
+              ) : undefined
+            }
           />
-          <Button
-            color="primary"
-            size="small"
-            onClick={() => navigate('/home')}
-          >
-            去选书
-          </Button>
         </div>
       ) : (
-        <List>
-          {bookshelf.map((item) => (
-            <List.Item
-              key={item.id}
-              onClick={() => navigate(`/book/${item.bookId}`, { state: { from: location.pathname } })}
-              style={{ padding: '12px 0' }}
-            >
+        <div className={styles.list}>
+          {filteredBooks.map((item) => {
+            const isFinished = item.book?.isFinished || item.progress >= 100
+            return (
               <Card
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  padding: '8px',
-                  gap: '12px',
-                }}
+                key={item.id}
+                variant="elevated"
+                onClick={() =>
+                  navigate(`/book/${item.bookId}`, {
+                    state: { from: location.pathname },
+                  })
+                }
               >
-                <img
-                  src={item.book?.cover || 'https://placehold.co/80x100/eee/999?text=Book'}
-                  alt={item.book?.title}
-                  style={{
-                    width: '80px',
-                    height: '100px',
-                    objectFit: 'cover',
-                    borderRadius: '4px',
-                  }}
-                />
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '4px' }}>
-                    {item.book?.title}
+                <div className={styles.itemInner}>
+                  <div className={styles.itemCover}>
+                    <BookCover
+                      src={
+                        item.book?.cover ||
+                        'https://placehold.co/80x100/eee/999?text=Book'
+                      }
+                      alt={item.book?.title}
+                      width={80}
+                      height={100}
+                    />
                   </div>
-                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>
-                    {item.book?.author}
+                  <div className={styles.itemInfo}>
+                    <div className={styles.bookTitle}>{item.book?.title}</div>
+                    <div className={styles.bookAuthor}>{item.book?.author}</div>
+                    <div className={styles.progressSection}>
+                      <div className={styles.progressBar}>
+                        <div
+                          className={`${styles.progressFill} ${
+                            isFinished
+                              ? styles.progressFinished
+                              : styles.progressReading
+                          }`}
+                          style={{
+                            width: `${Math.min(item.progress || 0, 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <div className={styles.meta}>
+                        <span className={styles.metaProgress}>
+                          {formatProgress(item.progress)}
+                        </span>
+                        <span className={styles.metaDate}>
+                          {item.lastReadTime
+                            ? formatDate(item.lastReadTime)
+                            : '未阅读'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
-                    阅读进度: {formatProgress(item.progress)}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#999' }}>
-                    {item.lastReadTime ? formatDate(item.lastReadTime) : '未阅读'}
+                  <div className={styles.removeWrap}>
+                    <Button
+                      variant="text"
+                      danger
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleRemove(item.bookId)
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
                   </div>
                 </div>
-                <Button
-                  size="mini"
-                  color="danger"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleRemove(item.bookId)
-                  }}
-                >
-                  移除
-                </Button>
               </Card>
-            </List.Item>
-          ))}
-        </List>
+            )
+          })}
+        </div>
       )}
     </div>
   )

@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react'
-import { List, Card, Button, Grid, Tag, Input, SearchBar } from 'antd-mobile'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { Sparkles, Bot, ArrowLeft, ChevronRight } from 'lucide-react'
 import { bookApi, aiApi } from '../services/api'
 import type { Book } from '../types'
-import { useNavigate, useLocation } from 'react-router-dom'
+import Button from '../components/Button'
+import Card from '../components/Card'
+import Tag from '../components/Tag'
+import Input from '../components/Input'
+import SearchBar from '../components/SearchBar'
+import BookCover from '../components/BookCover'
+import Empty from '../components/Empty'
+import styles from './Discover.module.css'
 
 export default function Discover() {
   const navigate = useNavigate()
@@ -44,7 +52,7 @@ export default function Discover() {
       } else if (sort === 'finish') {
         params.isFinished = true
       }
-      
+
       const res: any = await bookApi.getBooks(params)
       if (res && res.code === 200 && res.data && res.data.records) {
         if (append) {
@@ -124,83 +132,63 @@ export default function Discover() {
   }
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+    <div className={styles.page}>
+      <div className={styles.headerBar}>
         {(selectedCategory || selectedSort) && (
-          <Button size="small" onClick={handleBack} style={{ marginRight: '12px' }}>
-            ← 返回
+          <Button variant="text" size="sm" onClick={handleBack}>
+            <ArrowLeft size={16} />
           </Button>
         )}
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>
+        <h2 className={styles.pageTitle}>
           {getTitle()}
         </h2>
       </div>
 
       {!selectedCategory && !selectedSort && (
         <>
-          <SearchBar
-            placeholder="搜索书名或作者"
-            onSearch={(val) => navigate(`/search?keyword=${encodeURIComponent(val)}`)}
-            onFocus={() => navigate('/search')}
-            style={{ marginBottom: '12px' }}
-          />
+          <div className={styles.searchWrap}>
+            <SearchBar
+              placeholder="搜索书名或作者"
+              onSearch={(val) => navigate(`/search?keyword=${encodeURIComponent(val)}`)}
+              onFocus={() => navigate('/search')}
+            />
+          </div>
 
-          <Card
-            style={{
-              marginBottom: '16px',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: '#fff',
-              border: 'none',
-            }}
-          >
-            <div style={{ padding: '4px 0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                <span style={{ fontSize: '24px' }}>✨</span>
-                <span style={{ fontSize: '16px', fontWeight: 600 }}>AI智能推荐</span>
+          <Card className={styles.aiCard}>
+            <div className={styles.aiCardInner}>
+              <div className={styles.aiCardHeader}>
+                <Sparkles size={20} />
+                <span className={styles.aiCardTitle}>AI智能推荐</span>
               </div>
-              <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '12px' }}>
+              <div className={styles.aiCardDesc}>
                 告诉我你的阅读偏好，AI为你量身推荐好书
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <Input
-                  placeholder="如：推荐科幻小说、类似三体的书..."
-                  value={aiInput}
-                  onChange={setAiInput}
-                  onEnterPress={handleAIRecommend}
-                  style={{
-                    flex: 1,
-                    '--background': 'rgba(255,255,255,0.2)',
-                    '--color': '#fff',
-                    '--placeholder-color': 'rgba(255,255,255,0.7)',
-                    '--border-radius': '8px',
-                  } as any}
-                />
+              <div className={styles.aiInputRow}>
+                <div className={styles.aiInput}>
+                  <Input
+                    placeholder="如：推荐科幻小说、类似三体的书..."
+                    value={aiInput}
+                    onChange={setAiInput}
+                    onEnterPress={handleAIRecommend}
+                    className={styles.aiInputField}
+                  />
+                </div>
                 <Button
-                  size="small"
-                  style={{
-                    background: 'rgba(255,255,255,0.25)',
-                    color: '#fff',
-                    border: '1px solid rgba(255,255,255,0.4)',
-                    borderRadius: '8px',
-                  }}
+                  variant="secondary"
+                  size="sm"
+                  className={styles.aiPromptBtn}
                   onClick={handleAIRecommend}
                   loading={aiLoading}
                 >
                   推荐
                 </Button>
               </div>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+              <div className={styles.aiSuggestionChips}>
                 {['推荐科幻小说', '最近热门文学', '类似斗破苍穹', '适合睡前阅读'].map(q => (
                   <span
                     key={q}
+                    className={styles.aiSuggestionChip}
                     onClick={() => { setAiInput(q) }}
-                    style={{
-                      padding: '3px 10px',
-                      borderRadius: '12px',
-                      background: 'rgba(255,255,255,0.2)',
-                      fontSize: '11px',
-                      cursor: 'pointer',
-                    }}
                   >
                     {q}
                   </span>
@@ -210,89 +198,93 @@ export default function Discover() {
           </Card>
 
           {showAIRecommend && (
-            <Card
-              style={{
-                marginBottom: '16px',
-                borderLeft: '3px solid #764ba2',
-                background: 'linear-gradient(135deg, #f9f7ff 0%, #fff 100%)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <span style={{ fontSize: '16px' }}>🤖</span>
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#764ba2' }}>AI推荐结果</span>
+            <Card className={styles.aiResultCard} variant="flat">
+              <div className={styles.aiResultHeader}>
+                <Bot size={16} color="var(--color-primary)" />
+                <span className={styles.aiResultTitle}>AI推荐结果</span>
               </div>
               {aiLoading ? (
-                <div style={{ color: '#999', fontSize: '13px' }}>AI正在为您精选推荐...</div>
+                <div className={styles.aiResultLoading}>AI正在为您精选推荐...</div>
               ) : (
-                <div style={{ fontSize: '13px', lineHeight: '1.7', whiteSpace: 'pre-wrap', color: '#333' }}>
+                <div className={styles.aiResultContent}>
                   {aiAnswer}
                 </div>
               )}
             </Card>
           )}
 
-          <Card title="分类浏览" style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+          <Card title="分类浏览" className={styles.categoryCard}>
+            <div className={styles.categoryGrid}>
               {categories.map((category) => (
                 <div
                   key={category.id}
+                  className={styles.categoryItem}
                   onClick={() => handleCategoryClick(category.id)}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    padding: '16px',
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                  }}
                 >
-                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>{category.icon}</div>
-                  <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{category.name}</div>
+                  <div className={styles.categoryIconWrap}>{category.icon}</div>
+                  <div className={styles.categoryName}>{category.name}</div>
                 </div>
               ))}
             </div>
           </Card>
 
-          <Card title="排行榜">
-            <List>
-              <List.Item
-                onClick={() => handleRankClick('hot')}
-                style={{ padding: '12px 0' }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>🔥 热门榜</span>
-                  <span style={{ color: '#999' }}>查看更多 →</span>
-                </div>
-              </List.Item>
-              <List.Item
-                onClick={() => handleRankClick('new')}
-                style={{ padding: '12px 0' }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>🆕 新书榜</span>
-                  <span style={{ color: '#999' }}>查看更多 →</span>
-                </div>
-              </List.Item>
-              <List.Item
-                onClick={() => handleRankClick('rating')}
-                style={{ padding: '12px 0' }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>⭐ 评分榜</span>
-                  <span style={{ color: '#999' }}>查看更多 →</span>
-                </div>
-              </List.Item>
-              <List.Item
-                onClick={() => handleRankClick('finish')}
-                style={{ padding: '12px 0' }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>✅ 完结榜</span>
-                  <span style={{ color: '#999' }}>查看更多 →</span>
-                </div>
-              </List.Item>
-            </List>
+          <Card title="排行榜" className={styles.rankingCard}>
+            <div
+              className={styles.rankingItem}
+              onClick={() => handleRankClick('hot')}
+            >
+              <div className={styles.rankingItemInner}>
+                <span className={styles.rankingLabel}>
+                  <span className={styles.rankingIcon}>🔥</span>
+                  热门榜
+                </span>
+                <span className={styles.rankingArrow}>
+                  查看更多 <ChevronRight size={14} />
+                </span>
+              </div>
+            </div>
+            <div
+              className={styles.rankingItem}
+              onClick={() => handleRankClick('new')}
+            >
+              <div className={styles.rankingItemInner}>
+                <span className={styles.rankingLabel}>
+                  <span className={styles.rankingIcon}>🆕</span>
+                  新书榜
+                </span>
+                <span className={styles.rankingArrow}>
+                  查看更多 <ChevronRight size={14} />
+                </span>
+              </div>
+            </div>
+            <div
+              className={styles.rankingItem}
+              onClick={() => handleRankClick('rating')}
+            >
+              <div className={styles.rankingItemInner}>
+                <span className={styles.rankingLabel}>
+                  <span className={styles.rankingIcon}>⭐</span>
+                  评分榜
+                </span>
+                <span className={styles.rankingArrow}>
+                  查看更多 <ChevronRight size={14} />
+                </span>
+              </div>
+            </div>
+            <div
+              className={styles.rankingItem}
+              onClick={() => handleRankClick('finish')}
+            >
+              <div className={styles.rankingItemInner}>
+                <span className={styles.rankingLabel}>
+                  <span className={styles.rankingIcon}>✅</span>
+                  完结榜
+                </span>
+                <span className={styles.rankingArrow}>
+                  查看更多 <ChevronRight size={14} />
+                </span>
+              </div>
+            </div>
           </Card>
         </>
       )}
@@ -300,78 +292,55 @@ export default function Discover() {
       {(selectedCategory || selectedSort) && (
         <div>
           {books.length === 0 && !loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#999' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
-              <div>暂无书籍数据</div>
-            </div>
+            <Empty
+              icon="📚"
+              description="暂无书籍数据"
+            />
           ) : (
             <>
-              <Grid columns={2} gap={12}>
+              <div className={styles.bookGrid}>
                 {books.map((book) => (
-                  <Grid.Item key={book.id}>
-                    <Card
-                      onClick={() => navigate(`/book/${book.id}`, { state: { from: location.pathname } })}
-                      style={{ padding: '8px' }}
-                    >
-                      <div style={{ position: 'relative' }}>
-                        <img
-                          src={book.cover || 'https://placehold.co/150x200/eee/999?text=Book'}
-                          alt={book.title}
-                          style={{
-                            width: '100%',
-                            height: '160px',
-                            objectFit: 'cover',
-                            borderRadius: '4px',
-                          }}
-                        />
-                        {book.isFinished && (
-                          <Tag
-                            color="success"
-                            style={{
-                              position: 'absolute',
-                              top: '4px',
-                              right: '4px',
-                              fontSize: '10px',
-                            }}
-                          >
-                            完结
-                          </Tag>
-                        )}
+                  <div
+                    key={book.id}
+                    className={styles.bookCard}
+                    onClick={() => navigate(`/book/${book.id}`, { state: { from: location.pathname } })}
+                  >
+                    <div className={styles.bookCoverWrap}>
+                      <BookCover
+                        src={book.cover || 'https://placehold.co/150x200/eee/999?text=Book'}
+                        alt={book.title}
+                      />
+                      {book.isFinished && (
+                        <div className={styles.finishedBadge}>
+                          <Tag color="accent">完结</Tag>
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.bookInfo}>
+                      <div className={`${styles.bookTitle} text-ellipsis`}>
+                        {book.title}
                       </div>
-                      <div style={{ marginTop: '8px' }}>
-                        <div
-                          className="text-ellipsis"
-                          style={{ fontSize: '14px', fontWeight: 'bold' }}
-                        >
-                          {book.title}
-                        </div>
-                        <div
-                          className="text-ellipsis"
-                          style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}
-                        >
-                          {book.author}
-                        </div>
-                        <div
-                          className="text-ellipsis-2"
-                          style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}
-                        >
-                          {book.description}
-                        </div>
+                      <div className={`${styles.bookAuthor} text-ellipsis`}>
+                        {book.author}
                       </div>
-                    </Card>
-                  </Grid.Item>
+                      <div className={`${styles.bookDesc} text-ellipsis-2`}>
+                        {book.description}
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </Grid>
+              </div>
               {hasMore && (
-                <Button
-                  block
-                  color="primary"
-                  onClick={loadMore}
-                  loading={loading}
-                  style={{ marginTop: '16px' }}
-                >
-                  {loading ? '加载中...' : '加载更多'}
-                </Button>
+                <div className={styles.loadMore}>
+                  <Button
+                    variant="primary"
+                    block
+                    onClick={loadMore}
+                    loading={loading}
+                  >
+                    {loading ? '加载中...' : '加载更多'}
+                  </Button>
+                </div>
               )}
             </>
           )}

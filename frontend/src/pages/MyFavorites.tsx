@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { List, Empty, Button, Toast } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft } from 'lucide-react'
+import BookCover from '../components/BookCover'
+import Button from '../components/Button'
+import Empty from '../components/Empty'
+import Toast from '../components/Toast'
+import styles from './MyFavorites.module.css'
 
 interface Favorite {
   id: number
@@ -34,74 +38,65 @@ export default function MyFavorites() {
 
   const handleRemove = (id: number) => {
     setFavorites(favorites.filter(f => f.id !== id))
-    Toast.show('已取消收藏')
+    Toast.show({ content: '已取消收藏' })
   }
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-        <div
-          onClick={() => navigate('/user')}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginRight: '12px',
-          }}
-        >
-          <LeftOutline fontSize={18} color="#fff" />
-        </div>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <button className={styles.backBtn} onClick={() => navigate('/user')}>
+          <ArrowLeft size={18} />
+        </button>
+        <h2 className={styles.title}>
           我的收藏
         </h2>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px' }}>加载中...</div>
+        <div className={styles.loading}>加载中...</div>
       ) : favorites.length === 0 ? (
-        <Empty description="暂无收藏" />
+        <Empty
+          description="暂无收藏"
+        />
       ) : (
-        <List>
+        <div className={styles.list}>
           {favorites.map((item) => (
-            <List.Item
+            <div
               key={item.id}
+              className={styles.favoriteCard}
               onClick={() => navigate(`/book/${item.bookId}`, { state: { from: location.pathname } })}
-              style={{ padding: '12px' }}
             >
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <img
-                  src={item.bookCover || 'https://placehold.co/60x80/eee/999?text=Book'}
+              <div className={styles.coverWrap}>
+                <BookCover
+                  src={item.bookCover}
                   alt={item.bookTitle}
-                  style={{
-                    width: '50px',
-                    height: '70px',
-                    objectFit: 'cover',
-                    borderRadius: '4px',
-                  }}
+                  width={60}
+                  height={80}
                 />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '4px' }}>
-                    {item.bookTitle}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    {item.author} · {item.category}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
-                    收藏于 {item.addTime}
-                  </div>
-                  <Button size="mini" fill="outline" onClick={(e) => { e.stopPropagation(); handleRemove(item.id) }}>
+              </div>
+              <div className={styles.favoriteInfo}>
+                <div className={styles.favoriteTitle}>
+                  {item.bookTitle}
+                </div>
+                <div className={styles.favoriteAuthor}>
+                  {item.author} - {item.category}
+                </div>
+                <div className={styles.favoriteDate}>
+                  {'收藏于 ' + item.addTime}
+                </div>
+                <div className={styles.favoriteAction}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={(e) => { e.stopPropagation(); handleRemove(item.id) }}
+                  >
                     取消收藏
                   </Button>
                 </div>
               </div>
-            </List.Item>
+            </div>
           ))}
-        </List>
+        </div>
       )}
     </div>
   )

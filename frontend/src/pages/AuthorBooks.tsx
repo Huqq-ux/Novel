@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Toast, Dialog } from 'antd-mobile'
+import { ArrowLeft, BookOpen, FileText } from 'lucide-react'
 import { authorBookApi } from '../services/api'
 import ImageUploader from '../components/ImageUploader'
+import Button from '../components/Button'
+import Tag from '../components/Tag'
+import Toast from '../components/Toast'
+import Modal from '../components/Modal'
+import styles from './AuthorBooks.module.css'
 
 interface Book {
   id: number
@@ -44,6 +49,9 @@ export default function AuthorBooks() {
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [showAddChapter, setShowAddChapter] = useState(false)
   const [editingChapter, setEditingChapter] = useState<Chapter | null>(null)
+
+  // Delete confirmation
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -92,7 +100,7 @@ export default function AuthorBooks() {
 
   const handleCreateBook = async () => {
     if (!formData.title.trim()) {
-      Toast.show('请输入书名')
+      Toast.show({ content: '请输入书名' })
       return
     }
 
@@ -100,7 +108,7 @@ export default function AuthorBooks() {
     try {
       const response: any = await authorBookApi.createBook(formData)
       if (response?.code === 200) {
-        Toast.show('创建成功')
+        Toast.success('创建成功')
         setShowCreateModal(false)
         setFormData({
           title: '',
@@ -112,10 +120,10 @@ export default function AuthorBooks() {
         })
         loadBooks()
       } else {
-        Toast.show(response?.message || '创建失败')
+        Toast.show({ content: response?.message || '创建失败' })
       }
     } catch (error: any) {
-      Toast.show(error.response?.data?.message || '创建失败')
+      Toast.show({ content: error.response?.data?.message || '创建失败' })
     } finally {
       setLoading(false)
     }
@@ -125,24 +133,24 @@ export default function AuthorBooks() {
     try {
       const response: any = await authorBookApi.updateBook(bookId, data)
       if (response?.code === 200) {
-        Toast.show('更新成功')
+        Toast.success('更新成功')
         loadBooks()
       } else {
-        Toast.show(response?.message || '更新失败')
+        Toast.show({ content: response?.message || '更新失败' })
       }
     } catch (error: any) {
-      Toast.show(error.response?.data?.message || '更新失败')
+      Toast.show({ content: error.response?.data?.message || '更新失败' })
     }
   }
 
   const handleAddChapter = async () => {
     if (!currentBook) return
     if (!chapterForm.title.trim()) {
-      Toast.show('请输入章节标题')
+      Toast.show({ content: '请输入章节标题' })
       return
     }
     if (!chapterForm.content.trim()) {
-      Toast.show('请输入章节内容')
+      Toast.show({ content: '请输入章节内容' })
       return
     }
 
@@ -150,16 +158,16 @@ export default function AuthorBooks() {
     try {
       const response: any = await authorBookApi.addChapter(currentBook.id, chapterForm)
       if (response?.code === 200) {
-        Toast.show('添加成功')
+        Toast.success('添加成功')
         setShowAddChapter(false)
         setChapterForm({ title: '', content: '', price: 10, isFree: 1 })
         loadChapters(currentBook.id)
         loadBooks()
       } else {
-        Toast.show(response?.message || '添加失败')
+        Toast.show({ content: response?.message || '添加失败' })
       }
     } catch (error: any) {
-      Toast.show(error.response?.data?.message || '添加失败')
+      Toast.show({ content: error.response?.data?.message || '添加失败' })
     } finally {
       setLoading(false)
     }
@@ -176,39 +184,36 @@ export default function AuthorBooks() {
         chapterForm
       )
       if (response?.code === 200) {
-        Toast.show('更新成功')
+        Toast.success('更新成功')
         setEditingChapter(null)
         setChapterForm({ title: '', content: '', price: 10, isFree: 1 })
         loadChapters(currentBook.id)
       } else {
-        Toast.show(response?.message || '更新失败')
+        Toast.show({ content: response?.message || '更新失败' })
       }
     } catch (error: any) {
-      Toast.show(error.response?.data?.message || '更新失败')
+      Toast.show({ content: error.response?.data?.message || '更新失败' })
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDeleteChapter = async (chapterId: number) => {
-    if (!currentBook) return
-
-    const confirmed = await Dialog.confirm({
-      content: '确定要删除这个章节吗？',
-    })
-    if (!confirmed) return
+  const confirmDeleteChapter = async () => {
+    if (!currentBook || deleteTargetId === null) return
 
     try {
-      const response: any = await authorBookApi.deleteChapter(currentBook.id, chapterId)
+      const response: any = await authorBookApi.deleteChapter(currentBook.id, deleteTargetId)
       if (response?.code === 200) {
-        Toast.show('删除成功')
+        Toast.success('删除成功')
         loadChapters(currentBook.id)
         loadBooks()
       } else {
-        Toast.show(response?.message || '删除失败')
+        Toast.show({ content: response?.message || '删除失败' })
       }
     } catch (error: any) {
-      Toast.show(error.response?.data?.message || '删除失败')
+      Toast.show({ content: error.response?.data?.message || '删除失败' })
+    } finally {
+      setDeleteTargetId(null)
     }
   }
 
@@ -229,32 +234,17 @@ export default function AuthorBooks() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <div
-        style={{
-          position: 'sticky',
-          top: 0,
-          background: '#fff',
-          padding: '12px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid #eee',
-          zIndex: 100,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div
-            onClick={() => navigate(-1)}
-            style={{ fontSize: '24px', marginRight: '12px', cursor: 'pointer' }}
-          >
-            ←
-          </div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold' }}>我的作品</div>
+    <div className={styles.page}>
+      <div className={styles.headerBar}>
+        <div className={styles.headerLeft}>
+          <button className={styles.backBtn} onClick={() => navigate(-1)}>
+            <ArrowLeft size={24} />
+          </button>
+          <div className={styles.headerTitle}>我的作品</div>
         </div>
         <Button
-          size="small"
-          color="primary"
+          size="sm"
+          variant="primary"
           onClick={() => setShowCreateModal(true)}
         >
           新建作品
@@ -262,121 +252,76 @@ export default function AuthorBooks() {
       </div>
 
       {books.length === 0 && !loading ? (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '60px 20px',
-            color: '#999',
-          }}
-        >
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
-          <div>暂无作品，点击右上角创建</div>
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>
+            <BookOpen size={48} />
+          </div>
+          <div className={styles.emptyText}>暂无作品，点击右上角创建</div>
         </div>
       ) : (
-        <div style={{ padding: '12px' }}>
+        <div className={styles.list}>
           {books.map((book) => (
-            <div
-              key={book.id}
-              style={{
-                background: '#fff',
-                borderRadius: '12px',
-                padding: '16px',
-                marginBottom: '12px',
-              }}
-            >
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <img
-                  src={book.cover || 'https://placehold.co/80x112/eee/999?text=封面'}
-                  alt={book.title}
-                  style={{
-                    width: '80px',
-                    height: '112px',
-                    borderRadius: '8px',
-                    objectFit: 'cover',
-                  }}
-                />
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      fontSize: '16px',
-                      fontWeight: 'bold',
-                      marginBottom: '4px',
-                    }}
-                  >
+            <div key={book.id} className={styles.bookCard}>
+              <div className={styles.bookCardInner}>
+                {book.cover ? (
+                  <img
+                    src={book.cover}
+                    alt={book.title}
+                    className={styles.coverImg}
+                    style={{ width: 80, height: 112 }}
+                  />
+                ) : (
+                  <div className={styles.coverPlaceholder}>
+                    <BookOpen size={32} />
+                  </div>
+                )}
+                <div className={styles.bookInfo}>
+                  <div className={styles.bookTitle}>
                     {book.title}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>
-                    {book.category} · {book.chapterCount}章 · {book.totalWords || 0}字
+                  <div className={styles.bookMeta}>
+                    {book.category} - {book.chapterCount}章 - {book.totalWords || 0}字
                   </div>
-                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
-                    点击 {book.clickCount || 0} · 收藏 {book.collectCount || 0}
+                  <div className={styles.bookStats}>
+                    点击 {book.clickCount || 0} - 收藏 {book.collectCount || 0}
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <span
-                      style={{
-                        background: book.priceType === 1 ? '#fff3e0' : '#e8f5e9',
-                        color: book.priceType === 1 ? '#ff9800' : '#4caf50',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                      }}
-                    >
+                  <div className={styles.tags}>
+                    <Tag color={book.priceType === 1 ? 'warning' : 'accent'}>
                       {book.priceType === 1 ? '付费' : '免费'}
-                    </span>
-                    <span
-                      style={{
-                        background: book.isFinished ? '#e3f2fd' : '#fce4ec',
-                        color: book.isFinished ? '#2196f3' : '#e91e63',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                      }}
-                    >
+                    </Tag>
+                    <Tag color={book.isFinished ? 'accent' : 'warning'}>
                       {book.isFinished ? '已完结' : '连载中'}
-                    </span>
-                    <span
-                      style={{
-                        background: book.status === 1 ? '#e8f5e9' : '#ffebee',
-                        color: book.status === 1 ? '#4caf50' : '#f44336',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                      }}
-                    >
+                    </Tag>
+                    <Tag color={book.status === 1 ? 'accent' : 'danger'}>
                       {book.status === 1 ? '已上架' : '已下架'}
-                    </span>
+                    </Tag>
                   </div>
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '8px',
-                  marginTop: '12px',
-                  paddingTop: '12px',
-                  borderTop: '1px solid #f0f0f0',
-                }}
-              >
+              <div className={styles.actions}>
                 <Button
-                  size="small"
+                  size="sm"
+                  variant="secondary"
                   onClick={() => openChapterModal(book)}
                 >
                   管理章节
                 </Button>
                 <Button
-                  size="small"
+                  size="sm"
+                  variant="secondary"
                   onClick={() => {
                     const newPriceType = book.priceType === 0 ? 1 : 0
-                    handleUpdateBook(book.id, { priceType: newPriceType })
+                    handleUpdateBook(book.id, { priceType: newPriceType } as any)
                   }}
                 >
                   {book.priceType === 0 ? '设为付费' : '设为免费'}
                 </Button>
                 <Button
-                  size="small"
+                  size="sm"
+                  variant="secondary"
                   onClick={() => {
-                    handleUpdateBook(book.id, { isFinished: !book.isFinished })
+                    handleUpdateBook(book.id, { isFinished: !book.isFinished } as any)
                   }}
                 >
                   {book.isFinished ? '设为连载' : '设为完结'}
@@ -387,80 +332,31 @@ export default function AuthorBooks() {
         </div>
       )}
 
+      {/* Create book modal */}
       {showCreateModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px',
-          }}
-          onClick={() => setShowCreateModal(false)}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: '12px',
-              width: '100%',
-              maxWidth: '400px',
-              maxHeight: '80vh',
-              overflow: 'auto',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              style={{
-                padding: '16px',
-                borderBottom: '1px solid #eee',
-                fontWeight: 'bold',
-                fontSize: '16px',
-              }}
-            >
+        <div className={styles.overlay} onClick={() => setShowCreateModal(false)}>
+          <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.dialogHeader}>
               创建新作品
             </div>
-            <div style={{ padding: '16px' }}>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                  书名 *
-                </label>
+            <div className={styles.dialogBody}>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>书名 *</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="请输入书名"
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
+                  className={styles.formNative}
                 />
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                  分类
-                </label>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>分类</label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
+                  className={`${styles.formNative} ${styles.select}`}
                 >
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
@@ -468,31 +364,19 @@ export default function AuthorBooks() {
                 </select>
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                  简介
-                </label>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>简介</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="请输入简介"
                   rows={4}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    resize: 'none',
-                    boxSizing: 'border-box',
-                  }}
+                  className={`${styles.formNative} ${styles.textarea}`}
                 />
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                  封面图片
-                </label>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>封面图片</label>
                 <ImageUploader
                   value={formData.cover}
                   onChange={(url) => setFormData({ ...formData, cover: url })}
@@ -500,12 +384,10 @@ export default function AuthorBooks() {
                 />
               </div>
 
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                  付费类型
-                </label>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>付费类型</label>
+                <div className={styles.radioGroup}>
+                  <label className={styles.radioLabel}>
                     <input
                       type="radio"
                       checked={formData.priceType === 0}
@@ -513,7 +395,7 @@ export default function AuthorBooks() {
                     />
                     免费
                   </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <label className={styles.radioLabel}>
                     <input
                       type="radio"
                       checked={formData.priceType === 1}
@@ -525,10 +407,8 @@ export default function AuthorBooks() {
               </div>
 
               {formData.priceType === 1 && (
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                    免费章节数
-                  </label>
+                <div className={styles.formRow}>
+                  <label className={styles.formLabel}>免费章节数</label>
                   <input
                     type="number"
                     value={formData.freeChapterCount}
@@ -537,28 +417,22 @@ export default function AuthorBooks() {
                     }
                     placeholder="前几章免费"
                     min="0"
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      boxSizing: 'border-box',
-                    }}
+                    className={styles.formNative}
                   />
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div className={styles.formActions}>
                 <Button
                   block
+                  variant="secondary"
                   onClick={() => setShowCreateModal(false)}
                 >
                   取消
                 </Button>
                 <Button
                   block
-                  color="primary"
+                  variant="primary"
                   onClick={handleCreateBook}
                   loading={loading}
                 >
@@ -570,49 +444,28 @@ export default function AuthorBooks() {
         </div>
       )}
 
+      {/* Chapter management modal (fullscreen) */}
       {showChapterModal && currentBook && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: '#f5f5f5',
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              position: 'sticky',
-              top: 0,
-              background: '#fff',
-              padding: '12px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid #eee',
-              zIndex: 100,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div
+        <div className={styles.overlayFull}>
+          <div className={styles.headerBar}>
+            <div className={styles.headerLeft}>
+              <button
+                className={styles.backBtn}
                 onClick={() => {
                   setShowChapterModal(false)
                   setChapters([])
                   setCurrentBook(null)
                 }}
-                style={{ fontSize: '24px', marginRight: '12px', cursor: 'pointer' }}
               >
-                ←
-              </div>
-              <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                <ArrowLeft size={24} />
+              </button>
+              <div className={styles.headerTitle}>
                 {currentBook.title} - 章节管理
               </div>
             </div>
             <Button
-              size="small"
-              color="primary"
+              size="sm"
+              variant="primary"
               onClick={() => setShowAddChapter(true)}
             >
               添加章节
@@ -620,55 +473,42 @@ export default function AuthorBooks() {
           </div>
 
           {chapters.length === 0 ? (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: '60px 20px',
-                color: '#999',
-              }}
-            >
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📄</div>
-              <div>暂无章节，点击右上角添加</div>
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>
+                <FileText size={48} />
+              </div>
+              <div className={styles.emptyText}>暂无章节，点击右上角添加</div>
             </div>
           ) : (
-            <div style={{ padding: '12px' }}>
+            <div className={styles.chapterList}>
               {chapters.map((chapter) => (
-                <div
-                  key={chapter.id}
-                  style={{
-                    background: '#fff',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    marginBottom: '8px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: '500' }}>
+                <div key={chapter.id} className={styles.chapterItem}>
+                  <div className={styles.chapterInfo}>
+                    <div className={styles.chapterTitle}>
                       第{chapter.orderNum}章 {chapter.title}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+                    <div className={styles.chapterMeta}>
                       {chapter.wordCount || 0}字
                       {currentBook.priceType === 1 && (
-                        <span style={{ marginLeft: '8px' }}>
-                          · {chapter.isFree === 1 ? '免费' : `${chapter.price || 10}书币`}
+                        <span className={styles.chapterMetaSep}>
+                          - {chapter.isFree === 1 ? '免费' : `${chapter.price || 10}书币`}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div className={styles.chapterActions}>
                     <Button
-                      size="mini"
+                      size="sm"
+                      variant="secondary"
                       onClick={() => openEditChapter(chapter)}
                     >
                       编辑
                     </Button>
                     <Button
-                      size="mini"
-                      color="danger"
-                      onClick={() => handleDeleteChapter(chapter.id)}
+                      size="sm"
+                      variant="secondary"
+                      danger
+                      onClick={() => setDeleteTargetId(chapter.id)}
                     >
                       删除
                     </Button>
@@ -680,49 +520,28 @@ export default function AuthorBooks() {
         </div>
       )}
 
+      {/* Add / Edit chapter page (fullscreen) */}
       {(showAddChapter || editingChapter) && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: '#fff',
-            zIndex: 1001,
-          }}
-        >
-          <div
-            style={{
-              position: 'sticky',
-              top: 0,
-              background: '#fff',
-              padding: '12px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid #eee',
-              zIndex: 100,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div
+        <div className={styles.editPage}>
+          <div className={styles.headerBar}>
+            <div className={styles.headerLeft}>
+              <button
+                className={styles.backBtn}
                 onClick={() => {
                   setShowAddChapter(false)
                   setEditingChapter(null)
                   setChapterForm({ title: '', content: '', price: 10, isFree: 1 })
                 }}
-                style={{ fontSize: '24px', marginRight: '12px', cursor: 'pointer' }}
               >
-                ←
-              </div>
-              <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                <ArrowLeft size={24} />
+              </button>
+              <div className={styles.headerTitle}>
                 {editingChapter ? '编辑章节' : '添加章节'}
               </div>
             </div>
             <Button
-              size="small"
-              color="primary"
+              size="sm"
+              variant="primary"
               onClick={editingChapter ? handleUpdateChapter : handleAddChapter}
               loading={loading}
             >
@@ -730,56 +549,35 @@ export default function AuthorBooks() {
             </Button>
           </div>
 
-          <div style={{ padding: '16px' }}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                章节标题 *
-              </label>
+          <div className={styles.editBody}>
+            <div className={styles.formRow}>
+              <label className={styles.formLabel}>章节标题 *</label>
               <input
                 type="text"
                 value={chapterForm.title}
                 onChange={(e) => setChapterForm({ ...chapterForm, title: e.target.value })}
                 placeholder="请输入章节标题"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
-                }}
+                className={styles.formNative}
               />
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                章节内容 *
-              </label>
+            <div className={styles.formRow}>
+              <label className={styles.formLabel}>章节内容 *</label>
               <textarea
                 value={chapterForm.content}
                 onChange={(e) => setChapterForm({ ...chapterForm, content: e.target.value })}
                 placeholder="请输入章节内容"
                 rows={15}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  resize: 'none',
-                  boxSizing: 'border-box',
-                }}
+                className={`${styles.formNative} ${styles.textarea}`}
               />
             </div>
 
             {currentBook?.priceType === 1 && (
               <>
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                    是否免费
-                  </label>
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div className={styles.formRow}>
+                  <label className={styles.formLabel}>是否免费</label>
+                  <div className={styles.radioGroup}>
+                    <label className={styles.radioLabel}>
                       <input
                         type="radio"
                         checked={chapterForm.isFree === 1}
@@ -787,7 +585,7 @@ export default function AuthorBooks() {
                       />
                       免费
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <label className={styles.radioLabel}>
                       <input
                         type="radio"
                         checked={chapterForm.isFree === 0}
@@ -799,10 +597,8 @@ export default function AuthorBooks() {
                 </div>
 
                 {chapterForm.isFree === 0 && (
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-                      章节价格（书币）
-                    </label>
+                  <div className={styles.formRow}>
+                    <label className={styles.formLabel}>章节价格（书币）</label>
                     <input
                       type="number"
                       value={chapterForm.price}
@@ -810,14 +606,7 @@ export default function AuthorBooks() {
                         setChapterForm({ ...chapterForm, price: parseInt(e.target.value) || 10 })
                       }
                       min="1"
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        border: '1px solid #ddd',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        boxSizing: 'border-box',
-                      }}
+                      className={styles.formNative}
                     />
                   </div>
                 )}
@@ -826,6 +615,17 @@ export default function AuthorBooks() {
           </div>
         </div>
       )}
+
+      {/* Delete confirmation modal */}
+      <Modal
+        visible={deleteTargetId !== null}
+        title="确认删除"
+        content="确定要删除这个章节吗？"
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={confirmDeleteChapter}
+        confirmText="确定"
+        danger
+      />
     </div>
   )
 }

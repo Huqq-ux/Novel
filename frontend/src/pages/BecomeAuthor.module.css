@@ -1,0 +1,237 @@
+/* BecomeAuthor page — 梧桐调 style */
+
+.page {
+  padding: var(--space-md);
+  padding-bottom: 60px;
+  min-height: 100vh;
+}
+
+/* === Header === */
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: var(--space-md);
+  border: none;
+  color: var(--color-text-inverse);
+  transition: background var(--transition-fast);
+}
+
+.backBtn:active {
+  background: var(--color-text-primary);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* === Loading === */
+.loading {
+  padding: 100px var(--space-md) var(--space-md);
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-base);
+}
+
+/* === Status card (already author / pending application) === */
+.statusCard {
+  text-align: center;
+  padding: var(--space-3xl) var(--space-xl);
+}
+
+.statusIcon {
+  font-size: 64px;
+  margin-bottom: var(--space-lg);
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.statusTitle {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.statusTag {
+  margin-bottom: var(--space-lg);
+}
+
+.statusMeta {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.statusHint {
+  font-size: var(--font-size-base);
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-lg);
+}
+
+.statusAction {
+  margin-top: var(--space-xl);
+}
+
+/* === Steps === */
+.steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-2xl);
+  position: relative;
+}
+
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 30px;
+  right: 30px;
+  height: 2px;
+  background: var(--color-border);
+  z-index: 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.stepDot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  margin-bottom: var(--space-xs);
+  background: var(--color-border);
+  color: var(--color-text-placeholder);
+  transition: all var(--transition-base);
+}
+
+.stepActive .stepDot {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.stepDone .stepDot {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.stepLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-placeholder);
+  text-align: center;
+  transition: color var(--transition-base);
+}
+
+.stepActive .stepLabel {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.stepDone .stepLabel {
+  color: var(--color-accent);
+}
+
+/* === Email verification section === */
+.verifySection {
+  margin-bottom: var(--space-lg);
+}
+
+.verifyHint {
+  margin-bottom: var(--space-lg);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+
+.formRow {
+  margin-bottom: var(--space-lg);
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+}
+
+.codeRow {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+}
+
+.codeRow > :first-child {
+  flex: 1;
+}
+
+.sendBtn {
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+.verifyBtn {
+  margin-top: var(--space-lg);
+}
+
+/* === Application form section === */
+.formSection {
+  margin-bottom: var(--space-lg);
+}
+
+.formGroup {
+  margin-bottom: var(--space-lg);
+}
+
+.formHelp {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-xs);
+}
+
+.submitBtn {
+  margin-top: var(--space-lg);
+}
+
+/* === Notice card === */
+.noticeCard {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+}
+
+.noticeCard p {
+  margin: 0 0 var(--space-xs);
+}
+
+.noticeCard p:last-child {
+  margin-bottom: 0;
+}

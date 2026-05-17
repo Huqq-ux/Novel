@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Toast } from 'antd-mobile'
+import { ArrowLeft, Star } from 'lucide-react'
 import { bookApi } from '../services/api'
+import Tag from '../components/Tag'
+import BookCover from '../components/BookCover'
+import Toast from '../components/Toast'
+import styles from './PaidBooks.module.css'
 
 interface Book {
   id: number
@@ -23,12 +27,19 @@ interface Book {
 
 const categories = ['全部', '玄幻', '仙侠', '都市', '历史', '科幻', '游戏', '悬疑', '言情', '其他']
 
+type SortBy = 'popular' | 'newest' | 'rating'
+
+/**
+ * 付费书籍页面
+ * 功能描述：展示平台所有付费书籍，支持分类筛选和多种排序方式
+ * 实现逻辑：通过 API 获取书籍列表，前端按 priceType 过滤付费书籍，根据分类和排序条件重新整理后渲染
+ */
 export default function PaidBooks() {
   const navigate = useNavigate()
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('全部')
-  const [sortBy, setSortBy] = useState<'popular' | 'newest' | 'rating'>('popular')
+  const [sortBy, setSortBy] = useState<SortBy>('popular')
 
   useEffect(() => {
     loadPaidBooks()
@@ -45,7 +56,7 @@ export default function PaidBooks() {
       const response: any = await bookApi.getBooks(params)
       if (response && response.code === 200) {
         const bookList = response.data?.records || response.data?.list || response.data || []
-        let paidBooks = Array.isArray(bookList) 
+        let paidBooks = Array.isArray(bookList)
           ? bookList.filter((b: Book) => b.priceType === 1)
           : []
 
@@ -65,7 +76,7 @@ export default function PaidBooks() {
       }
     } catch (error) {
       console.error('Failed to load paid books:', error)
-      Toast.show('加载失败')
+      Toast.error('加载失败')
     } finally {
       setLoading(false)
     }
@@ -83,190 +94,103 @@ export default function PaidBooks() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <div
-        style={{
-          position: 'sticky',
-          top: 0,
-          background: 'linear-gradient(135deg, #ff9500 0%, #ff6b00 100%)',
-          padding: '16px',
-          color: '#fff',
-          zIndex: 100,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <div className={styles.heroRow}>
+          <button
+            className={styles.heroBack}
             onClick={() => navigate(-1)}
-            style={{ fontSize: '24px', cursor: 'pointer' }}
+            aria-label="返回"
           >
-            ←
-          </div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>付费书籍</div>
+            <ArrowLeft size={24} />
+          </button>
+          <div className={styles.heroTitle}>付费书籍</div>
         </div>
-
-        <div style={{ fontSize: '14px', opacity: 0.9 }}>
+        <div className={styles.heroDesc}>
           精选优质付费内容，开启精彩阅读之旅
         </div>
       </div>
 
-      <div
-        style={{
-          background: '#fff',
-          padding: '12px 16px',
-          display: 'flex',
-          gap: '8px',
-          overflowX: 'auto',
-          borderBottom: '1px solid #eee',
-        }}
-      >
+      <div className={styles.categoryBar}>
         {categories.map((cat) => (
-          <div
+          <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            style={{
-              padding: '6px 16px',
-              borderRadius: '16px',
-              fontSize: '14px',
-              whiteSpace: 'nowrap',
-              cursor: 'pointer',
-              background: activeCategory === cat ? '#ff9500' : '#f5f5f5',
-              color: activeCategory === cat ? '#fff' : '#666',
-              transition: 'all 0.2s',
-            }}
+            className={`${styles.pill} ${activeCategory === cat ? styles.pillActive : ''}`}
           >
             {cat}
-          </div>
+          </button>
         ))}
       </div>
 
-      <div
-        style={{
-          background: '#fff',
-          padding: '12px 16px',
-          display: 'flex',
-          gap: '12px',
-          borderBottom: '1px solid #eee',
-        }}
-      >
-        <span style={{ fontSize: '14px', color: '#666' }}>排序：</span>
-        {[
-          { key: 'popular', label: '最热门' },
-          { key: 'newest', label: '最新上架' },
-          { key: 'rating', label: '评分最高' },
-        ].map((item) => (
-          <div
+      <div className={styles.sortBar}>
+        <span className={styles.sortLabel}>排序：</span>
+        {([
+          { key: 'popular' as SortBy, label: '最热门' },
+          { key: 'newest' as SortBy, label: '最新上架' },
+          { key: 'rating' as SortBy, label: '评分最高' },
+        ]).map((item) => (
+          <button
             key={item.key}
-            onClick={() => setSortBy(item.key as any)}
-            style={{
-              fontSize: '14px',
-              cursor: 'pointer',
-              color: sortBy === item.key ? '#ff9500' : '#666',
-              fontWeight: sortBy === item.key ? 'bold' : 'normal',
-            }}
+            onClick={() => setSortBy(item.key)}
+            className={`${styles.sortOption} ${sortBy === item.key ? styles.sortOptionActive : ''}`}
           >
             {item.label}
-          </div>
+          </button>
         ))}
       </div>
 
-      <div style={{ padding: '16px' }}>
+      <div className={styles.listSection}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+          <div className={styles.loadingState}>
             加载中...
           </div>
         ) : books.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
-            <div>暂无付费书籍</div>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>📚</div>
+            <div className={styles.emptyText}>暂无付费书籍</div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
             {books.map((book) => (
               <div
                 key={book.id}
+                className={styles.bookCard}
                 onClick={() => handleBookClick(book.id)}
-                style={{
-                  background: '#fff',
-                  borderRadius: '12px',
-                  padding: '12px',
-                  display: 'flex',
-                  gap: '12px',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                }}
               >
-                <div
-                  style={{
-                    width: '80px',
-                    height: '112px',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    flexShrink: 0,
-                    position: 'relative',
-                  }}
-                >
-                  <img
+                <div className={styles.coverWrap}>
+                  <BookCover
                     src={book.cover || 'https://placehold.co/80x112/eee/999?text=Book'}
                     alt={book.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    width={80}
+                    height={112}
                   />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '4px',
-                      left: '4px',
-                      background: '#ff9500',
-                      color: '#fff',
-                      fontSize: '10px',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    付费
+                  <div className={styles.paidBadge}>
+                    <Tag color="primary">付费</Tag>
                   </div>
                 </div>
 
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div className={styles.bookInfo}>
                   <div>
-                    <div
-                      style={{
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        marginBottom: '4px',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 1,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}
-                    >
+                    <div className={styles.bookTitle}>
                       {book.title}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>
+                    <div className={styles.bookMeta}>
                       {book.author} · {book.category}
                     </div>
-                    <div
-                      style={{
-                        fontSize: '13px',
-                        color: '#666',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        lineHeight: '1.5',
-                      }}
-                    >
+                    <div className={styles.bookDesc}>
                       {book.description || '暂无简介'}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#999' }}>
+                  <div className={styles.statsRow}>
+                    <div className={styles.statsLeft}>
                       <span>💰 前{book.freeChapterCount || 0}章免费</span>
                       <span>📖 {formatNumber(book.totalWords || 0)}字</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ color: '#ff9500' }}>⭐</span>
-                      <span style={{ fontSize: '12px', fontWeight: 'bold' }}>
+                    <div className={styles.rating}>
+                      <Star size={12} className={styles.ratingIcon} fill="var(--color-primary)" />
+                      <span className={styles.ratingValue}>
                         {book.rating ? book.rating.toFixed(1) : '8.0'}
                       </span>
                     </div>
@@ -278,18 +202,11 @@ export default function PaidBooks() {
         )}
       </div>
 
-      <div
-        style={{
-          background: '#fff',
-          margin: '16px',
-          borderRadius: '12px',
-          padding: '16px',
-        }}
-      >
-        <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px' }}>
+      <div className={styles.infoCard}>
+        <div className={styles.infoTitle}>
           💡 付费书籍说明
         </div>
-        <div style={{ fontSize: '13px', color: '#666', lineHeight: '1.8' }}>
+        <div className={styles.infoList}>
           <div>• 付费书籍提供部分免费章节试读</div>
           <div>• 使用书币可解锁付费章节</div>
           <div>• 解锁后可永久阅读该章节</div>

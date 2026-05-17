@@ -62,7 +62,7 @@ export default function AdminDashboard() {
     {
       title: '待审核申请',
       value: stats.pendingApplications,
-      color: '#1890ff',
+      color: 'var(--color-primary)',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
     {
       title: '总申请数',
       value: stats.totalApplications,
-      color: '#52c41a',
+      color: 'var(--color-accent)',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
     {
       title: '已通过',
       value: stats.approvedApplications,
-      color: '#13c2c2',
+      color: 'var(--color-info)',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
     {
       title: '已拒绝',
       value: stats.rejectedApplications,
-      color: '#ff4d4f',
+      color: 'var(--color-danger)',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
@@ -111,9 +111,9 @@ export default function AdminDashboard() {
 
   const getStatusBadge = (status: number) => {
     const styles: Record<number, { bg: string; color: string; text: string }> = {
-      0: { bg: '#e6f7ff', color: '#1890ff', text: '待审核' },
-      1: { bg: '#f6ffed', color: '#52c41a', text: '已通过' },
-      2: { bg: '#fff2f0', color: '#ff4d4f', text: '已拒绝' },
+      0: { bg: 'var(--color-primary-light)', color: 'var(--color-primary)', text: '待审核' },
+      1: { bg: 'var(--color-accent-light)', color: 'var(--color-accent)', text: '已通过' },
+      2: { bg: 'var(--color-danger-light)', color: 'var(--color-danger)', text: '已拒绝' },
     }
     const style = styles[status] || styles[0]
     return (
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
         <div style={{ textAlign: 'center' }}>
           <div className="loading-spinner" />
-          <p style={{ color: '#8c8c8c', marginTop: '16px' }}>加载中...</p>
+          <p style={{ color: 'var(--color-text-tertiary)', marginTop: '16px' }}>加载中...</p>
         </div>
       </div>
     )
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
           <div
             key={index}
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: 'var(--color-card)',
               borderRadius: '12px',
               padding: '24px',
               boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
@@ -174,8 +174,8 @@ export default function AdminDashboard() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <p style={{ color: '#8c8c8c', fontSize: '14px', margin: 0 }}>{card.title}</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', margin: '8px 0 0', color: '#262626' }}>
+                <p style={{ color: 'var(--color-text-tertiary)', fontSize: '14px', margin: 0 }}>{card.title}</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', margin: '8px 0 0', color: 'var(--color-text-primary)' }}>
                   {card.value}
                 </p>
               </div>
@@ -207,7 +207,7 @@ export default function AdminDashboard() {
       >
         <div
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: 'var(--color-card)',
             borderRadius: '12px',
             padding: '24px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
@@ -217,7 +217,7 @@ export default function AdminDashboard() {
             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>最近申请</h3>
             <span
               onClick={() => navigate('/admin/author-audit')}
-              style={{ color: '#1890ff', cursor: 'pointer', fontSize: '14px' }}
+              style={{ color: 'var(--color-primary)', cursor: 'pointer', fontSize: '14px' }}
             >
               查看全部 →
             </span>
@@ -232,7 +232,7 @@ export default function AdminDashboard() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     padding: '12px 0',
-                    borderBottom: '1px solid #f0f0f0',
+                    borderBottom: '1px solid var(--color-divider)',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -241,19 +241,19 @@ export default function AdminDashboard() {
                         width: '40px',
                         height: '40px',
                         borderRadius: '8px',
-                        backgroundColor: '#f0f2f5',
+                        backgroundColor: 'var(--color-bg)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontWeight: 'bold',
-                        color: '#1890ff',
+                        color: 'var(--color-primary)',
                       }}
                     >
                       {app.penName?.charAt(0) || '?'}
                     </div>
                     <div>
                       <p style={{ margin: 0, fontWeight: 500 }}>{app.penName}</p>
-                      <p style={{ margin: 0, fontSize: '12px', color: '#8c8c8c' }}>
+                      <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-tertiary)' }}>
                         {new Date(app.createTime).toLocaleDateString()}
                       </p>
                     </div>
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
               ))}
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#8c8c8c' }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-tertiary)' }}>
               暂无申请记录
             </div>
           )}
@@ -271,7 +271,7 @@ export default function AdminDashboard() {
 
         <div
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: 'var(--color-card)',
             borderRadius: '12px',
             padding: '24px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
@@ -281,7 +281,7 @@ export default function AdminDashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '14px', color: '#595959' }}>待审核</span>
+                <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>待审核</span>
                 <span style={{ fontSize: '14px', fontWeight: 500 }}>
                   {stats.pendingApplications} / {stats.totalApplications || 1}
                 </span>
@@ -289,7 +289,7 @@ export default function AdminDashboard() {
               <div
                 style={{
                   height: '8px',
-                  backgroundColor: '#f0f0f0',
+                  backgroundColor: 'var(--color-divider)',
                   borderRadius: '4px',
                   overflow: 'hidden',
                 }}
@@ -298,7 +298,7 @@ export default function AdminDashboard() {
                   style={{
                     width: `${(stats.pendingApplications / (stats.totalApplications || 1)) * 100}%`,
                     height: '100%',
-                    backgroundColor: '#1890ff',
+                    backgroundColor: 'var(--color-primary)',
                     borderRadius: '4px',
                     transition: 'width 0.5s',
                   }}
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '14px', color: '#595959' }}>已通过</span>
+                <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>已通过</span>
                 <span style={{ fontSize: '14px', fontWeight: 500 }}>
                   {stats.approvedApplications} / {stats.totalApplications || 1}
                 </span>
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
               <div
                 style={{
                   height: '8px',
-                  backgroundColor: '#f0f0f0',
+                  backgroundColor: 'var(--color-divider)',
                   borderRadius: '4px',
                   overflow: 'hidden',
                 }}
@@ -324,7 +324,7 @@ export default function AdminDashboard() {
                   style={{
                     width: `${(stats.approvedApplications / (stats.totalApplications || 1)) * 100}%`,
                     height: '100%',
-                    backgroundColor: '#52c41a',
+                    backgroundColor: 'var(--color-accent)',
                     borderRadius: '4px',
                     transition: 'width 0.5s',
                   }}
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '14px', color: '#595959' }}>已拒绝</span>
+                <span style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>已拒绝</span>
                 <span style={{ fontSize: '14px', fontWeight: 500 }}>
                   {stats.rejectedApplications} / {stats.totalApplications || 1}
                 </span>
@@ -341,7 +341,7 @@ export default function AdminDashboard() {
               <div
                 style={{
                   height: '8px',
-                  backgroundColor: '#f0f0f0',
+                  backgroundColor: 'var(--color-divider)',
                   borderRadius: '4px',
                   overflow: 'hidden',
                 }}
@@ -350,7 +350,7 @@ export default function AdminDashboard() {
                   style={{
                     width: `${(stats.rejectedApplications / (stats.totalApplications || 1)) * 100}%`,
                     height: '100%',
-                    backgroundColor: '#ff4d4f',
+                    backgroundColor: 'var(--color-danger)',
                     borderRadius: '4px',
                     transition: 'width 0.5s',
                   }}
@@ -363,20 +363,20 @@ export default function AdminDashboard() {
             style={{
               marginTop: '24px',
               padding: '16px',
-              backgroundColor: '#f6ffed',
+              backgroundColor: 'var(--color-accent-light)',
               borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
               <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
             <div>
-              <p style={{ margin: 0, fontWeight: 500, color: '#262626' }}>审核通过率</p>
-              <p style={{ margin: 0, fontSize: '12px', color: '#8c8c8c' }}>
+              <p style={{ margin: 0, fontWeight: 500, color: 'var(--color-text-primary)' }}>审核通过率</p>
+              <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-tertiary)' }}>
                 {stats.totalApplications > 0
                   ? Math.round((stats.approvedApplications / stats.totalApplications) * 100)
                   : 0}
@@ -389,7 +389,7 @@ export default function AdminDashboard() {
 
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           padding: '24px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
@@ -404,7 +404,7 @@ export default function AdminDashboard() {
               flex: '1',
               minWidth: '200px',
               padding: '20px',
-              backgroundColor: '#e6f7ff',
+              backgroundColor: 'var(--color-primary-light)',
               borderRadius: '8px',
               cursor: 'pointer',
               transition: 'transform 0.2s',
@@ -422,13 +422,13 @@ export default function AdminDashboard() {
                   width: '40px',
                   height: '40px',
                   borderRadius: '8px',
-                  backgroundColor: '#1890ff',
+                  backgroundColor: 'var(--color-primary)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-inverse)" strokeWidth="2">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -436,8 +436,8 @@ export default function AdminDashboard() {
                 </svg>
               </div>
               <div>
-                <p style={{ margin: 0, fontWeight: 500, color: '#262626' }}>审核作者申请</p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#8c8c8c' }}>
+                <p style={{ margin: 0, fontWeight: 500, color: 'var(--color-text-primary)' }}>审核作者申请</p>
+                <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-tertiary)' }}>
                   {stats.pendingApplications} 条待处理
                 </p>
               </div>
@@ -448,7 +448,7 @@ export default function AdminDashboard() {
               flex: '1',
               minWidth: '200px',
               padding: '20px',
-              backgroundColor: '#f6ffed',
+              backgroundColor: 'var(--color-accent-light)',
               borderRadius: '8px',
               cursor: 'pointer',
               transition: 'transform 0.2s',
@@ -466,21 +466,21 @@ export default function AdminDashboard() {
                   width: '40px',
                   height: '40px',
                   borderRadius: '8px',
-                  backgroundColor: '#52c41a',
+                  backgroundColor: 'var(--color-accent)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-inverse)" strokeWidth="2">
                   <path d="M12 2L2 7l10 5 10-5-10-5z" />
                   <path d="M2 17l10 5 10-5" />
                   <path d="M2 12l10 5 10-5" />
                 </svg>
               </div>
               <div>
-                <p style={{ margin: 0, fontWeight: 500, color: '#262626' }}>内容管理</p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#8c8c8c' }}>管理书籍和章节</p>
+                <p style={{ margin: 0, fontWeight: 500, color: 'var(--color-text-primary)' }}>内容管理</p>
+                <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-tertiary)' }}>管理书籍和章节</p>
               </div>
             </div>
           </div>
@@ -489,7 +489,7 @@ export default function AdminDashboard() {
               flex: '1',
               minWidth: '200px',
               padding: '20px',
-              backgroundColor: '#fff7e6',
+              backgroundColor: 'var(--color-warning-light)',
               borderRadius: '8px',
               cursor: 'pointer',
               transition: 'transform 0.2s',
@@ -507,21 +507,21 @@ export default function AdminDashboard() {
                   width: '40px',
                   height: '40px',
                   borderRadius: '8px',
-                  backgroundColor: '#fa8c16',
+                  backgroundColor: 'var(--color-warning)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-inverse)" strokeWidth="2">
                   <path d="M18 20V10" />
                   <path d="M12 20V4" />
                   <path d="M6 20v-6" />
                 </svg>
               </div>
               <div>
-                <p style={{ margin: 0, fontWeight: 500, color: '#262626' }}>数据报表</p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#8c8c8c' }}>查看详细统计</p>
+                <p style={{ margin: 0, fontWeight: 500, color: 'var(--color-text-primary)' }}>数据报表</p>
+                <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-tertiary)' }}>查看详细统计</p>
               </div>
             </div>
           </div>

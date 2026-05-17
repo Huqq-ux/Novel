@@ -1,0 +1,116 @@
+/* MyComments page — 梧桐调 style */
+
+.page {
+  padding: var(--space-md);
+  padding-bottom: 60px;
+  min-height: 100vh;
+}
+
+/* === Header === */
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: var(--space-md);
+  border: none;
+  color: var(--color-text-inverse);
+  transition: background var(--transition-fast);
+}
+
+.backBtn:active {
+  background: var(--color-text-primary);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* === Loading === */
+.loading {
+  text-align: center;
+  padding: var(--space-3xl) var(--space-xl);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-base);
+}
+
+/* === Comment list === */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* === Comment card === */
+.commentCard {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-sm);
+}
+
+.commentBookTitle {
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.commentBookTitle:hover {
+  color: var(--color-primary);
+}
+
+.commentDate {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+  margin-left: var(--space-sm);
+}
+
+.commentContent {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-sm);
+  word-break: break-word;
+}
+
+.commentFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.commentLikes {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.commentLikesIcon {
+  color: var(--color-primary);
+}

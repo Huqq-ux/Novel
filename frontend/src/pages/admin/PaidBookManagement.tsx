@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Dialog, Toast } from 'antd-mobile'
+import CustomToast from '../../components/Toast'
 import { adminApi } from '../../services/api'
+
+const Toast = {
+  show: (msg: string) => CustomToast.show({ type: 'info', content: msg }),
+}
+const confirmDialog = (content: string, onConfirm: () => void) => {
+  if (window.confirm(content)) onConfirm()
+}
 
 interface Book {
   id: number
@@ -144,23 +151,18 @@ export default function PaidBookManagement() {
   }
 
   const handleDelete = async (book: Book) => {
-    Dialog.confirm({
-      content: `确定要删除付费书籍 "${book.title}" 吗？此操作不可恢复！`,
-      confirmText: '确定删除',
-      cancelText: '取消',
-      onConfirm: async () => {
-        try {
-          const response: any = await adminApi.deleteBook(book.id)
-          if (response && response.code === 200) {
-            Toast.show('删除成功')
-            loadBooks()
-          } else {
-            Toast.show(response?.message || '删除失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '删除失败')
+    confirmDialog(`确定要删除付费书籍 "${book.title}" 吗？此操作不可恢复！`, async () => {
+      try {
+        const response: any = await adminApi.deleteBook(book.id)
+        if (response && response.code === 200) {
+          Toast.show('删除成功')
+          loadBooks()
+        } else {
+          Toast.show(response?.message || '删除失败')
         }
-      },
+      } catch (error: any) {
+        Toast.show(error.response?.data?.message || '删除失败')
+      }
     })
   }
 
@@ -168,23 +170,18 @@ export default function PaidBookManagement() {
     const newStatus = book.status === 1 ? 0 : 1
     const action = newStatus === 0 ? '下架' : '上架'
 
-    Dialog.confirm({
-      content: `确定要${action}书籍 "${book.title}" 吗？`,
-      confirmText: '确定',
-      cancelText: '取消',
-      onConfirm: async () => {
-        try {
-          const response: any = await adminApi.updateBookStatus(book.id, newStatus)
-          if (response && response.code === 200) {
-            Toast.show(`${action}成功`)
-            loadBooks()
-          } else {
-            Toast.show(response?.message || '操作失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '操作失败')
+    confirmDialog(`确定要${action}书籍 "${book.title}" 吗？`, async () => {
+      try {
+        const response: any = await adminApi.updateBookStatus(book.id, newStatus)
+        if (response && response.code === 200) {
+          Toast.show(`${action}成功`)
+          loadBooks()
+        } else {
+          Toast.show(response?.message || '操作失败')
         }
-      },
+      } catch (error: any) {
+        Toast.show(error.response?.data?.message || '操作失败')
+      }
     })
   }
 
@@ -210,8 +207,8 @@ export default function PaidBookManagement() {
             borderRadius: '12px',
             fontSize: '12px',
             fontWeight: 500,
-            backgroundColor: '#f6ffed',
-            color: '#52c41a',
+            backgroundColor: 'var(--color-accent-light)',
+            color: 'var(--color-accent)',
           }}
         >
           已上架
@@ -225,8 +222,8 @@ export default function PaidBookManagement() {
           borderRadius: '12px',
           fontSize: '12px',
           fontWeight: 500,
-          backgroundColor: '#fff2f0',
-          color: '#ff4d4f',
+          backgroundColor: 'var(--color-danger-light)',
+          color: 'var(--color-danger)',
         }}
       >
         已下架
@@ -247,7 +244,7 @@ export default function PaidBookManagement() {
     <div>
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           padding: '16px 24px',
           marginBottom: '24px',
@@ -266,7 +263,7 @@ export default function PaidBookManagement() {
               height="16"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#8c8c8c"
+              stroke="var(--color-text-tertiary)"
               strokeWidth="2"
               style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
             >
@@ -282,7 +279,7 @@ export default function PaidBookManagement() {
               style={{
                 padding: '8px 12px 8px 36px',
                 borderRadius: '8px',
-                border: '1px solid #d9d9d9',
+                border: '1px solid var(--color-border)',
                 fontSize: '14px',
                 width: '220px',
                 outline: 'none',
@@ -299,10 +296,10 @@ export default function PaidBookManagement() {
             style={{
               padding: '8px 12px',
               borderRadius: '8px',
-              border: '1px solid #d9d9d9',
+              border: '1px solid var(--color-border)',
               fontSize: '14px',
               outline: 'none',
-              backgroundColor: '#fff',
+              backgroundColor: 'var(--color-card)',
             }}
           >
             <option value="">全部分类</option>
@@ -315,8 +312,8 @@ export default function PaidBookManagement() {
             onClick={handleSearch}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#1890ff',
-              color: '#fff',
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-text-inverse)',
               border: 'none',
               borderRadius: '8px',
               fontSize: '14px',
@@ -328,15 +325,15 @@ export default function PaidBookManagement() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ color: '#8c8c8c', fontSize: '14px' }}>
+          <div style={{ color: 'var(--color-text-tertiary)', fontSize: '14px' }}>
             共 {total} 本付费书籍
           </div>
           <button
             onClick={() => setShowAddModal(true)}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#ff9500',
-              color: '#fff',
+              backgroundColor: 'var(--color-warning)',
+              color: 'var(--color-text-inverse)',
               border: 'none',
               borderRadius: '8px',
               fontSize: '14px',
@@ -353,7 +350,7 @@ export default function PaidBookManagement() {
 
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
           overflow: 'hidden',
@@ -361,32 +358,32 @@ export default function PaidBookManagement() {
       >
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ backgroundColor: '#fafafa' }}>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+            <tr style={{ backgroundColor: 'var(--color-bg)' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 书籍信息
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 分类
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 字数
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 章节
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 免费章节
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 点击
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 收藏
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 状态
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 操作
               </th>
             </tr>
@@ -397,11 +394,11 @@ export default function PaidBookManagement() {
                 <tr
                   key={book.id}
                   style={{
-                    borderBottom: '1px solid #f0f0f0',
+                    borderBottom: '1px solid var(--color-divider)',
                     transition: 'background-color 0.2s',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fafafa'
+                    e.currentTarget.style.backgroundColor = 'var(--color-bg)'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent'
@@ -414,7 +411,7 @@ export default function PaidBookManagement() {
                           width: '48px',
                           height: '64px',
                           borderRadius: '4px',
-                          backgroundColor: '#f0f0f0',
+                          backgroundColor: 'var(--color-divider)',
                           overflow: 'hidden',
                           flexShrink: 0,
                         }}
@@ -429,7 +426,7 @@ export default function PaidBookManagement() {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              color: '#ff9500',
+                              color: 'var(--color-warning)',
                               fontSize: '20px',
                             }}
                           >
@@ -440,9 +437,9 @@ export default function PaidBookManagement() {
                       <div>
                         <p style={{ margin: 0, fontWeight: 500, fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           {book.title}
-                          <span style={{ fontSize: '11px', background: '#fff3e0', color: '#ff9500', padding: '2px 6px', borderRadius: '4px' }}>付费</span>
+                          <span style={{ fontSize: '11px', background: 'var(--color-warning-light)', color: 'var(--color-warning)', padding: '2px 6px', borderRadius: '4px' }}>付费</span>
                         </p>
-                        <p style={{ margin: 0, fontSize: '12px', color: '#8c8c8c' }}>{book.author}</p>
+                        <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-tertiary)' }}>{book.author}</p>
                       </div>
                     </div>
                   </td>
@@ -453,13 +450,13 @@ export default function PaidBookManagement() {
                   <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center' }}>
                     {book.chapterCount || 0}
                   </td>
-                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: '#52c41a' }}>
+                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: 'var(--color-accent)' }}>
                     前{book.freeChapterCount || 0}章
                   </td>
-                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: '#1890ff' }}>
+                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: 'var(--color-primary)' }}>
                     {formatNumber(book.clickCount || 0)}
                   </td>
-                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: '#ff4d4f' }}>
+                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: 'var(--color-danger)' }}>
                     {formatNumber(book.collectCount || 0)}
                   </td>
                   <td style={{ padding: '16px' }}>{getStatusBadge(book.status)}</td>
@@ -469,9 +466,9 @@ export default function PaidBookManagement() {
                         onClick={() => openEditModal(book)}
                         style={{
                           padding: '4px 12px',
-                          backgroundColor: '#e6f7ff',
-                          color: '#1890ff',
-                          border: '1px solid #1890ff',
+                          backgroundColor: 'var(--color-primary-light)',
+                          color: 'var(--color-primary)',
+                          border: '1px solid var(--color-primary)',
                           borderRadius: '4px',
                           fontSize: '12px',
                           cursor: 'pointer',
@@ -483,9 +480,9 @@ export default function PaidBookManagement() {
                         onClick={() => handleToggleStatus(book)}
                         style={{
                           padding: '4px 12px',
-                          backgroundColor: book.status === 1 ? '#fff2f0' : '#f6ffed',
-                          color: book.status === 1 ? '#ff4d4f' : '#52c41a',
-                          border: `1px solid ${book.status === 1 ? '#ff4d4f' : '#52c41a'}`,
+                          backgroundColor: book.status === 1 ? 'var(--color-danger-light)' : 'var(--color-accent-light)',
+                          color: book.status === 1 ? 'var(--color-danger)' : 'var(--color-accent)',
+                          border: `1px solid ${book.status === 1 ? 'var(--color-danger)' : 'var(--color-accent)'}`,
                           borderRadius: '4px',
                           fontSize: '12px',
                           cursor: 'pointer',
@@ -497,9 +494,9 @@ export default function PaidBookManagement() {
                         onClick={() => handleDelete(book)}
                         style={{
                           padding: '4px 12px',
-                          backgroundColor: '#fff',
-                          color: '#ff4d4f',
-                          border: '1px solid #ff4d4f',
+                          backgroundColor: 'var(--color-card)',
+                          color: 'var(--color-danger)',
+                          border: '1px solid var(--color-danger)',
                           borderRadius: '4px',
                           fontSize: '12px',
                           cursor: 'pointer',
@@ -513,7 +510,7 @@ export default function PaidBookManagement() {
               ))
             ) : (
               <tr>
-                <td colSpan={9} style={{ padding: '60px', textAlign: 'center', color: '#8c8c8c' }}>
+                <td colSpan={9} style={{ padding: '60px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
                   <div style={{ fontSize: '48px', marginBottom: '16px' }}>💰</div>
                   <p style={{ margin: 0 }}>暂无付费书籍数据</p>
                   <p style={{ margin: '8px 0 0', fontSize: '12px' }}>点击右上角"添加付费书籍"按钮添加</p>
@@ -530,10 +527,10 @@ export default function PaidBookManagement() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderTop: '1px solid #f0f0f0',
+              borderTop: '1px solid var(--color-divider)',
             }}
           >
-            <div style={{ color: '#8c8c8c', fontSize: '14px' }}>
+            <div style={{ color: 'var(--color-text-tertiary)', fontSize: '14px' }}>
               第 {page} / {totalPages} 页
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -542,9 +539,9 @@ export default function PaidBookManagement() {
                 disabled={page === 1}
                 style={{
                   padding: '6px 12px',
-                  backgroundColor: page === 1 ? '#f5f5f5' : '#fff',
-                  color: page === 1 ? '#d9d9d9' : '#595959',
-                  border: '1px solid #d9d9d9',
+                  backgroundColor: page === 1 ? 'var(--color-bg)' : 'var(--color-card)',
+                  color: page === 1 ? 'var(--color-border)' : 'var(--color-text-secondary)',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '4px',
                   fontSize: '14px',
                   cursor: page === 1 ? 'not-allowed' : 'pointer',
@@ -557,9 +554,9 @@ export default function PaidBookManagement() {
                 disabled={page === totalPages}
                 style={{
                   padding: '6px 12px',
-                  backgroundColor: page === totalPages ? '#f5f5f5' : '#1890ff',
-                  color: page === totalPages ? '#d9d9d9' : '#fff',
-                  border: '1px solid #1890ff',
+                  backgroundColor: page === totalPages ? 'var(--color-bg)' : 'var(--color-primary)',
+                  color: page === totalPages ? 'var(--color-border)' : 'var(--color-text-inverse)',
+                  border: '1px solid var(--color-primary)',
                   borderRadius: '4px',
                   fontSize: '14px',
                   cursor: page === totalPages ? 'not-allowed' : 'pointer',
@@ -593,7 +590,7 @@ export default function PaidBookManagement() {
         >
           <div
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: 'var(--color-card)',
               borderRadius: '12px',
               width: '90%',
               maxWidth: '500px',
@@ -605,7 +602,7 @@ export default function PaidBookManagement() {
             <div
               style={{
                 padding: '16px 24px',
-                borderBottom: '1px solid #f0f0f0',
+                borderBottom: '1px solid var(--color-divider)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -624,7 +621,7 @@ export default function PaidBookManagement() {
                   border: 'none',
                   fontSize: '20px',
                   cursor: 'pointer',
-                  color: '#8c8c8c',
+                  color: 'var(--color-text-tertiary)',
                 }}
               >
                 ×
@@ -634,7 +631,7 @@ export default function PaidBookManagement() {
             <div style={{ padding: '24px' }}>
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500 }}>
-                  书名 <span style={{ color: '#ff4d4f' }}>*</span>
+                  书名 <span style={{ color: 'var(--color-danger)' }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -644,7 +641,7 @@ export default function PaidBookManagement() {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    border: '1px solid #d9d9d9',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     boxSizing: 'border-box',
@@ -654,7 +651,7 @@ export default function PaidBookManagement() {
 
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500 }}>
-                  作者 <span style={{ color: '#ff4d4f' }}>*</span>
+                  作者 <span style={{ color: 'var(--color-danger)' }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -664,7 +661,7 @@ export default function PaidBookManagement() {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    border: '1px solid #d9d9d9',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     boxSizing: 'border-box',
@@ -682,7 +679,7 @@ export default function PaidBookManagement() {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    border: '1px solid #d9d9d9',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     boxSizing: 'border-box',
@@ -706,7 +703,7 @@ export default function PaidBookManagement() {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    border: '1px solid #d9d9d9',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     boxSizing: 'border-box',
@@ -727,7 +724,7 @@ export default function PaidBookManagement() {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    border: '1px solid #d9d9d9',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     boxSizing: 'border-box',
@@ -748,7 +745,7 @@ export default function PaidBookManagement() {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    border: '1px solid #d9d9d9',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     boxSizing: 'border-box',
@@ -768,7 +765,7 @@ export default function PaidBookManagement() {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    border: '1px solid #d9d9d9',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     resize: 'none',
@@ -786,9 +783,9 @@ export default function PaidBookManagement() {
                   style={{
                     flex: 1,
                     padding: '12px',
-                    backgroundColor: '#fff',
-                    color: '#595959',
-                    border: '1px solid #d9d9d9',
+                    backgroundColor: 'var(--color-card)',
+                    color: 'var(--color-text-secondary)',
+                    border: '1px solid var(--color-border)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     cursor: 'pointer',
@@ -802,8 +799,8 @@ export default function PaidBookManagement() {
                   style={{
                     flex: 1,
                     padding: '12px',
-                    backgroundColor: '#ff9500',
-                    color: '#fff',
+                    backgroundColor: 'var(--color-warning)',
+                    color: 'var(--color-text-inverse)',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '14px',

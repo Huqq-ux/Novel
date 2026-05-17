@@ -44,20 +44,20 @@ export default function DataReports() {
   }
 
   const userStats = [
-    { label: '总用户数', value: stats.totalUsers, color: '#1890ff', icon: '👥' },
-    { label: '作者数量', value: stats.totalAuthors, color: '#52c41a', icon: '✍️' },
-    { label: '活跃用户', value: stats.activeUsers, color: '#13c2c2', icon: '🔥' },
+    { label: '总用户数', value: stats.totalUsers, color: 'var(--color-primary)', icon: '👥' },
+    { label: '作者数量', value: stats.totalAuthors, color: 'var(--color-accent)', icon: '✍️' },
+    { label: '活跃用户', value: stats.activeUsers, color: 'var(--color-info)', icon: '🔥' },
   ]
 
   const bookStats = [
-    { label: '总书籍数', value: stats.totalBooks, color: '#722ed1', icon: '📚' },
-    { label: '总章节数', value: stats.totalChapters, color: '#fa8c16', icon: '📖' },
-    { label: '总字数', value: stats.totalWords, color: '#eb2f96', icon: '📝' },
+    { label: '总书籍数', value: stats.totalBooks, color: 'var(--color-info)', icon: '📚' },
+    { label: '总章节数', value: stats.totalChapters, color: 'var(--color-warning)', icon: '📖' },
+    { label: '总字数', value: stats.totalWords, color: 'var(--color-danger)', icon: '📝' },
   ]
 
   const activityStats = [
-    { label: '总阅读量', value: stats.totalReads, color: '#1890ff', icon: '👁️' },
-    { label: '总评论数', value: stats.totalComments, color: '#52c41a', icon: '💬' },
+    { label: '总阅读量', value: stats.totalReads, color: 'var(--color-primary)', icon: '👁️' },
+    { label: '总评论数', value: stats.totalComments, color: 'var(--color-accent)', icon: '💬' },
   ]
 
   const formatNumber = (num: number) => {
@@ -74,7 +74,7 @@ export default function DataReports() {
     <div
       key={item.label}
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: 'var(--color-card)',
         borderRadius: '12px',
         padding: '24px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
@@ -91,8 +91,8 @@ export default function DataReports() {
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <p style={{ color: '#8c8c8c', fontSize: '14px', margin: 0 }}>{item.label}</p>
-          <p style={{ fontSize: '32px', fontWeight: 'bold', margin: '8px 0 0', color: '#262626' }}>
+          <p style={{ color: 'var(--color-text-tertiary)', fontSize: '14px', margin: 0 }}>{item.label}</p>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', margin: '8px 0 0', color: 'var(--color-text-primary)' }}>
             {formatNumber(item.value)}
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function DataReports() {
             width: '48px',
             height: '48px',
             borderRadius: '12px',
-            backgroundColor: `${item.color}15`,
+            backgroundColor: 'var(--color-surface)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -119,7 +119,7 @@ export default function DataReports() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
         <div style={{ textAlign: 'center' }}>
           <div className="loading-spinner" />
-          <p style={{ color: '#8c8c8c', marginTop: '16px' }}>加载中...</p>
+          <p style={{ color: 'var(--color-text-tertiary)', marginTop: '16px' }}>加载中...</p>
         </div>
       </div>
     )
@@ -128,7 +128,7 @@ export default function DataReports() {
   return (
     <div>
       <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: '#262626' }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
           用户统计
         </h3>
         <div
@@ -143,7 +143,7 @@ export default function DataReports() {
       </div>
 
       <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: '#262626' }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
           内容统计
         </h3>
         <div
@@ -158,7 +158,7 @@ export default function DataReports() {
       </div>
 
       <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: '#262626' }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
           活跃度统计
         </h3>
         <div
@@ -174,13 +174,13 @@ export default function DataReports() {
 
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           padding: '24px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         }}
       >
-        <h3 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: 600, color: '#262626' }}>
+        <h3 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
           数据概览
         </h3>
         
@@ -188,84 +188,84 @@ export default function DataReports() {
           <div
             style={{
               padding: '20px',
-              backgroundColor: '#e6f7ff',
+              backgroundColor: 'var(--color-primary-light)',
               borderRadius: '12px',
-              borderLeft: '4px solid #1890ff',
+              borderLeft: '4px solid var(--color-primary)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <span style={{ fontSize: '24px' }}>📊</span>
               <span style={{ fontSize: '16px', fontWeight: 500 }}>用户增长趋势</span>
             </div>
-            <p style={{ margin: 0, fontSize: '14px', color: '#595959' }}>
+            <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
               平台用户持续增长，作者转化率良好
             </p>
             <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#52c41a', fontSize: '14px', fontWeight: 500 }}>↑ 12.5%</span>
-              <span style={{ color: '#8c8c8c', fontSize: '12px' }}>较上月</span>
+              <span style={{ color: 'var(--color-accent)', fontSize: '14px', fontWeight: 500 }}>↑ 12.5%</span>
+              <span style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>较上月</span>
             </div>
           </div>
 
           <div
             style={{
               padding: '20px',
-              backgroundColor: '#f6ffed',
+              backgroundColor: 'var(--color-accent-light)',
               borderRadius: '12px',
-              borderLeft: '4px solid #52c41a',
+              borderLeft: '4px solid var(--color-accent)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <span style={{ fontSize: '24px' }}>📚</span>
               <span style={{ fontSize: '16px', fontWeight: 500 }}>内容增长趋势</span>
             </div>
-            <p style={{ margin: 0, fontSize: '14px', color: '#595959' }}>
+            <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
               书籍和章节数量稳步增长
             </p>
             <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#52c41a', fontSize: '14px', fontWeight: 500 }}>↑ 8.3%</span>
-              <span style={{ color: '#8c8c8c', fontSize: '12px' }}>较上月</span>
+              <span style={{ color: 'var(--color-accent)', fontSize: '14px', fontWeight: 500 }}>↑ 8.3%</span>
+              <span style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>较上月</span>
             </div>
           </div>
 
           <div
             style={{
               padding: '20px',
-              backgroundColor: '#fff7e6',
+              backgroundColor: 'var(--color-warning-light)',
               borderRadius: '12px',
-              borderLeft: '4px solid #fa8c16',
+              borderLeft: '4px solid var(--color-warning)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <span style={{ fontSize: '24px' }}>👁️</span>
               <span style={{ fontSize: '16px', fontWeight: 500 }}>阅读活跃度</span>
             </div>
-            <p style={{ margin: 0, fontSize: '14px', color: '#595959' }}>
+            <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
               用户阅读时长和频率保持稳定
             </p>
             <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#52c41a', fontSize: '14px', fontWeight: 500 }}>↑ 5.2%</span>
-              <span style={{ color: '#8c8c8c', fontSize: '12px' }}>较上月</span>
+              <span style={{ color: 'var(--color-accent)', fontSize: '14px', fontWeight: 500 }}>↑ 5.2%</span>
+              <span style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>较上月</span>
             </div>
           </div>
 
           <div
             style={{
               padding: '20px',
-              backgroundColor: '#f9f0ff',
+              backgroundColor: 'var(--color-primary-light)',
               borderRadius: '12px',
-              borderLeft: '4px solid #722ed1',
+              borderLeft: '4px solid var(--color-info)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <span style={{ fontSize: '24px' }}>💬</span>
               <span style={{ fontSize: '16px', fontWeight: 500 }}>互动数据</span>
             </div>
-            <p style={{ margin: 0, fontSize: '14px', color: '#595959' }}>
+            <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
               评论和收藏活跃度持续提升
             </p>
             <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#52c41a', fontSize: '14px', fontWeight: 500 }}>↑ 15.8%</span>
-              <span style={{ color: '#8c8c8c', fontSize: '12px' }}>较上月</span>
+              <span style={{ color: 'var(--color-accent)', fontSize: '14px', fontWeight: 500 }}>↑ 15.8%</span>
+              <span style={{ color: 'var(--color-text-tertiary)', fontSize: '12px' }}>较上月</span>
             </div>
           </div>
         </div>

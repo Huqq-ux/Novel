@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Dialog, Toast } from 'antd-mobile'
+import CustomToast from '../../components/Toast'
 import { adminApi } from '../../services/api'
+
+const Toast = {
+  show: (msg: string) => CustomToast.show({ type: 'info', content: msg }),
+}
+const confirmDialog = (content: string, onConfirm: () => void) => {
+  if (window.confirm(content)) onConfirm()
+}
 
 interface User {
   id: number
@@ -67,23 +74,18 @@ export default function UserManagement() {
     const newStatus = user.status === 1 ? 0 : 1
     const action = newStatus === 0 ? '禁用' : '启用'
 
-    Dialog.confirm({
-      content: `确定要${action}用户 "${user.username}" 吗？`,
-      confirmText: '确定',
-      cancelText: '取消',
-      onConfirm: async () => {
-        try {
-          const response: any = await adminApi.updateUserStatus(user.id, newStatus)
-          if (response && response.code === 200) {
-            Toast.show(`${action}成功`)
-            loadUsers()
-          } else {
-            Toast.show(response?.message || '操作失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '操作失败')
+    confirmDialog(`确定要${action}用户 "${user.username}" 吗？`, async () => {
+      try {
+        const response: any = await adminApi.updateUserStatus(user.id, newStatus)
+        if (response && response.code === 200) {
+          Toast.show(`${action}成功`)
+          loadUsers()
+        } else {
+          Toast.show(response?.message || '操作失败')
         }
-      },
+      } catch (error: any) {
+        Toast.show(error.response?.data?.message || '操作失败')
+      }
     })
   }
 
@@ -91,23 +93,18 @@ export default function UserManagement() {
     const newRole = user.role === 'admin' ? 'user' : 'admin'
     const action = newRole === 'admin' ? '设为管理员' : '取消管理员'
 
-    Dialog.confirm({
-      content: `确定要${action} "${user.username}" 吗？`,
-      confirmText: '确定',
-      cancelText: '取消',
-      onConfirm: async () => {
-        try {
-          const response: any = await adminApi.updateUserRole(user.id, newRole)
-          if (response && response.code === 200) {
-            Toast.show('角色已更新')
-            loadUsers()
-          } else {
-            Toast.show(response?.message || '操作失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '操作失败')
+    confirmDialog(`确定要${action} "${user.username}" 吗？`, async () => {
+      try {
+        const response: any = await adminApi.updateUserRole(user.id, newRole)
+        if (response && response.code === 200) {
+          Toast.show('角色已更新')
+          loadUsers()
+        } else {
+          Toast.show(response?.message || '操作失败')
         }
-      },
+      } catch (error: any) {
+        Toast.show(error.response?.data?.message || '操作失败')
+      }
     })
   }
 
@@ -120,8 +117,8 @@ export default function UserManagement() {
             borderRadius: '12px',
             fontSize: '12px',
             fontWeight: 500,
-            backgroundColor: '#f6ffed',
-            color: '#52c41a',
+            backgroundColor: 'var(--color-accent-light)',
+            color: 'var(--color-accent)',
           }}
         >
           正常
@@ -135,8 +132,8 @@ export default function UserManagement() {
           borderRadius: '12px',
           fontSize: '12px',
           fontWeight: 500,
-          backgroundColor: '#fff2f0',
-          color: '#ff4d4f',
+          backgroundColor: 'var(--color-danger-light)',
+          color: 'var(--color-danger)',
         }}
       >
         已禁用
@@ -156,8 +153,8 @@ export default function UserManagement() {
             borderRadius: '4px',
             fontSize: '11px',
             fontWeight: 500,
-            backgroundColor: '#722ed1',
-            color: '#fff',
+            backgroundColor: 'var(--color-primary-dark)',
+            color: 'var(--color-text-inverse)',
             marginRight: '4px',
           }}
         >
@@ -175,8 +172,8 @@ export default function UserManagement() {
             borderRadius: '4px',
             fontSize: '11px',
             fontWeight: 500,
-            backgroundColor: '#1890ff',
-            color: '#fff',
+            backgroundColor: 'var(--color-primary)',
+            color: 'var(--color-text-inverse)',
           }}
         >
           作者
@@ -193,8 +190,8 @@ export default function UserManagement() {
             borderRadius: '4px',
             fontSize: '11px',
             fontWeight: 500,
-            backgroundColor: '#f0f0f0',
-            color: '#8c8c8c',
+            backgroundColor: 'var(--color-divider)',
+            color: 'var(--color-text-tertiary)',
           }}
         >
           用户
@@ -212,7 +209,7 @@ export default function UserManagement() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
         <div style={{ textAlign: 'center' }}>
           <div className="loading-spinner" />
-          <p style={{ color: '#8c8c8c', marginTop: '16px' }}>加载中...</p>
+          <p style={{ color: 'var(--color-text-tertiary)', marginTop: '16px' }}>加载中...</p>
         </div>
       </div>
     )
@@ -222,7 +219,7 @@ export default function UserManagement() {
     <div>
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           padding: '16px 24px',
           marginBottom: '24px',
@@ -241,7 +238,7 @@ export default function UserManagement() {
               height="16"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#8c8c8c"
+              stroke="var(--color-text-tertiary)"
               strokeWidth="2"
               style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
             >
@@ -257,7 +254,7 @@ export default function UserManagement() {
               style={{
                 padding: '8px 12px 8px 36px',
                 borderRadius: '8px',
-                border: '1px solid #d9d9d9',
+                border: '1px solid var(--color-border)',
                 fontSize: '14px',
                 width: '220px',
                 outline: 'none',
@@ -274,10 +271,10 @@ export default function UserManagement() {
             style={{
               padding: '8px 12px',
               borderRadius: '8px',
-              border: '1px solid #d9d9d9',
+              border: '1px solid var(--color-border)',
               fontSize: '14px',
               outline: 'none',
-              backgroundColor: '#fff',
+              backgroundColor: 'var(--color-card)',
             }}
           >
             <option value="">全部角色</option>
@@ -295,10 +292,10 @@ export default function UserManagement() {
             style={{
               padding: '8px 12px',
               borderRadius: '8px',
-              border: '1px solid #d9d9d9',
+              border: '1px solid var(--color-border)',
               fontSize: '14px',
               outline: 'none',
-              backgroundColor: '#fff',
+              backgroundColor: 'var(--color-card)',
             }}
           >
             <option value="">全部状态</option>
@@ -310,8 +307,8 @@ export default function UserManagement() {
             onClick={handleSearch}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#1890ff',
-              color: '#fff',
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-text-inverse)',
               border: 'none',
               borderRadius: '8px',
               fontSize: '14px',
@@ -322,14 +319,14 @@ export default function UserManagement() {
           </button>
         </div>
 
-        <div style={{ color: '#8c8c8c', fontSize: '14px' }}>
+        <div style={{ color: 'var(--color-text-tertiary)', fontSize: '14px' }}>
           共 {total} 个用户
         </div>
       </div>
 
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
           overflow: 'hidden',
@@ -337,23 +334,23 @@ export default function UserManagement() {
       >
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ backgroundColor: '#fafafa' }}>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+            <tr style={{ backgroundColor: 'var(--color-bg)' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 用户信息
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 角色
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 书币余额
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 注册时间
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 状态
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 操作
               </th>
             </tr>
@@ -364,11 +361,11 @@ export default function UserManagement() {
                 <tr
                   key={user.id}
                   style={{
-                    borderBottom: '1px solid #f0f0f0',
+                    borderBottom: '1px solid var(--color-divider)',
                     transition: 'background-color 0.2s',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fafafa'
+                    e.currentTarget.style.backgroundColor = 'var(--color-bg)'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent'
@@ -381,11 +378,11 @@ export default function UserManagement() {
                           width: '40px',
                           height: '40px',
                           borderRadius: '50%',
-                          backgroundColor: '#1890ff',
+                          backgroundColor: 'var(--color-primary)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: '#fff',
+                          color: 'var(--color-text-inverse)',
                           fontWeight: 'bold',
                           fontSize: '14px',
                           overflow: 'hidden',
@@ -399,13 +396,13 @@ export default function UserManagement() {
                       </div>
                       <div>
                         <p style={{ margin: 0, fontWeight: 500 }}>{user.username}</p>
-                        <p style={{ margin: 0, fontSize: '12px', color: '#8c8c8c' }}>{user.email}</p>
+                        <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-tertiary)' }}>{user.email}</p>
                       </div>
                     </div>
                   </td>
                   <td style={{ padding: '16px' }}>{getRoleBadge(user.role, user.isAuthor)}</td>
                   <td style={{ padding: '16px', fontSize: '14px' }}>{user.coinBalance || 0}</td>
-                  <td style={{ padding: '16px', fontSize: '14px', color: '#8c8c8c' }}>
+                  <td style={{ padding: '16px', fontSize: '14px', color: 'var(--color-text-tertiary)' }}>
                     {new Date(user.createTime).toLocaleDateString()}
                   </td>
                   <td style={{ padding: '16px' }}>{getStatusBadge(user.status)}</td>
@@ -415,9 +412,9 @@ export default function UserManagement() {
                         onClick={() => handleToggleStatus(user)}
                         style={{
                           padding: '4px 12px',
-                          backgroundColor: user.status === 1 ? '#fff2f0' : '#f6ffed',
-                          color: user.status === 1 ? '#ff4d4f' : '#52c41a',
-                          border: `1px solid ${user.status === 1 ? '#ff4d4f' : '#52c41a'}`,
+                          backgroundColor: user.status === 1 ? 'var(--color-danger-light)' : 'var(--color-accent-light)',
+                          color: user.status === 1 ? 'var(--color-danger)' : 'var(--color-accent)',
+                          border: `1px solid ${user.status === 1 ? 'var(--color-danger)' : 'var(--color-accent)'}`,
                           borderRadius: '4px',
                           fontSize: '12px',
                           cursor: 'pointer',
@@ -429,9 +426,9 @@ export default function UserManagement() {
                         onClick={() => handleUpdateRole(user)}
                         style={{
                           padding: '4px 12px',
-                          backgroundColor: user.role === 'admin' ? '#f9f0ff' : '#e6f7ff',
-                          color: user.role === 'admin' ? '#722ed1' : '#1890ff',
-                          border: `1px solid ${user.role === 'admin' ? '#722ed1' : '#1890ff'}`,
+                          backgroundColor: user.role === 'admin' ? 'var(--color-primary-light)' : 'var(--color-primary-light)',
+                          color: user.role === 'admin' ? 'var(--color-primary-dark)' : 'var(--color-primary)',
+                          border: `1px solid ${user.role === 'admin' ? 'var(--color-primary-dark)' : 'var(--color-primary)'}`,
                           borderRadius: '4px',
                           fontSize: '12px',
                           cursor: 'pointer',
@@ -445,13 +442,13 @@ export default function UserManagement() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} style={{ padding: '60px', textAlign: 'center', color: '#8c8c8c' }}>
+                <td colSpan={6} style={{ padding: '60px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
                   <svg
                     width="48"
                     height="48"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#d9d9d9"
+                    stroke="var(--color-border)"
                     strokeWidth="1.5"
                     style={{ margin: '0 auto 16px' }}
                   >
@@ -474,10 +471,10 @@ export default function UserManagement() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderTop: '1px solid #f0f0f0',
+              borderTop: '1px solid var(--color-divider)',
             }}
           >
-            <div style={{ color: '#8c8c8c', fontSize: '14px' }}>
+            <div style={{ color: 'var(--color-text-tertiary)', fontSize: '14px' }}>
               第 {page} / {totalPages} 页
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -486,9 +483,9 @@ export default function UserManagement() {
                 disabled={page === 1}
                 style={{
                   padding: '6px 12px',
-                  backgroundColor: page === 1 ? '#f5f5f5' : '#fff',
-                  color: page === 1 ? '#d9d9d9' : '#595959',
-                  border: '1px solid #d9d9d9',
+                  backgroundColor: page === 1 ? 'var(--color-bg)' : 'var(--color-card)',
+                  color: page === 1 ? 'var(--color-border)' : 'var(--color-text-secondary)',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '4px',
                   fontSize: '14px',
                   cursor: page === 1 ? 'not-allowed' : 'pointer',
@@ -501,9 +498,9 @@ export default function UserManagement() {
                 disabled={page === totalPages}
                 style={{
                   padding: '6px 12px',
-                  backgroundColor: page === totalPages ? '#f5f5f5' : '#1890ff',
-                  color: page === totalPages ? '#d9d9d9' : '#fff',
-                  border: '1px solid #1890ff',
+                  backgroundColor: page === totalPages ? 'var(--color-bg)' : 'var(--color-primary)',
+                  color: page === totalPages ? 'var(--color-border)' : 'var(--color-text-inverse)',
+                  border: '1px solid var(--color-primary)',
                   borderRadius: '4px',
                   fontSize: '14px',
                   cursor: page === totalPages ? 'not-allowed' : 'pointer',
