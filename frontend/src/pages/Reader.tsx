@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { Button, Toast, Dialog } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft } from 'lucide-react'
 import { bookApi, bookshelfApi, unlockApi } from '../services/api'
 import { useBookshelfStore } from '../store/bookshelf'
 import type { Book, Chapter } from '../types'
+import Button from '../components/Button'
+import Toast from '../components/Toast'
+import styles from './Reader.module.css'
 
 interface UnlockStatus {
   needUnlock: boolean
@@ -57,7 +59,7 @@ export default function Reader() {
           if (unlockResponse?.code === 200) {
             const status = unlockResponse.data
             setUnlockStatus(status)
-            
+
             if (status.needUnlock && !status.isFree) {
               setLoading(false)
               return
@@ -68,7 +70,7 @@ export default function Reader() {
         const chapterResponse: any = await bookApi.getChapterContent(Number(bookId), Number(chapterId))
         if (chapterResponse && chapterResponse.code === 200 && chapterResponse.data) {
           setChapter(chapterResponse.data)
-          
+
           if (!isInBookshelf(Number(bookId))) {
             addToBookshelf({
               id: Date.now(),
@@ -81,19 +83,19 @@ export default function Reader() {
           } else {
             updateProgress(Number(bookId), Number(chapterId))
           }
-          
+
           try {
             await bookshelfApi.updateProgress(Number(bookId), Number(chapterId))
           } catch (apiError) {
             console.error('Failed to sync progress to server:', apiError)
           }
         } else {
-          Toast.show('章节不存在')
+          Toast.info('章节不存在')
         }
       }
     } catch (error) {
       console.error('Failed to load book/chapter:', error)
-      Toast.show('加载失败')
+      Toast.error('加载失败')
     } finally {
       setLoading(false)
     }
@@ -112,56 +114,52 @@ export default function Reader() {
 
   const handleUnlock = async () => {
     if (!chapterId) return
-    
+
     const token = localStorage.getItem('accessToken')
     if (!token) {
-      Toast.show('请先登录')
+      Toast.info('请先登录')
       navigate('/user')
       return
     }
 
     if (userBalance < (unlockStatus?.price || 0)) {
-      const goRecharge = await Dialog.confirm({
-        content: `书币不足，当前余额 ${userBalance} 书币，需要 ${unlockStatus?.price} 书币。是否前往充值？`,
-        confirmText: '去充值',
-        cancelText: '取消',
-      })
+      const goRecharge = window.confirm(
+        `书币不足，当前余额 ${userBalance} 书币，需要 ${unlockStatus?.price} 书币。是否前往充值？`
+      )
       if (goRecharge) {
         navigate('/recharge')
       }
       return
     }
 
-    const confirmed = await Dialog.confirm({
-      content: `确定花费 ${unlockStatus?.price} 书币解锁此章节吗？`,
-      confirmText: '确定解锁',
-      cancelText: '取消',
-    })
-    
+    const confirmed = window.confirm(
+      `确定花费 ${unlockStatus?.price} 书币解锁此章节吗？`
+    )
+
     if (!confirmed) return
 
     setUnlocking(true)
     try {
       const response: any = await unlockApi.unlockChapter(Number(chapterId))
       if (response?.code === 200) {
-        Toast.show('解锁成功')
+        Toast.success('解锁成功')
         const newBalance = response.data?.remainingBalance || userBalance - (unlockStatus?.price || 0)
         setUserBalance(newBalance)
-        
+
         const userStr = localStorage.getItem('user')
         if (userStr) {
           const user = JSON.parse(userStr)
           user.coinBalance = newBalance
           localStorage.setItem('user', JSON.stringify(user))
         }
-        
+
         setUnlockStatus({ needUnlock: false, isFree: unlockStatus!.isFree, price: unlockStatus!.price, unlocked: true })
         loadBookAndChapter()
       } else {
-        Toast.show(response?.message || '解锁失败')
+        Toast.error(response?.message || '解锁失败')
       }
     } catch (error: any) {
-      Toast.show(error.response?.data?.message || '解锁失败')
+      Toast.error(error.response?.data?.message || '解锁失败')
     } finally {
       setUnlocking(false)
     }
@@ -173,7 +171,7 @@ export default function Reader() {
       setUnlockStatus(null)
       navigate(`/read/${bookId}/${chapters[currentIndex - 1].id}`, { state: { from: fromPath.current } })
     } else {
-      Toast.show('已经是第一章了')
+      Toast.info('已经是第一章了')
     }
   }
 
@@ -183,7 +181,7 @@ export default function Reader() {
       setUnlockStatus(null)
       navigate(`/read/${bookId}/${chapters[currentIndex + 1].id}`, { state: { from: fromPath.current } })
     } else {
-      Toast.show('已经是最后一章了')
+      Toast.info('已经是最后一章了')
     }
   }
 
@@ -191,13 +189,8 @@ export default function Reader() {
     setFontSize(size)
   }
 
-  const handleGoBack = async () => {
-    const result = await Dialog.confirm({
-      content: '确定要退出阅读吗？',
-      confirmText: '确定',
-      cancelText: '取消',
-    })
-    
+  const handleGoBack = () => {
+    const result = window.confirm('确定要退出阅读吗？')
     if (result) {
       if (bookId && chapterId) {
         updateProgress(Number(bookId), Number(chapterId))
@@ -211,115 +204,81 @@ export default function Reader() {
     setShowToolbar((prev) => !prev)
   }
 
+  const currentIndex = chapters.findIndex((c) => c.id === Number(chapterId))
+  const progressPercent = chapters.length > 0 ? Math.round(((currentIndex + 1) / chapters.length) * 100) : 0
+
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>加载中...</div>
+    return (
+      <div className={styles.pageLoading}>
+        <div style={{
+          width: 24, height: 24,
+          border: '2px solid var(--color-border)',
+          borderTopColor: 'var(--color-primary)',
+          borderRadius: '50%',
+          animation: 'spin 0.6s linear infinite',
+        }} />
+      </div>
+    )
   }
 
   if (unlockStatus?.needUnlock && !unlockStatus.isFree) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          backgroundColor: '#fff',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            background: '#fff',
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            borderBottom: '1px solid #eee',
-            zIndex: 100,
-          }}
-        >
-          <div
-            onClick={handleGoBack}
-            style={{ fontSize: '24px', marginRight: '12px', cursor: 'pointer' }}
-          >
-            ←
+      <div className={styles.unlockWall}>
+        <div className={styles.unlockHeader}>
+          <div onClick={handleGoBack} style={{ fontSize: '20px', cursor: 'pointer', marginRight: '12px' }}>
+            <ArrowLeft size={20} />
           </div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
             {book?.title}
           </div>
         </div>
 
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '40px 20px',
-          }}
-        >
-          <div style={{ fontSize: '64px', marginBottom: '24px' }}>🔒</div>
-          <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px' }}>
-            此章节为付费内容
-          </div>
-          <div style={{ fontSize: '14px', color: '#666', marginBottom: '24px', textAlign: 'center' }}>
-            解锁后可阅读完整内容
-          </div>
+        <div className={styles.unlockBody}>
+          <div className={styles.unlockIcon}>🔒</div>
+          <div className={styles.unlockTitle}>此章节为付费内容</div>
+          <div className={styles.unlockDesc}>解锁后可阅读完整内容</div>
 
-          <div
-            style={{
-              background: '#f5f5f5',
-              borderRadius: '12px',
-              padding: '20px',
-              width: '100%',
-              maxWidth: '300px',
-              marginBottom: '24px',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <span style={{ color: '#666' }}>章节价格</span>
-              <span style={{ fontWeight: 'bold' }}>{unlockStatus.price} 书币</span>
+          <div className={styles.unlockInfo}>
+            <div className={styles.unlockRow}>
+              <span className={styles.unlockLabel}>章节价格</span>
+              <span className={styles.unlockValue}>{unlockStatus.price} 书币</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#666' }}>当前余额</span>
-              <span style={{ fontWeight: 'bold', color: userBalance >= unlockStatus.price ? '#52c41a' : '#ff4d4f' }}>
+            <div className={styles.unlockRow}>
+              <span className={styles.unlockLabel}>当前余额</span>
+              <span style={{
+                fontWeight: 'bold',
+                color: userBalance >= unlockStatus.price ? 'var(--color-accent)' : 'var(--color-danger)',
+              }}>
                 {userBalance} 书币
               </span>
             </div>
           </div>
 
-          <Button
-            color="primary"
-            size="large"
-            style={{ width: '100%', maxWidth: '300px', marginBottom: '12px', borderRadius: '24px' }}
-            onClick={handleUnlock}
-            loading={unlocking}
-            disabled={unlocking}
-          >
-            {unlocking ? '解锁中...' : '立即解锁'}
-          </Button>
+          <div className={styles.unlockBtn}>
+            <Button
+              variant="primary"
+              size="lg"
+              block
+              onClick={handleUnlock}
+              loading={unlocking}
+              disabled={unlocking}
+            >
+              {unlocking ? '解锁中...' : '立即解锁'}
+            </Button>
+          </div>
 
-          <Button
-            size="large"
-            style={{ width: '100%', maxWidth: '300px', borderRadius: '24px' }}
-            onClick={() => navigate('/recharge')}
-          >
-            充值书币
-          </Button>
+          <div className={styles.unlockBtn}>
+            <Button variant="secondary" size="lg" block onClick={() => navigate('/recharge')}>
+              充值书币
+            </Button>
+          </div>
         </div>
 
-        <div
-          style={{
-            padding: '16px',
-            borderTop: '1px solid #eee',
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Button size="small" onClick={handlePrevChapter}>
+        <div className={styles.navFooter}>
+          <Button variant="secondary" size="sm" onClick={handlePrevChapter}>
             上一章
           </Button>
-          <Button size="small" onClick={handleNextChapter}>
+          <Button variant="secondary" size="sm" onClick={handleNextChapter}>
             下一章
           </Button>
         </div>
@@ -328,117 +287,74 @@ export default function Reader() {
   }
 
   if (!chapter) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>章节不存在</div>
+    return <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>章节不存在</div>
   }
 
   return (
-    <div
-      style={{
-        padding: '16px',
-        paddingBottom: '80px',
-        backgroundColor: '#fff',
-        minHeight: '100vh',
-        position: 'relative',
-      }}
-      onClick={toggleToolbar}
-    >
-      <div
-        onClick={(e) => {
-          e.stopPropagation()
-          handleGoBack()
-        }}
-        style={{
-          position: 'absolute',
-          top: '16px',
-          left: '16px',
-          width: '44px',
-          height: '44px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          zIndex: 1000,
-          opacity: showToolbar ? 1 : 0,
-          transform: showToolbar ? 'translateX(0)' : 'translateX(-20px)',
-          transition: 'opacity 0.3s ease, transform 0.3s ease',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-        }}
-      >
-        <LeftOutline fontSize={20} color="#fff" />
-      </div>
-
+    <div style={{ background: 'var(--color-bg)', minHeight: '100vh', paddingBottom: '80px' }}>
       <div
         style={{
-          marginBottom: '16px',
-          paddingTop: '20px',
           opacity: showToolbar ? 1 : 0,
           transform: showToolbar ? 'translateY(0)' : 'translateY(-10px)',
           transition: 'opacity 0.3s ease, transform 0.3s ease',
         }}
       >
-        <h1 style={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'center', marginBottom: '8px' }}>
-          {chapter.title}
-        </h1>
-        <div style={{ fontSize: '12px', color: '#999', textAlign: 'center' }}>
-          {book?.title}
+        <div className={styles.toolbar}>
+          <span onClick={handleGoBack} style={{ cursor: 'pointer', fontSize: '14px', color: 'var(--color-text-tertiary)' }}>
+            <ArrowLeft size={18} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+            返回
+          </span>
+          <span className={styles.toolbarTitle}>{chapter.title}</span>
+          <span style={{ fontSize: '14px', color: 'var(--color-text-tertiary)' }}>⚙</span>
         </div>
       </div>
 
-      <div
-        style={{
-          fontSize: `${fontSize}px`,
-          lineHeight: '1.8',
-          color: '#333',
-          whiteSpace: 'pre-wrap',
-        }}
-      >
+      <div className={styles.content} onClick={toggleToolbar} style={{ fontSize: `${fontSize}px` }}>
         {chapter.content}
       </div>
 
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          bottom: '0',
-          left: '0',
-          right: '0',
-          backgroundColor: '#fff',
-          borderTop: '1px solid #eee',
-          padding: '12px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '600px',
-          margin: '0 auto',
-          opacity: showToolbar ? 1 : 0,
-          transform: showToolbar ? 'translateY(0)' : 'translateY(100%)',
-          transition: 'opacity 0.3s ease, transform 0.3s ease',
-        }}
-      >
-        <Button size="small" onClick={handlePrevChapter}>
-          上一章
-        </Button>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Button
-            size="small"
-            onClick={() => handleFontSizeChange(fontSize - 2)}
-            disabled={fontSize <= 12}
-          >
-            A-
-          </Button>
-          <Button
-            size="small"
-            onClick={() => handleFontSizeChange(fontSize + 2)}
-            disabled={fontSize >= 24}
-          >
-            A+
-          </Button>
-        </div>
-        <Button size="small" onClick={handleNextChapter}>
-          下一章
-        </Button>
+      <div className={styles.progressBar}>
+        <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
+      </div>
+      <div className={styles.progressText}>
+        {currentIndex + 1} / {chapters.length} 章 · 已读 {progressPercent}%
+      </div>
+
+      <div className={styles.nav}>
+        <button
+          className={`${styles.navBtn} ${styles.prevBtn}`}
+          onClick={handlePrevChapter}
+          disabled={currentIndex === 0}
+        >
+          ← 上一章
+        </button>
+        <button
+          className={`${styles.navBtn} ${styles.nextBtn}`}
+          onClick={handleNextChapter}
+          disabled={currentIndex >= chapters.length - 1}
+        >
+          下一章 →
+        </button>
+      </div>
+
+      <div className={styles.settingsBar}>
+        <button
+          className={styles.fontSizeBtn}
+          onClick={() => handleFontSizeChange(fontSize - 2)}
+          disabled={fontSize <= 12}
+        >
+          A⁻
+        </button>
+        <span style={{ fontWeight: 600 }}>Aa</span>
+        <button
+          className={styles.fontSizeBtn}
+          onClick={() => handleFontSizeChange(fontSize + 2)}
+          disabled={fontSize >= 24}
+        >
+          A⁺
+        </button>
+        <span style={{ color: 'var(--color-border)' }}>|</span>
+        <span style={{ cursor: 'pointer' }} onClick={() => navigate(`/book/${bookId}/comments`)}>💬 评论</span>
       </div>
     </div>
   )
