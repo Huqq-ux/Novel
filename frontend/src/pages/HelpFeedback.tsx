@@ -1,13 +1,23 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, List, Input, Button, TextArea, Toast } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft } from 'lucide-react'
+import Card from '../components/Card'
+import Button from '../components/Button'
+import Input from '../components/Input'
+import Toast from '../components/Toast'
+import styles from './HelpFeedback.module.css'
 
 interface FAQ {
   question: string
   answer: string
 }
 
+/**
+ * 帮助与反馈页面
+ * 功能描述：提供常见问题（FAQ）浏览和用户意见反馈提交功能
+ * 实现逻辑：通过 Tab 切换「常见问题」和「意见反馈」两个面板，
+ * 反馈表单提交后通过 Toast 提示成功并清空表单
+ */
 export default function HelpFeedback() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<'faq' | 'feedback'>('faq')
@@ -24,95 +34,84 @@ export default function HelpFeedback() {
 
   const handleSubmitFeedback = () => {
     if (!feedback.trim()) {
-      Toast.show('请输入反馈内容')
+      Toast.error('请输入反馈内容')
       return
     }
-    Toast.show('感谢您的反馈！')
+    Toast.success('感谢您的反馈！')
     setFeedback('')
     setContact('')
   }
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-        <div
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <button
+          className={styles.backBtn}
           onClick={() => navigate(-1)}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginRight: '12px',
-          }}
+          aria-label="返回"
         >
-          <LeftOutline fontSize={18} color="#fff" />
-        </div>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
-          帮助与反馈
-        </h2>
+          <ArrowLeft size={18} />
+        </button>
+        <h2 className={styles.headerTitle}>帮助与反馈</h2>
       </div>
 
-      <div style={{ display: 'flex', marginBottom: '16px' }}>
-        <Button
-          fill={activeTab === 'faq' ? 'solid' : 'none'}
-          color={activeTab === 'faq' ? 'primary' : 'default'}
-          style={{ flex: 1 }}
+      <div className={styles.tabBar}>
+        <button
+          className={`${styles.tabBtn} ${activeTab === 'faq' ? styles.tabBtnActive : ''}`}
           onClick={() => setActiveTab('faq')}
         >
           常见问题
-        </Button>
-        <Button
-          fill={activeTab === 'feedback' ? 'solid' : 'none'}
-          color={activeTab === 'feedback' ? 'primary' : 'default'}
-          style={{ flex: 1 }}
+        </button>
+        <button
+          className={`${styles.tabBtn} ${activeTab === 'feedback' ? styles.tabBtnActive : ''}`}
           onClick={() => setActiveTab('feedback')}
         >
           意见反馈
-        </Button>
+        </button>
       </div>
 
       {activeTab === 'faq' ? (
-        <Card>
-          <List>
+        <div className={styles.faqCard}>
+          <Card variant="elevated">
             {faqs.map((item, index) => (
-              <List.Item key={index} style={{ padding: '12px 0' }}>
-                <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '4px' }}>
+              <div key={index} className={styles.faqItem}>
+                <div className={styles.faqQuestion}>
                   Q: {item.question}
                 </div>
-                <div style={{ fontSize: '13px', color: '#666', lineHeight: '1.6' }}>
+                <div className={styles.faqAnswer}>
                   A: {item.answer}
                 </div>
-              </List.Item>
+              </div>
             ))}
-          </List>
-        </Card>
+          </Card>
+        </div>
       ) : (
-        <Card>
-          <div style={{ padding: '12px 0' }}>
-            <div style={{ fontSize: '14px', marginBottom: '8px' }}>问题描述</div>
-            <TextArea
-              placeholder="请详细描述您遇到的问题或建议"
-              value={feedback}
-              onChange={setFeedback}
-              rows={4}
-              style={{ marginBottom: '16px' }}
-            />
-            <div style={{ fontSize: '14px', marginBottom: '8px' }}>联系方式（选填）</div>
-            <Input
-              placeholder="手机号或邮箱"
-              value={contact}
-              onChange={setContact}
-              style={{ marginBottom: '16px' }}
-            />
-            <Button color="primary" block onClick={handleSubmitFeedback}>
-              提交反馈
-            </Button>
-          </div>
-        </Card>
+        <div className={styles.feedbackCard}>
+          <Card variant="elevated">
+            <div className={styles.feedbackContent}>
+              <div className={styles.formGroup}>
+                <div className={styles.formLabel}>问题描述</div>
+                <Input
+                  placeholder="请详细描述您遇到的问题或建议"
+                  value={feedback}
+                  onChange={setFeedback}
+                  rows={4}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <div className={styles.formLabel}>联系方式（选填）</div>
+                <Input
+                  placeholder="手机号或邮箱"
+                  value={contact}
+                  onChange={setContact}
+                />
+              </div>
+              <Button variant="primary" block onClick={handleSubmitFeedback}>
+                提交反馈
+              </Button>
+            </div>
+          </Card>
+        </div>
       )}
     </div>
   )

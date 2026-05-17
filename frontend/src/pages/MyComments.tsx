@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { List, Empty, Button, Dialog, Toast } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft, ThumbsUp, Trash2 } from 'lucide-react'
 import { commentApi } from '../services/api'
+import Button from '../components/Button'
+import Empty from '../components/Empty'
+import Modal from '../components/Modal'
+import Toast from '../components/Toast'
+import styles from './MyComments.module.css'
 
 interface Comment {
   id: number
@@ -17,6 +21,7 @@ export default function MyComments() {
   const navigate = useNavigate()
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
 
   useEffect(() => {
     loadComments()
@@ -29,7 +34,7 @@ export default function MyComments() {
       if (response && response.code === 200) {
         setComments(response.data || [])
       } else if (response && response.code === 401) {
-        Toast.show('请先登录')
+        Toast.show({ content: '请先登录' })
         setComments([])
       } else {
         setComments([])
@@ -37,7 +42,7 @@ export default function MyComments() {
     } catch (error: any) {
       console.error('Failed to load comments:', error)
       if (error.response?.status === 401 || error.response?.data?.code === 401) {
-        Toast.show('请先登录')
+        Toast.show({ content: '请先登录' })
       }
       setComments([])
     } finally {
@@ -45,23 +50,22 @@ export default function MyComments() {
     }
   }
 
-  const handleDelete = async (id: number) => {
-    const result = await Dialog.confirm({
-      content: '确定要删除这条评论吗？',
-    })
-    if (result) {
-      try {
-        const response: any = await commentApi.deleteComment(id)
-        if (response && response.code === 200) {
-          setComments(prev => prev.filter(c => c.id !== id))
-          Toast.show('删除成功')
-        } else {
-          Toast.show(response?.message || '删除失败')
-        }
-      } catch (error: any) {
-        console.error('Failed to delete comment:', error)
-        Toast.show('删除失败')
+  const handleDelete = async () => {
+    if (deleteTargetId === null) return
+
+    try {
+      const response: any = await commentApi.deleteComment(deleteTargetId)
+      if (response && response.code === 200) {
+        setComments(prev => prev.filter(c => c.id !== deleteTargetId))
+        Toast.success('删除成功')
+      } else {
+        Toast.show({ content: response?.message || '删除失败' })
       }
+    } catch (error: any) {
+      console.error('Failed to delete comment:', error)
+      Toast.show({ content: '删除失败' })
+    } finally {
+      setDeleteTargetId(null)
     }
   }
 
@@ -75,59 +79,69 @@ export default function MyComments() {
   }
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-        <div
-          onClick={() => navigate(-1)}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginRight: '12px',
-          }}
-        >
-          <LeftOutline fontSize={18} color="#fff" />
-        </div>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} />
+        </button>
+        <h2 className={styles.title}>
           我的评论
         </h2>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px' }}>加载中...</div>
+        <div className={styles.loading}>加载中...</div>
       ) : comments.length === 0 ? (
-        <Empty description="暂无评论记录" />
+        <Empty
+          description="暂无评论记录"
+        />
       ) : (
-        <List>
+        <div className={styles.list}>
           {comments.map((comment) => (
-            <List.Item
-              key={comment.id}
-              style={{ padding: '12px' }}
-            >
-              <div style={{ marginBottom: '8px' }}>
-                <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{comment.bookTitle}</span>
-                <span style={{ fontSize: '12px', color: '#999', marginLeft: '8px' }}>
+            <div key={comment.id} className={styles.commentCard}>
+              <div className={styles.commentHeader}>
+                <span
+                  className={styles.commentBookTitle}
+                  onClick={() => navigate(`/book/${comment.bookId}`)}
+                >
+                  {comment.bookTitle}
+                </span>
+                <span className={styles.commentDate}>
                   {formatDate(comment.createTime)}
                 </span>
               </div>
-              <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.6', marginBottom: '8px' }}>
+              <div className={styles.commentContent}>
                 {comment.content}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#999' }}>👍 {comment.likes || 0} 赞</span>
-                <Button size="mini" fill="none" onClick={() => handleDelete(comment.id)}>
+              <div className={styles.commentFooter}>
+                <span className={styles.commentLikes}>
+                  <ThumbsUp size={14} className={styles.commentLikesIcon} />
+                  {comment.likes || 0} 赞
+                </span>
+                <Button
+                  size="sm"
+                  variant="text"
+                  danger
+                  onClick={() => setDeleteTargetId(comment.id)}
+                >
+                  <Trash2 size={14} style={{ marginRight: 4 }} />
                   删除
                 </Button>
               </div>
-            </List.Item>
+            </div>
           ))}
-        </List>
+        </div>
       )}
+
+      <Modal
+        visible={deleteTargetId !== null}
+        title="确认删除"
+        content="确定要删除这条评论吗？"
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={handleDelete}
+        confirmText="确定"
+        danger
+      />
     </div>
   )
 }

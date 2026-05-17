@@ -1,0 +1,264 @@
+/* PaidBooks page — 梧桐调 style */
+
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+/* === Hero header === */
+.hero {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  padding: var(--space-lg);
+  color: var(--color-text-inverse);
+  z-index: 100;
+}
+
+.heroRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.heroBack {
+  background: none;
+  border: none;
+  color: var(--color-text-inverse);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: opacity var(--transition-fast);
+}
+
+.heroBack:active {
+  opacity: 0.7;
+}
+
+.heroTitle {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  margin: 0;
+}
+
+.heroDesc {
+  font-size: var(--font-size-base);
+  opacity: 0.9;
+}
+
+/* === Category pills === */
+.categoryBar {
+  background: var(--color-card);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-divider);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.categoryBar::-webkit-scrollbar {
+  display: none;
+}
+
+.pill {
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  font-family: var(--font-sans);
+}
+
+.pillActive {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* === Sort bar === */
+.sortBar {
+  background: var(--color-card);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  gap: var(--space-md);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.sortLabel {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.sortOption {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  font-family: var(--font-sans);
+}
+
+.sortOptionActive {
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+/* === Book list === */
+.listSection {
+  padding: var(--space-lg);
+}
+
+.bookCard {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  display: flex;
+  gap: var(--space-md);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast);
+}
+
+.bookCard:active {
+  box-shadow: var(--shadow-md);
+}
+
+/* === Book cover area === */
+.coverWrap {
+  position: relative;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.paidBadge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 1;
+}
+
+/* === Book info === */
+.bookInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.bookTitle {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-xs);
+}
+
+.bookDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* === Bottom stats row === */
+.statsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statsLeft {
+  display: flex;
+  gap: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.ratingIcon {
+  color: var(--color-primary);
+}
+
+.ratingValue {
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  color: var(--color-text-secondary);
+}
+
+/* === Loading & empty states === */
+.loadingState {
+  text-align: center;
+  padding: var(--space-3xl);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-base);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--space-3xl);
+  color: var(--color-text-tertiary);
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: var(--space-lg);
+}
+
+.emptyText {
+  font-size: var(--font-size-base);
+}
+
+/* === Info card === */
+.infoCard {
+  background: var(--color-card);
+  margin: var(--space-lg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.infoTitle {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+}
+
+.infoList {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+}

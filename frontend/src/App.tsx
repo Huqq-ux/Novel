@@ -1,11 +1,11 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
-import { TabBar, SpinLoading } from 'antd-mobile'
-import { HomeOutlined, BookOutlined, CompassOutlined, UserOutlined } from '@ant-design/icons'
-import { Home, Bookshelf, Discover, User } from './pages'
+import { Home, Book as BookIcon, Compass, User as UserIcon } from 'lucide-react'
+import { Home as HomePage, Bookshelf, Discover, User } from './pages'
 import AIFloatingAssistant from './components/AIFloatingAssistant'
+import TabBar from './components/TabBar'
+import type { TabItem } from './components/TabBar/types'
 
-// Lazy-loaded pages
 const BookDetail = lazy(() => import('./pages/BookDetail'))
 const Reader = lazy(() => import('./pages/Reader'))
 const Search = lazy(() => import('./pages/Search'))
@@ -23,7 +23,6 @@ const AuthorBooks = lazy(() => import('./pages/AuthorBooks'))
 const PaidBooks = lazy(() => import('./pages/PaidBooks'))
 const AuthorAudit = lazy(() => import('./pages/AuthorAudit'))
 
-// Lazy-loaded admin pages
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AuthorAuditNew = lazy(() => import('./pages/admin/AuthorAuditNew'))
@@ -33,26 +32,34 @@ const DataReports = lazy(() => import('./pages/admin/DataReports'))
 const SystemSettings = lazy(() => import('./pages/admin/SystemSettings'))
 const PaidBookManagement = lazy(() => import('./pages/admin/PaidBookManagement'))
 
-const PageLoader = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-    <SpinLoading color="primary" />
-  </div>
-)
+function PageLoader() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+      <div style={{
+        width: 24, height: 24,
+        border: '2px solid var(--color-border)',
+        borderTopColor: 'var(--color-primary)',
+        borderRadius: '50%',
+        animation: 'spin 0.6s linear infinite',
+      }} />
+    </div>
+  )
+}
 
 function AppContent() {
   const location = useLocation()
   const navigate = useNavigate()
   const activeTab = location.pathname.split('/')[1] || 'home'
 
-  const tabs = [
-    { key: 'home', title: '首页', icon: <HomeOutlined /> },
-    { key: 'bookshelf', title: '书架', icon: <BookOutlined /> },
-    { key: 'discover', title: '发现', icon: <CompassOutlined /> },
-    { key: 'user', title: '我的', icon: <UserOutlined /> },
+  const tabs: TabItem[] = [
+    { key: 'home', title: '首页', icon: <Home size={20} /> },
+    { key: 'bookshelf', title: '书架', icon: <BookIcon size={20} /> },
+    { key: 'discover', title: '发现', icon: <Compass size={20} /> },
+    { key: 'user', title: '我的', icon: <UserIcon size={20} /> },
   ]
 
   const isAdminRoute = location.pathname.startsWith('/admin')
-  const showTabBar = !['/read'].some(path => location.pathname.startsWith(path)) && !isAdminRoute
+  const showTabBar = !location.pathname.startsWith('/read') && !isAdminRoute
 
   if (isAdminRoute) {
     return (
@@ -77,8 +84,8 @@ function AppContent() {
       <div style={{ flex: 1, overflowY: 'auto' }}>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/home" element={<HomePage />} />
             <Route path="/bookshelf" element={<Bookshelf />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/user" element={<User />} />
@@ -102,29 +109,17 @@ function AppContent() {
         </Suspense>
       </div>
       {showTabBar && (
-        <TabBar
-          activeKey={activeTab}
-          onChange={(key) => {
-            navigate(`/${key}`)
-          }}
-          style={{ position: 'sticky', bottom: 0, left: 0, right: 0 }}
-        >
-          {tabs.map(item => (
-            <TabBar.Item key={item.key} icon={item.icon} title={item.title} />
-          ))}
-        </TabBar>
+        <TabBar items={tabs} activeKey={activeTab} onChange={key => navigate(`/${key}`)} />
       )}
       <AIFloatingAssistant />
     </div>
   )
 }
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <AppContent />
     </BrowserRouter>
   )
 }
-
-export default App

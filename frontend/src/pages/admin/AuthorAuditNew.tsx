@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Dialog, Toast } from 'antd-mobile'
+import CustomToast from '../../components/Toast'
 import { authorApi } from '../../services/api'
+
+const Toast = {
+  show: (msg: string) => CustomToast.show({ type: 'info', content: msg }),
+}
+const confirmDialog = (content: string, onConfirm: () => void) => {
+  if (window.confirm(content)) onConfirm()
+}
 
 interface Application {
   id: number
@@ -93,27 +100,22 @@ export default function AuthorAuditNew() {
   }
 
   const handleApprove = async (id: number) => {
-    Dialog.confirm({
-      content: '确定通过该申请吗？',
-      confirmText: '确定',
-      cancelText: '取消',
-      onConfirm: async () => {
-        setProcessing(true)
-        try {
-          const response: any = await authorApi.approveApplication(id, auditComment)
-          if (response && response.code === 200) {
-            Toast.show('审核通过')
-            setSelectedApplication(null)
-            loadData()
-          } else {
-            Toast.show(response?.message || '操作失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '操作失败')
-        } finally {
-          setProcessing(false)
+    confirmDialog('确定通过该申请吗？', async () => {
+      setProcessing(true)
+      try {
+        const response: any = await authorApi.approveApplication(id, auditComment)
+        if (response && response.code === 200) {
+          Toast.show('审核通过')
+          setSelectedApplication(null)
+          loadData()
+        } else {
+          Toast.show(response?.message || '操作失败')
         }
-      },
+      } catch (error: any) {
+        Toast.show(error.response?.data?.message || '操作失败')
+      } finally {
+        setProcessing(false)
+      }
     })
   }
 
@@ -123,35 +125,30 @@ export default function AuthorAuditNew() {
       return
     }
 
-    Dialog.confirm({
-      content: '确定拒绝该申请吗？',
-      confirmText: '确定',
-      cancelText: '取消',
-      onConfirm: async () => {
-        setProcessing(true)
-        try {
-          const response: any = await authorApi.rejectApplication(id, auditComment)
-          if (response && response.code === 200) {
-            Toast.show('已拒绝申请')
-            setSelectedApplication(null)
-            loadData()
-          } else {
-            Toast.show(response?.message || '操作失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '操作失败')
-        } finally {
-          setProcessing(false)
+    confirmDialog('确定拒绝该申请吗？', async () => {
+      setProcessing(true)
+      try {
+        const response: any = await authorApi.rejectApplication(id, auditComment)
+        if (response && response.code === 200) {
+          Toast.show('已拒绝申请')
+          setSelectedApplication(null)
+          loadData()
+        } else {
+          Toast.show(response?.message || '操作失败')
         }
-      },
+      } catch (error: any) {
+        Toast.show(error.response?.data?.message || '操作失败')
+      } finally {
+        setProcessing(false)
+      }
     })
   }
 
   const getStatusBadge = (status: number) => {
     const styles: Record<number, { bg: string; color: string; text: string }> = {
-      0: { bg: '#e6f7ff', color: '#1890ff', text: '待审核' },
-      1: { bg: '#f6ffed', color: '#52c41a', text: '已通过' },
-      2: { bg: '#fff2f0', color: '#ff4d4f', text: '已拒绝' },
+      0: { bg: 'var(--color-primary-light)', color: 'var(--color-primary)', text: '待审核' },
+      1: { bg: 'var(--color-accent-light)', color: 'var(--color-accent)', text: '已通过' },
+      2: { bg: 'var(--color-danger-light)', color: 'var(--color-danger)', text: '已拒绝' },
     }
     const style = styles[status] || styles[0]
     return (
@@ -188,7 +185,7 @@ export default function AuthorAuditNew() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
         <div style={{ textAlign: 'center' }}>
           <div className="loading-spinner" />
-          <p style={{ color: '#8c8c8c', marginTop: '16px' }}>加载中...</p>
+          <p style={{ color: 'var(--color-text-tertiary)', marginTop: '16px' }}>加载中...</p>
         </div>
       </div>
     )
@@ -207,7 +204,7 @@ export default function AuthorAuditNew() {
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: '#1890ff',
+              color: 'var(--color-primary)',
               fontSize: '14px',
               padding: 0,
             }}
@@ -222,7 +219,7 @@ export default function AuthorAuditNew() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '24px' }}>
           <div
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: 'var(--color-card)',
               borderRadius: '12px',
               padding: '24px',
               boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
@@ -235,37 +232,37 @@ export default function AuthorAuditNew() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               <div>
-                <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '4px' }}>
+                <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '4px' }}>
                   笔名
                 </label>
                 <p style={{ margin: 0, fontSize: '16px', fontWeight: 500 }}>{selectedApplication.penName || '-'}</p>
               </div>
               <div>
-                <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '4px' }}>
+                <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '4px' }}>
                   真实姓名
                 </label>
                 <p style={{ margin: 0, fontSize: '16px' }}>{selectedApplication.realName || '-'}</p>
               </div>
               <div>
-                <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '4px' }}>
+                <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '4px' }}>
                   联系电话
                 </label>
                 <p style={{ margin: 0, fontSize: '16px' }}>{selectedApplication.phone || '-'}</p>
               </div>
               <div>
-                <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '4px' }}>
+                <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '4px' }}>
                   联系邮箱
                 </label>
                 <p style={{ margin: 0, fontSize: '16px' }}>{selectedApplication.email || '-'}</p>
               </div>
               <div>
-                <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '4px' }}>
+                <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '4px' }}>
                   擅长类型
                 </label>
                 <p style={{ margin: 0, fontSize: '16px' }}>{selectedApplication.specialty || '-'}</p>
               </div>
               <div>
-                <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '4px' }}>
+                <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '4px' }}>
                   申请时间
                 </label>
                 <p style={{ margin: 0, fontSize: '16px' }}>
@@ -275,13 +272,13 @@ export default function AuthorAuditNew() {
             </div>
 
             <div style={{ marginTop: '24px' }}>
-              <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '8px' }}>
+              <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '8px' }}>
                 个人简介
               </label>
               <div
                 style={{
                   padding: '16px',
-                  backgroundColor: '#fafafa',
+                  backgroundColor: 'var(--color-bg)',
                   borderRadius: '8px',
                   fontSize: '14px',
                   lineHeight: 1.6,
@@ -293,7 +290,7 @@ export default function AuthorAuditNew() {
 
             {selectedApplication.workSamples && selectedApplication.workSamples.length > 0 && (
               <div style={{ marginTop: '24px' }}>
-                <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '8px' }}>
+                <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '8px' }}>
                   作品示例
                 </label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -305,9 +302,9 @@ export default function AuthorAuditNew() {
                       rel="noopener noreferrer"
                       style={{
                         padding: '12px 16px',
-                        backgroundColor: '#f0f2f5',
+                        backgroundColor: 'var(--color-bg)',
                         borderRadius: '8px',
-                        color: '#1890ff',
+                        color: 'var(--color-primary)',
                         textDecoration: 'none',
                         fontSize: '14px',
                         display: 'flex',
@@ -329,13 +326,13 @@ export default function AuthorAuditNew() {
 
             {selectedApplication.auditComment && (
               <div style={{ marginTop: '24px' }}>
-                <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '8px' }}>
+                <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '8px' }}>
                   审核意见
                 </label>
                 <div
                   style={{
                     padding: '16px',
-                    backgroundColor: selectedApplication.status === 1 ? '#f6ffed' : '#fff2f0',
+                    backgroundColor: selectedApplication.status === 1 ? 'var(--color-accent-light)' : 'var(--color-danger-light)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     lineHeight: 1.6,
@@ -350,7 +347,7 @@ export default function AuthorAuditNew() {
           {selectedApplication.status === 0 && (
             <div
               style={{
-                backgroundColor: '#fff',
+                backgroundColor: 'var(--color-card)',
                 borderRadius: '12px',
                 padding: '24px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
@@ -360,7 +357,7 @@ export default function AuthorAuditNew() {
               <h3 style={{ margin: 0, marginBottom: '16px', fontSize: '16px', fontWeight: 600 }}>审核操作</h3>
 
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', color: '#8c8c8c', fontSize: '12px', marginBottom: '8px' }}>
+                <label style={{ display: 'block', color: 'var(--color-text-tertiary)', fontSize: '12px', marginBottom: '8px' }}>
                   审核意见
                 </label>
                 <textarea
@@ -371,7 +368,7 @@ export default function AuthorAuditNew() {
                     width: '100%',
                     padding: '12px',
                     borderRadius: '8px',
-                    border: '1px solid #d9d9d9',
+                    border: '1px solid var(--color-border)',
                     fontSize: '14px',
                     resize: 'vertical',
                     minHeight: '100px',
@@ -379,10 +376,10 @@ export default function AuthorAuditNew() {
                     transition: 'border-color 0.3s',
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#1890ff'
+                    e.target.style.borderColor = 'var(--color-primary)'
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = '#d9d9d9'
+                    e.target.style.borderColor = 'var(--color-border)'
                   }}
                 />
               </div>
@@ -394,8 +391,8 @@ export default function AuthorAuditNew() {
                   style={{
                     width: '100%',
                     padding: '12px 24px',
-                    backgroundColor: '#52c41a',
-                    color: '#fff',
+                    backgroundColor: 'var(--color-accent)',
+                    color: 'var(--color-text-inverse)',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '14px',
@@ -419,9 +416,9 @@ export default function AuthorAuditNew() {
                   style={{
                     width: '100%',
                     padding: '12px 24px',
-                    backgroundColor: '#fff',
-                    color: '#ff4d4f',
-                    border: '1px solid #ff4d4f',
+                    backgroundColor: 'var(--color-card)',
+                    color: 'var(--color-danger)',
+                    border: '1px solid var(--color-danger)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: 500,
@@ -451,7 +448,7 @@ export default function AuthorAuditNew() {
     <div>
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           padding: '16px 24px',
           marginBottom: '24px',
@@ -472,8 +469,8 @@ export default function AuthorAuditNew() {
                 padding: '8px 16px',
                 borderRadius: '20px',
                 border: 'none',
-                backgroundColor: activeFilter === filter.key ? '#1890ff' : '#f0f2f5',
-                color: activeFilter === filter.key ? '#fff' : '#595959',
+                backgroundColor: activeFilter === filter.key ? 'var(--color-primary)' : 'var(--color-bg)',
+                color: activeFilter === filter.key ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
                 fontSize: '14px',
                 cursor: 'pointer',
                 transition: 'all 0.3s',
@@ -490,7 +487,7 @@ export default function AuthorAuditNew() {
             height="16"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#8c8c8c"
+            stroke="var(--color-text-tertiary)"
             strokeWidth="2"
             style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
           >
@@ -505,17 +502,17 @@ export default function AuthorAuditNew() {
             style={{
               padding: '8px 12px 8px 36px',
               borderRadius: '20px',
-              border: '1px solid #d9d9d9',
+              border: '1px solid var(--color-border)',
               fontSize: '14px',
               width: '280px',
               outline: 'none',
               transition: 'border-color 0.3s',
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = '#1890ff'
+              e.target.style.borderColor = 'var(--color-primary)'
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = '#d9d9d9'
+              e.target.style.borderColor = 'var(--color-border)'
             }}
           />
         </div>
@@ -523,7 +520,7 @@ export default function AuthorAuditNew() {
 
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
           overflow: 'hidden',
@@ -531,23 +528,23 @@ export default function AuthorAuditNew() {
       >
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ backgroundColor: '#fafafa' }}>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+            <tr style={{ backgroundColor: 'var(--color-bg)' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 申请人
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 真实姓名
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 擅长类型
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 申请时间
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 状态
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 操作
               </th>
             </tr>
@@ -558,11 +555,11 @@ export default function AuthorAuditNew() {
                 <tr
                   key={app.id}
                   style={{
-                    borderBottom: '1px solid #f0f0f0',
+                    borderBottom: '1px solid var(--color-divider)',
                     transition: 'background-color 0.2s',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fafafa'
+                    e.currentTarget.style.backgroundColor = 'var(--color-bg)'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent'
@@ -575,11 +572,11 @@ export default function AuthorAuditNew() {
                           width: '40px',
                           height: '40px',
                           borderRadius: '8px',
-                          backgroundColor: '#1890ff',
+                          backgroundColor: 'var(--color-primary)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: '#fff',
+                          color: 'var(--color-text-inverse)',
                           fontWeight: 'bold',
                           fontSize: '14px',
                         }}
@@ -588,13 +585,13 @@ export default function AuthorAuditNew() {
                       </div>
                       <div>
                         <p style={{ margin: 0, fontWeight: 500 }}>{app.penName || app.username}</p>
-                        <p style={{ margin: 0, fontSize: '12px', color: '#8c8c8c' }}>{app.email}</p>
+                        <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-tertiary)' }}>{app.email}</p>
                       </div>
                     </div>
                   </td>
                   <td style={{ padding: '16px', fontSize: '14px' }}>{app.realName || '-'}</td>
                   <td style={{ padding: '16px', fontSize: '14px' }}>{app.specialty || '-'}</td>
-                  <td style={{ padding: '16px', fontSize: '14px', color: '#8c8c8c' }}>
+                  <td style={{ padding: '16px', fontSize: '14px', color: 'var(--color-text-tertiary)' }}>
                     {new Date(app.createTime).toLocaleDateString()}
                   </td>
                   <td style={{ padding: '16px' }}>{getStatusBadge(app.status)}</td>
@@ -603,8 +600,8 @@ export default function AuthorAuditNew() {
                       onClick={() => handleViewDetail(app.id)}
                       style={{
                         padding: '6px 16px',
-                        backgroundColor: '#e6f7ff',
-                        color: '#1890ff',
+                        backgroundColor: 'var(--color-primary-light)',
+                        color: 'var(--color-primary)',
                         border: 'none',
                         borderRadius: '6px',
                         fontSize: '14px',
@@ -612,10 +609,10 @@ export default function AuthorAuditNew() {
                         transition: 'background-color 0.2s',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#bae7ff'
+                        e.currentTarget.style.backgroundColor = 'var(--color-primary)'
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#e6f7ff'
+                        e.currentTarget.style.backgroundColor = 'var(--color-primary-light)'
                       }}
                     >
                       查看详情
@@ -625,13 +622,13 @@ export default function AuthorAuditNew() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} style={{ padding: '60px', textAlign: 'center', color: '#8c8c8c' }}>
+                <td colSpan={6} style={{ padding: '60px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
                   <svg
                     width="48"
                     height="48"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#d9d9d9"
+                    stroke="var(--color-border)"
                     strokeWidth="1.5"
                     style={{ margin: '0 auto 16px' }}
                   >

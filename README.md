@@ -1,98 +1,163 @@
 # 墨语小说 - 小说阅读平台
 
-一个模仿番茄免费小说的Web应用，包含完整的前后端功能。
+墨语小说是一个全栈 Web 阅读平台，包含小说浏览、沉浸式阅读器、书架管理、用户认证、评论评分、付费解锁、作者创作管理、管理后台和 AI 智能助手等功能。
 
 ## 项目结构
 
 ```
 Novel/
-├── frontend/          # 前端项目 (React + TypeScript + Vite)
+├── frontend/                    # React 前端
 │   ├── src/
-│   │   ├── pages/     # 页面组件
-│   │   ├── services/  # API服务
-│   │   ├── store/     # 状态管理
-│   │   ├── types/     # TypeScript类型定义
-│   │   └── ...
-│   └── package.json
-├── backend/           # 后端项目 (Spring Boot + JPA)
+│   │   ├── App.tsx              # 路由定义 + TabBar 布局
+│   │   ├── main.tsx             # 入口
+│   │   ├── components/          # 自定义组件库（14 个）+ 业务组件
+│   │   │   ├── Button/          # 按钮
+│   │   │   ├── Card/            # 卡片容器
+│   │   │   ├── Input/           # 输入框
+│   │   │   ├── Tag/             # 标签
+│   │   │   ├── Modal/           # 模态框
+│   │   │   ├── Toast/           # 轻提示
+│   │   │   ├── TabBar/          # 底部标签栏
+│   │   │   ├── Empty/           # 空状态
+│   │   │   ├── Skeleton/        # 骨架屏
+│   │   │   ├── SearchBar/       # 搜索栏
+│   │   │   ├── BookCover/       # 书籍封面
+│   │   │   ├── InfiniteScroll/  # 无限滚动
+│   │   │   ├── PullToRefresh/   # 下拉刷新
+│   │   │   ├── StarRating/      # 星级评分
+│   │   │   ├── AIFloatingAssistant.tsx  # AI 浮动助手
+│   │   │   ├── BookRating.tsx   # 评分面板
+│   │   │   └── ImageUploader.tsx # 图片上传
+│   │   ├── pages/               # 页面组件（30+ 个）
+│   │   │   ├── admin/           # 管理后台（7 个页面）
+│   │   │   ├── Home.tsx         # 首页
+│   │   │   ├── Bookshelf.tsx    # 书架
+│   │   │   ├── Discover.tsx     # 发现
+│   │   │   ├── User.tsx         # 个人中心
+│   │   │   ├── BookDetail.tsx   # 书籍详情
+│   │   │   ├── Reader.tsx       # 阅读器
+│   │   │   ├── Search.tsx       # 搜索
+│   │   │   └── ...              # 更多功能页面
+│   │   ├── styles/              # 全局样式
+│   │   │   ├── tokens.css       # Design Tokens
+│   │   │   ├── reset.css        # CSS Reset
+│   │   │   ├── typography.css   # 字体系统
+│   │   │   └── utilities.css    # 工具类
+│   │   ├── services/
+│   │   │   └── api.ts           # API 调用
+│   │   ├── store/               # 状态管理（zustand）
+│   │   ├── types/               # TypeScript 类型定义
+│   │   └── hooks/               # 自定义 Hooks
+│   └── vite.config.ts
+├── backend/                     # Spring Boot 后端
 │   ├── src/main/java/com/novel/
-│   │   ├── entity/    # 实体类
-│   │   ├── repository/# 数据访问层
-│   │   ├── service/   # 业务逻辑层
-│   │   ├── controller/# 控制器
-│   │   ├── dto/       # 数据传输对象
-│   │   └── config/    # 配置类
+│   │   ├── config/              # 配置类（Security, Redis, MyBatis-Plus, CORS）
+│   │   ├── entity/              # 实体类（16 个）
+│   │   ├── mapper/              # MyBatis-Plus Mapper
+│   │   ├── service/             # 业务逻辑层
+│   │   ├── controller/          # REST 控制器（17 个）
+│   │   ├── dto/                 # 请求/响应 DTO
+│   │   ├── security/            # JWT 过滤器 + 认证
+│   │   ├── util/                # 工具类
+│   │   └── module/              # 模块化架构（事件总线 + SPI Facade）
 │   └── pom.xml
-└── README.md
+├── ai-service/                  # Python AI 微服务
+│   ├── app/
+│   │   ├── main.py              # FastAPI 应用入口
+│   │   ├── api/                 # 对话路由（推荐/搜索/客服）
+│   │   ├── core/                # LLM、向量存储、数据库、上下文管理
+│   │   └── modules/             # LangGraph 工作流模块
+│   └── requirements.txt
+└── novel_database.sql           # 数据库初始化脚本（16 张表）
 ```
 
 ## 技术栈
 
 ### 前端
-- React 18
-- TypeScript
-- Vite
-- Ant Design Mobile
-- React Router
-- Axios
-- Zustand (状态管理)
+| 技术 | 说明 |
+|------|------|
+| React 18.3 + TypeScript 5.2 | 函数组件 + Hooks |
+| Vite 4.5 | SWC 编译，代理配置 |
+| react-router-dom 6.22 | 客户端路由 |
+| axios | HTTP 请求（拦截器 + 自动 Token 刷新） |
+| zustand 4.5 | 轻量状态管理 + localStorage 持久化 |
+| lucide-react | 图标库 |
+| CSS Modules + CSS Variables | 梧桐调设计系统（金驼 #c4a882 主色调） |
 
 ### 后端
-- Spring Boot 3.2
-- Spring Data JPA
-- MySQL
-- Maven
+| 技术 | 说明 |
+|------|------|
+| Spring Boot 3.1 + Java 17 | REST API 服务 |
+| MyBatis-Plus 3.5.7 | ORM + 物理分页 |
+| Spring Security + JWT | 无状态认证（Access + Refresh 双 Token） |
+| MySQL 8.0 + Druid | 数据库 + 连接池 |
+| Redis + Lettuce | Cache-Aside 缓存（分级 TTL + 互斥锁防击穿） |
+
+### AI 服务
+| 技术 | 说明 |
+|------|------|
+| FastAPI 0.115 + Python 3.x | 异步 HTTP 服务 |
+| LangChain + LangGraph | 多节点有向图 AI 工作流 |
+| DashScope API | qwen3.6-plus 模型（OpenAI 兼容协议） |
+| ChromaDB | 向量存储（text-embedding-v3） |
+| Redis | 会话上下文存储 |
 
 ## 功能特性
 
-### 前端功能
-- 📚 首页：展示热门小说推荐
-- 📖 书架：管理已收藏的小说
-- 🔍 搜索：按书名或作者搜索
-- 📖 阅读器：支持字体大小调整、章节切换
-- 🔍 发现：分类浏览、排行榜
-- 👤 个人中心：用户信息管理
+### 读者功能
+- 首页推荐：Banner 推荐 + 分类浏览 + 书籍网格
+- 书籍详情：沉浸式 Hero + 章节列表 + 评分评论
+- 阅读器：衬线正文字体 + 字号调节 + 章节导航 + 付费解锁
+- 搜索：关键词搜索 + AI 智能搜索
+- 书架管理：阅读进度跟踪 + 分类筛选
+- 个人中心：登录注册 + 阅读历史 + 收藏 + 评论管理
+- 书币充值 + 每日签到
 
-### 后端API
-- 书籍管理：获取书籍列表、详情、章节
-- 书架管理：添加/删除书籍、更新阅读进度
-- 用户认证：登录、注册
-- 搜索功能：按关键词搜索书籍
+### 作者功能
+- 申请成为作者
+- 书籍/章节管理（CRUD）
+- 付费章节设置
+
+### 管理后台
+- 仪表盘数据概览
+- 用户/书籍/付费管理
+- 作者申请审核
+- 系统设置
+
+### AI 智能助手
+- 智能书籍推荐（偏好提取 → 向量检索 → LLM 排序）
+- AI 语义搜索
+- 客服问答
+- 浮动助手快速入口
 
 ## 快速开始
 
 ### 前置要求
 - Node.js 18+
 - Java 17+
+- Maven 3.6+
 - MySQL 8.0+
+- Python 3.x（AI 服务可选）
 
-### 数据库配置
+### 1. 数据库初始化
 
-1. 创建数据库：
 ```sql
 CREATE DATABASE novel CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-2. 修改后端配置文件 `backend/src/main/resources/application.yml` 中的数据库连接信息：
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/novel?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: your_username
-    password: your_password
-```
+执行 `novel_database.sql` 初始化表结构和测试数据。
 
-### 启动后端
+### 2. 启动后端
 
 ```bash
 cd backend
-mvn clean install
+# 修改 src/main/resources/application.yml 中的数据库连接和 JWT 密钥
 mvn spring-boot:run
 ```
 
-后端服务将在 http://localhost:8080 启动
+后端服务：http://localhost:8080
 
-### 启动前端
+### 3. 启动前端
 
 ```bash
 cd frontend
@@ -100,73 +165,49 @@ npm install
 npm run dev
 ```
 
-前端服务将在 http://localhost:3000 启动
+前端服务：http://localhost:3000
 
-## API接口文档
+### 4. 启动 AI 服务（可选）
 
-### 书籍相关
-- `GET /api/books` - 获取书籍列表
-- `GET /api/books/{id}` - 获取书籍详情
-- `GET /api/books/{id}/chapters` - 获取书籍章节列表
-- `GET /api/books/{bookId}/chapters/{chapterId}` - 获取章节内容
-- `GET /api/books/search?keyword=xxx` - 搜索书籍
+```bash
+cd ai-service
+pip install -r requirements.txt
+bash start.sh
+```
 
-### 书架相关
-- `GET /api/bookshelf` - 获取书架列表
-- `POST /api/bookshelf/add` - 添加到书架
-- `DELETE /api/bookshelf/{bookId}` - 从书架移除
-- `PUT /api/bookshelf/progress` - 更新阅读进度
+AI 服务：http://localhost:8001
 
-### 用户相关
-- `POST /api/auth/login` - 用户登录
-- `POST /api/auth/register` - 用户注册
-- `GET /api/user/info` - 获取用户信息
+## Vite 代理配置
 
-## 开发说明
+| 前端路径 | 代理目标 | 说明 |
+|----------|----------|------|
+| `/api/ai` | `http://localhost:8001` | AI 服务（优先匹配） |
+| `/api` | `http://localhost:8080` | Spring Boot 后端 |
 
-### 前端开发
-- 前端代码位于 `frontend/` 目录
-- 使用 Vite 作为构建工具
-- API请求通过 `src/services/api.ts` 统一管理
-- 状态管理使用 Zustand
+## 设计系统
 
-### 后端开发
-- 后端代码位于 `backend/` 目录
-- 使用 Spring Boot + JPA
-- 实体类自动创建数据库表
-- API接口统一返回 `ApiResponse` 格式
+梧桐调典雅版配色方案：
 
-## 待实现功能
+| Token | 色值 | 用途 |
+|-------|------|------|
+| 金驼 `--color-primary` | `#c4a882` | 主色调、品牌色 |
+| 松烟绿 `--color-accent` | `#4a6741` | 成功状态 |
+| 朱砂 `--color-danger` | `#c0392b` | 危险/错误 |
+| 宣纸白 `--color-bg` | `#fbf9f7` | 页面背景 |
+| 羊皮纸 `--color-surface` | `#f5f0e8` | 卡片/表面背景 |
+| 深棕 `--color-text-primary` | `#2c1f14` | 主文字色 |
 
-### 后端（需要您完成）
-- [ ] 用户认证和JWT Token实现
-- [ ] 密码加密（BCrypt）
-- [ ] 书籍数据爬取或导入
-- [ ] 阅读历史记录
-- [ ] 评论系统
-- [ ] 推荐算法
-- [ ] 缓存优化（Redis）
-- [ ] 文件上传（书籍封面）
-- [ ] 权限管理
-- [ ] API限流
+所有颜色、间距、圆角、阴影通过 CSS 自定义属性引用，定义在 `frontend/src/styles/tokens.css`。
 
-### 前端（可选扩展）
-- [ ] 用户登录注册界面
-- [ ] 阅读历史页面
-- [ ] 评论功能
-- [ ] 夜间模式
-- [ ] 阅读设置（字体、背景色等）
-- [ ] 书签功能
-- [ ] 离线阅读
-- [ ] PWA支持
+## 关键设计决策
 
-## 注意事项
+1. **双 Token 认证**：Access Token（JWT 1h）+ Refresh Token（UUID 7d），axios 拦截器自动静默刷新
+2. **统一 API 响应**：所有接口返回 `ApiResponse<T>`（`{ code, message, data }`）
+3. **Cache-Aside 缓存**：Redis 分级 TTL + 互斥锁防击穿 + 随机过期防雪崩
+4. **模块化架构**：Spring Boot 分层基础上叠加事件总线模块系统（ModuleContext + SPI Facade）
+5. **AI 工作流编排**：LangGraph 多节点有向图替代单次 LLM 调用
+6. **自定义组件库**：14 个组件 + CSS Modules + Design Tokens 三层架构
 
-1. 首次启动后端时，JPA会自动创建数据库表结构
-2. 需要手动插入测试数据到数据库
-3. 前端默认代理 `/api` 请求到后端 `http://localhost:8080`
-4. 生产环境请修改JWT密钥和数据库密码
+## License
 
-## 许可证
-
-MIT License
+MIT

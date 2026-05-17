@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { List, Button, Empty, Tag, Dialog } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft } from 'lucide-react'
 import { notificationApi } from '../services/api'
+import Button from '../components/Button'
+import Tag from '../components/Tag'
+import Empty from '../components/Empty'
+import Toast from '../components/Toast'
+import styles from './Notifications.module.css'
 
 interface Notification {
   id: number
@@ -27,9 +31,7 @@ export default function Notifications() {
   }, [])
 
   const loadNotifications = async (pageNum: number = 1) => {
-    if (pageNum === 1) {
-      setLoading(true)
-    }
+    if (pageNum === 1) setLoading(true)
     try {
       const response: any = await notificationApi.getNotifications(pageNum, 20)
       if (response && response.code === 200) {
@@ -66,32 +68,29 @@ export default function Notifications() {
   }
 
   const handleMarkAllAsRead = async () => {
-    Dialog.confirm({
-      content: '确定将所有通知标记为已读吗？',
-      onConfirm: async () => {
-        try {
-          const response: any = await notificationApi.markAllAsRead()
-          if (response && response.code === 200) {
-            setNotifications(
-              notifications.map((n) => ({ ...n, isRead: 1 }))
-            )
-            setUnreadCount(0)
-          }
-        } catch (error) {
-          console.error('Failed to mark all as read:', error)
-        }
-      },
-    })
+    if (!window.confirm('确定将所有通知标记为已读吗？')) return
+    try {
+      const response: any = await notificationApi.markAllAsRead()
+      if (response && response.code === 200) {
+        setNotifications(
+          notifications.map((n) => ({ ...n, isRead: 1 }))
+        )
+        setUnreadCount(0)
+        Toast.success('已全部标记为已读')
+      }
+    } catch (error) {
+      console.error('Failed to mark all as read:', error)
+    }
   }
 
-  const getTypeTag = (type: string) => {
+  const getTypeBadge = (type: string) => {
     switch (type) {
       case 'author':
         return <Tag color="primary">作者</Tag>
       case 'system':
         return <Tag color="default">系统</Tag>
       default:
-        return <Tag>其他</Tag>
+        return <Tag color="default">其他</Tag>
     }
   }
 
@@ -102,98 +101,65 @@ export default function Notifications() {
   }
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div
-            onClick={() => navigate('/user')}
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              marginRight: '12px',
-            }}
-          >
-            <LeftOutline fontSize={18} color="#fff" />
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <div className={styles.backBtn} onClick={() => navigate('/user')}>
+            <ArrowLeft size={18} color="#fff" />
           </div>
-          <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
+          <h2 className={styles.headerTitle}>
             消息通知
             {unreadCount > 0 && (
-              <Tag color="danger" style={{ marginLeft: '8px' }}>
-                {unreadCount}
-              </Tag>
+              <span className={styles.unreadBadge}>
+                <Tag color="danger">{String(unreadCount)}</Tag>
+              </span>
             )}
           </h2>
         </div>
         {unreadCount > 0 && (
-          <Button size="small" onClick={handleMarkAllAsRead}>
+          <Button variant="text" size="sm" onClick={handleMarkAllAsRead}>
             全部已读
           </Button>
         )}
       </div>
 
       {loading && notifications.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px' }}>加载中...</div>
+        <div className={styles.loadingWrap}>加载中...</div>
       ) : notifications.length === 0 ? (
         <Empty description="暂无通知" />
       ) : (
         <>
-          <List>
-            {notifications.map((notification) => (
-              <List.Item
-                key={notification.id}
-                onClick={() => {
-                  if (notification.isRead === 0) {
-                    handleMarkAsRead(notification.id)
-                  }
-                }}
-                style={{
-                  backgroundColor: notification.isRead === 0 ? '#f0f7ff' : '#fff',
-                }}
-                arrow={notification.isRead === 0}
-                prefix={
-                  <div
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      backgroundColor: notification.isRead === 0 ? '#1677ff' : '#ccc',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#fff',
-                      fontSize: '16px',
-                    }}
-                  >
-                    {notification.type === 'author' ? '✍️' : '📢'}
-                  </div>
+          {notifications.map((notification) => (
+            <div
+              key={notification.id}
+              className={`${styles.notificationItem} ${notification.isRead === 0 ? styles.notificationItemUnread : ''}`}
+              onClick={() => {
+                if (notification.isRead === 0) {
+                  handleMarkAsRead(notification.id)
                 }
-                description={
-                  <div>
-                    <div style={{ marginBottom: '4px' }}>{notification.content}</div>
-                    <div style={{ fontSize: '12px', color: '#999' }}>
-                      {new Date(notification.createTime).toLocaleString()}
-                    </div>
-                  </div>
-                }
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {getTypeTag(notification.type)}
-                  <span style={{ fontWeight: notification.isRead === 0 ? 'bold' : 'normal' }}>
+              }}
+            >
+              <div className={`${styles.avatar} ${notification.isRead === 1 ? styles.avatarRead : ''}`}>
+                {notification.type === 'author' ? '✍' : '📢'}
+              </div>
+              <div className={styles.notifContent}>
+                <div className={styles.notifTitle}>
+                  {getTypeBadge(notification.type)}
+                  <span className={`${styles.notifTitleText} ${notification.isRead === 1 ? styles.notifTitleTextRead : ''}`}>
                     {notification.title}
                   </span>
+                  {notification.isRead === 0 && <span style={{ color: 'var(--color-danger)', fontSize: '8px' }}>●</span>}
                 </div>
-              </List.Item>
-            ))}
-          </List>
+                <div className={styles.notifBody}>{notification.content}</div>
+                <div className={styles.notifTime}>
+                  {new Date(notification.createTime).toLocaleString()}
+                </div>
+              </div>
+            </div>
+          ))}
           {hasMore && (
-            <div style={{ textAlign: 'center', padding: '16px' }}>
-              <Button onClick={loadMore} loading={loading}>
+            <div className={styles.loadMore}>
+              <Button variant="secondary" onClick={loadMore} loading={loading}>
                 加载更多
               </Button>
             </div>

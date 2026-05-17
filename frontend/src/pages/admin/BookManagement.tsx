@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Dialog, Toast } from 'antd-mobile'
+import CustomToast from '../../components/Toast'
 import { adminApi } from '../../services/api'
+
+const Toast = {
+  show: (msg: string) => CustomToast.show({ type: 'info', content: msg }),
+}
+const confirmDialog = (content: string, onConfirm: () => void) => {
+  if (window.confirm(content)) onConfirm()
+}
 
 interface Book {
   id: number
@@ -73,44 +80,34 @@ export default function BookManagement() {
     const newStatus = book.status === 1 ? 0 : 1
     const action = newStatus === 0 ? '下架' : '上架'
 
-    Dialog.confirm({
-      content: `确定要${action}书籍 "${book.title}" 吗？`,
-      confirmText: '确定',
-      cancelText: '取消',
-      onConfirm: async () => {
-        try {
-          const response: any = await adminApi.updateBookStatus(book.id, newStatus)
-          if (response && response.code === 200) {
-            Toast.show(`${action}成功`)
-            loadBooks()
-          } else {
-            Toast.show(response?.message || '操作失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '操作失败')
+    confirmDialog(`确定要${action}书籍 "${book.title}" 吗？`, async () => {
+      try {
+        const response: any = await adminApi.updateBookStatus(book.id, newStatus)
+        if (response && response.code === 200) {
+          Toast.show(`${action}成功`)
+          loadBooks()
+        } else {
+          Toast.show(response?.message || '操作失败')
         }
-      },
+      } catch (error: any) {
+        Toast.show(error.response?.data?.message || '操作失败')
+      }
     })
   }
 
   const handleDelete = async (book: Book) => {
-    Dialog.confirm({
-      content: `确定要删除书籍 "${book.title}" 吗？此操作不可恢复！`,
-      confirmText: '确定删除',
-      cancelText: '取消',
-      onConfirm: async () => {
-        try {
-          const response: any = await adminApi.deleteBook(book.id)
-          if (response && response.code === 200) {
-            Toast.show('删除成功')
-            loadBooks()
-          } else {
-            Toast.show(response?.message || '删除失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '删除失败')
+    confirmDialog(`确定要删除书籍 "${book.title}" 吗？此操作不可恢复！`, async () => {
+      try {
+        const response: any = await adminApi.deleteBook(book.id)
+        if (response && response.code === 200) {
+          Toast.show('删除成功')
+          loadBooks()
+        } else {
+          Toast.show(response?.message || '删除失败')
         }
-      },
+      } catch (error: any) {
+        Toast.show(error.response?.data?.message || '删除失败')
+      }
     })
   }
 
@@ -123,8 +120,8 @@ export default function BookManagement() {
             borderRadius: '12px',
             fontSize: '12px',
             fontWeight: 500,
-            backgroundColor: '#f6ffed',
-            color: '#52c41a',
+            backgroundColor: 'var(--color-accent-light)',
+            color: 'var(--color-accent)',
           }}
         >
           已上架
@@ -138,8 +135,8 @@ export default function BookManagement() {
           borderRadius: '12px',
           fontSize: '12px',
           fontWeight: 500,
-          backgroundColor: '#fff2f0',
-          color: '#ff4d4f',
+          backgroundColor: 'var(--color-danger-light)',
+          color: 'var(--color-danger)',
         }}
       >
         已下架
@@ -161,7 +158,7 @@ export default function BookManagement() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
         <div style={{ textAlign: 'center' }}>
           <div className="loading-spinner" />
-          <p style={{ color: '#8c8c8c', marginTop: '16px' }}>加载中...</p>
+          <p style={{ color: 'var(--color-text-tertiary)', marginTop: '16px' }}>加载中...</p>
         </div>
       </div>
     )
@@ -171,7 +168,7 @@ export default function BookManagement() {
     <div>
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           padding: '16px 24px',
           marginBottom: '24px',
@@ -190,7 +187,7 @@ export default function BookManagement() {
               height="16"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#8c8c8c"
+              stroke="var(--color-text-tertiary)"
               strokeWidth="2"
               style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
             >
@@ -206,7 +203,7 @@ export default function BookManagement() {
               style={{
                 padding: '8px 12px 8px 36px',
                 borderRadius: '8px',
-                border: '1px solid #d9d9d9',
+                border: '1px solid var(--color-border)',
                 fontSize: '14px',
                 width: '220px',
                 outline: 'none',
@@ -223,10 +220,10 @@ export default function BookManagement() {
             style={{
               padding: '8px 12px',
               borderRadius: '8px',
-              border: '1px solid #d9d9d9',
+              border: '1px solid var(--color-border)',
               fontSize: '14px',
               outline: 'none',
-              backgroundColor: '#fff',
+              backgroundColor: 'var(--color-card)',
             }}
           >
             <option value="">全部分类</option>
@@ -245,10 +242,10 @@ export default function BookManagement() {
             style={{
               padding: '8px 12px',
               borderRadius: '8px',
-              border: '1px solid #d9d9d9',
+              border: '1px solid var(--color-border)',
               fontSize: '14px',
               outline: 'none',
-              backgroundColor: '#fff',
+              backgroundColor: 'var(--color-card)',
             }}
           >
             <option value="">全部状态</option>
@@ -260,8 +257,8 @@ export default function BookManagement() {
             onClick={handleSearch}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#1890ff',
-              color: '#fff',
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-text-inverse)',
               border: 'none',
               borderRadius: '8px',
               fontSize: '14px',
@@ -272,14 +269,14 @@ export default function BookManagement() {
           </button>
         </div>
 
-        <div style={{ color: '#8c8c8c', fontSize: '14px' }}>
+        <div style={{ color: 'var(--color-text-tertiary)', fontSize: '14px' }}>
           共 {total} 本书籍
         </div>
       </div>
 
       <div
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--color-card)',
           borderRadius: '12px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
           overflow: 'hidden',
@@ -287,29 +284,29 @@ export default function BookManagement() {
       >
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ backgroundColor: '#fafafa' }}>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+            <tr style={{ backgroundColor: 'var(--color-bg)' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 书籍信息
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 分类
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 字数
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 章节
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 阅读
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 收藏
               </th>
-              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 状态
               </th>
-              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#8c8c8c' }}>
+              <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
                 操作
               </th>
             </tr>
@@ -320,11 +317,11 @@ export default function BookManagement() {
                 <tr
                   key={book.id}
                   style={{
-                    borderBottom: '1px solid #f0f0f0',
+                    borderBottom: '1px solid var(--color-divider)',
                     transition: 'background-color 0.2s',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fafafa'
+                    e.currentTarget.style.backgroundColor = 'var(--color-bg)'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent'
@@ -337,7 +334,7 @@ export default function BookManagement() {
                           width: '48px',
                           height: '64px',
                           borderRadius: '4px',
-                          backgroundColor: '#f0f0f0',
+                          backgroundColor: 'var(--color-divider)',
                           overflow: 'hidden',
                           flexShrink: 0,
                         }}
@@ -352,7 +349,7 @@ export default function BookManagement() {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              color: '#8c8c8c',
+                              color: 'var(--color-text-tertiary)',
                               fontSize: '20px',
                             }}
                           >
@@ -362,7 +359,7 @@ export default function BookManagement() {
                       </div>
                       <div>
                         <p style={{ margin: 0, fontWeight: 500, fontSize: '15px' }}>{book.title}</p>
-                        <p style={{ margin: 0, fontSize: '12px', color: '#8c8c8c' }}>{book.author}</p>
+                        <p style={{ margin: 0, fontSize: '12px', color: 'var(--color-text-tertiary)' }}>{book.author}</p>
                       </div>
                     </div>
                   </td>
@@ -373,10 +370,10 @@ export default function BookManagement() {
                   <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center' }}>
                     {book.chapterCount || 0}
                   </td>
-                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: '#1890ff' }}>
+                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: 'var(--color-primary)' }}>
                     {formatNumber(book.readCount || 0)}
                   </td>
-                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: '#ff4d4f' }}>
+                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'center', color: 'var(--color-danger)' }}>
                     {formatNumber(book.collectCount || 0)}
                   </td>
                   <td style={{ padding: '16px' }}>{getStatusBadge(book.status)}</td>
@@ -386,9 +383,9 @@ export default function BookManagement() {
                         onClick={() => handleToggleStatus(book)}
                         style={{
                           padding: '4px 12px',
-                          backgroundColor: book.status === 1 ? '#fff2f0' : '#f6ffed',
-                          color: book.status === 1 ? '#ff4d4f' : '#52c41a',
-                          border: `1px solid ${book.status === 1 ? '#ff4d4f' : '#52c41a'}`,
+                          backgroundColor: book.status === 1 ? 'var(--color-danger-light)' : 'var(--color-accent-light)',
+                          color: book.status === 1 ? 'var(--color-danger)' : 'var(--color-accent)',
+                          border: `1px solid ${book.status === 1 ? 'var(--color-danger)' : 'var(--color-accent)'}`,
                           borderRadius: '4px',
                           fontSize: '12px',
                           cursor: 'pointer',
@@ -400,9 +397,9 @@ export default function BookManagement() {
                         onClick={() => handleDelete(book)}
                         style={{
                           padding: '4px 12px',
-                          backgroundColor: '#fff',
-                          color: '#ff4d4f',
-                          border: '1px solid #ff4d4f',
+                          backgroundColor: 'var(--color-card)',
+                          color: 'var(--color-danger)',
+                          border: '1px solid var(--color-danger)',
                           borderRadius: '4px',
                           fontSize: '12px',
                           cursor: 'pointer',
@@ -416,13 +413,13 @@ export default function BookManagement() {
               ))
             ) : (
               <tr>
-                <td colSpan={8} style={{ padding: '60px', textAlign: 'center', color: '#8c8c8c' }}>
+                <td colSpan={8} style={{ padding: '60px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
                   <svg
                     width="48"
                     height="48"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#d9d9d9"
+                    stroke="var(--color-border)"
                     strokeWidth="1.5"
                     style={{ margin: '0 auto 16px' }}
                   >
@@ -443,10 +440,10 @@ export default function BookManagement() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderTop: '1px solid #f0f0f0',
+              borderTop: '1px solid var(--color-divider)',
             }}
           >
-            <div style={{ color: '#8c8c8c', fontSize: '14px' }}>
+            <div style={{ color: 'var(--color-text-tertiary)', fontSize: '14px' }}>
               第 {page} / {totalPages} 页
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -455,9 +452,9 @@ export default function BookManagement() {
                 disabled={page === 1}
                 style={{
                   padding: '6px 12px',
-                  backgroundColor: page === 1 ? '#f5f5f5' : '#fff',
-                  color: page === 1 ? '#d9d9d9' : '#595959',
-                  border: '1px solid #d9d9d9',
+                  backgroundColor: page === 1 ? 'var(--color-bg)' : 'var(--color-card)',
+                  color: page === 1 ? 'var(--color-border)' : 'var(--color-text-secondary)',
+                  border: '1px solid var(--color-border)',
                   borderRadius: '4px',
                   fontSize: '14px',
                   cursor: page === 1 ? 'not-allowed' : 'pointer',
@@ -470,9 +467,9 @@ export default function BookManagement() {
                 disabled={page === totalPages}
                 style={{
                   padding: '6px 12px',
-                  backgroundColor: page === totalPages ? '#f5f5f5' : '#1890ff',
-                  color: page === totalPages ? '#d9d9d9' : '#fff',
-                  border: '1px solid #1890ff',
+                  backgroundColor: page === totalPages ? 'var(--color-bg)' : 'var(--color-primary)',
+                  color: page === totalPages ? 'var(--color-border)' : 'var(--color-text-inverse)',
+                  border: '1px solid var(--color-primary)',
                   borderRadius: '4px',
                   fontSize: '14px',
                   cursor: page === totalPages ? 'not-allowed' : 'pointer',

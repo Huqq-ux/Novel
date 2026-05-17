@@ -1,0 +1,125 @@
+/* MyFavorites page — 梧桐调 style */
+
+.page {
+  padding: var(--space-md);
+  padding-bottom: 60px;
+  min-height: 100vh;
+}
+
+/* === Header === */
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: var(--space-md);
+  border: none;
+  color: var(--color-text-inverse);
+  transition: background var(--transition-fast);
+}
+
+.backBtn:active {
+  background: var(--color-text-primary);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* === Loading === */
+.loading {
+  text-align: center;
+  padding: var(--space-3xl) var(--space-xl);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-base);
+}
+
+/* === Favorites list === */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* === Favorite card === */
+.favoriteCard {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  display: flex;
+  gap: var(--space-md);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast);
+}
+
+.favoriteCard:active {
+  box-shadow: var(--shadow-md);
+}
+
+.coverWrap {
+  flex-shrink: 0;
+  width: 60px;
+  height: 80px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.coverPlaceholder {
+  width: 60px;
+  height: 80px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-placeholder);
+}
+
+.favoriteInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.favoriteTitle {
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.favoriteAuthor {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-xs);
+}
+
+.favoriteDate {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-placeholder);
+  margin-bottom: var(--space-sm);
+}
+
+.favoriteAction {
+  align-self: flex-start;
+}

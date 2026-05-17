@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, Button, List, Toast, TextArea, Empty } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft, Heart, MessageCircle } from 'lucide-react'
 import { commentApi, bookApi } from '../services/api'
+import Button from '../components/Button'
+import Input from '../components/Input'
+import Card from '../components/Card'
+import Empty from '../components/Empty'
+import Toast from '../components/Toast'
+import styles from './BookComments.module.css'
 
 interface BookComment {
   id: number
@@ -96,11 +101,11 @@ export default function BookComments() {
 
   const handleSubmitComment = async () => {
     if (!commentContent.trim()) {
-      Toast.show('请输入评论内容')
+      Toast.show({ type: 'info', content: '请输入评论内容' })
       return
     }
     if (commentContent.length > 500) {
-      Toast.show('评论内容不能超过500字')
+      Toast.show({ type: 'info', content: '评论内容不能超过500字' })
       return
     }
 
@@ -108,20 +113,20 @@ export default function BookComments() {
     try {
       const response: any = await commentApi.addComment(Number(id), commentContent.trim())
       if (response && response.code === 200) {
-        Toast.show('评论成功')
+        Toast.success('评论成功')
         setCommentContent('')
         loadComments()
       } else if (response && response.code === 401) {
-        Toast.show('请先登录')
+        Toast.show({ type: 'info', content: '请先登录' })
       } else {
-        Toast.show(response?.message || '评论失败')
+        Toast.show({ type: 'error', content: response?.message || '评论失败' })
       }
     } catch (error: any) {
       console.error('Failed to submit comment:', error)
       if (error.response?.status === 401 || error.response?.data?.code === 401) {
-        Toast.show('请先登录')
+        Toast.show({ type: 'info', content: '请先登录' })
       } else {
-        Toast.show('评论失败')
+        Toast.error('评论失败')
       }
     } finally {
       setSubmitting(false)
@@ -140,11 +145,11 @@ export default function BookComments() {
 
   const handleSubmitReply = async (parentId: number) => {
     if (!replyContent.trim()) {
-      Toast.show('请输入回复内容')
+      Toast.show({ type: 'info', content: '请输入回复内容' })
       return
     }
     if (replyContent.length > 500) {
-      Toast.show('回复内容不能超过500字')
+      Toast.show({ type: 'info', content: '回复内容不能超过500字' })
       return
     }
 
@@ -152,21 +157,21 @@ export default function BookComments() {
     try {
       const response: any = await commentApi.addComment(Number(id), replyContent.trim(), parentId)
       if (response && response.code === 200) {
-        Toast.show('回复成功')
+        Toast.success('回复成功')
         setReplyContent('')
         setReplyingTo(null)
         loadComments()
       } else if (response && response.code === 401) {
-        Toast.show('请先登录')
+        Toast.show({ type: 'info', content: '请先登录' })
       } else {
-        Toast.show(response?.message || '回复失败')
+        Toast.show({ type: 'error', content: response?.message || '回复失败' })
       }
     } catch (error: any) {
       console.error('Failed to submit reply:', error)
       if (error.response?.status === 401 || error.response?.data?.code === 401) {
-        Toast.show('请先登录')
+        Toast.show({ type: 'info', content: '请先登录' })
       } else {
-        Toast.show('回复失败')
+        Toast.error('回复失败')
       }
     } finally {
       setSubmittingReply(false)
@@ -183,7 +188,7 @@ export default function BookComments() {
 
     const token = localStorage.getItem('accessToken')
     if (!token) {
-      Toast.show('请先登录')
+      Toast.show({ type: 'info', content: '请先登录' })
       return
     }
 
@@ -214,7 +219,7 @@ export default function BookComments() {
     try {
       const response: any = await commentApi.toggleLike(commentId)
       if (response && response.code === 401) {
-        Toast.show('请先登录')
+        Toast.show({ type: 'info', content: '请先登录' })
         loadComments()
       } else if (response && response.code === 200) {
         const updateWithServerData = (comments: BookComment[]): BookComment[] => {
@@ -240,7 +245,7 @@ export default function BookComments() {
     } catch (error: any) {
       console.error('Failed to toggle like:', error)
       if (error.response?.status === 401 || error.response?.data?.code === 401) {
-        Toast.show('请先登录')
+        Toast.show({ type: 'info', content: '请先登录' })
       }
       loadComments()
     } finally {
@@ -262,195 +267,130 @@ export default function BookComments() {
     }
   }
 
-  const renderComment = (comment: BookComment, isReply: boolean = false) => (
-    <div 
-      key={comment.id} 
-      style={{ 
-        width: '100%',
-        marginLeft: isReply ? '40px' : '0',
-        marginTop: isReply ? '12px' : '0',
-        padding: isReply ? '12px' : '0',
-        backgroundColor: isReply ? '#f9f9f9' : 'transparent',
-        borderRadius: isReply ? '8px' : '0',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div 
-            style={{ 
-              width: isReply ? '28px' : '32px', 
-              height: isReply ? '28px' : '32px', 
-              borderRadius: '50%', 
-              backgroundColor: isReply ? '#52c41a' : '#1890ff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontSize: isReply ? '12px' : '14px',
-              fontWeight: 'bold',
-            }}
-          >
-            {(comment.userName || '用户').charAt(0).toUpperCase()}
+  const renderComment = (comment: BookComment, isReply: boolean = false) => {
+    const itemClass = isReply ? styles.replyItem : styles.commentItem
+    const avatarClass = isReply ? styles.avatarSm : styles.avatar
+    const bodyClass = isReply ? `${styles.commentBody} ${styles.replyBody}` : styles.commentBody
+    const actionRowClass = isReply ? `${styles.actionRow} ${styles.replyActionRow}` : styles.actionRow
+
+    const likeBtnClasses = [
+      styles.actionBtn,
+      comment.isLiked && styles.likeBtnLiked,
+      likingComments.has(comment.id) && styles.actionBtnDisabled,
+    ].filter(Boolean).join(' ')
+
+    const replyBtnClasses = [
+      styles.actionBtn,
+      replyingTo === comment.id && styles.replyBtnActive,
+    ].filter(Boolean).join(' ')
+
+    return (
+      <div key={comment.id} className={itemClass}>
+        <div className={styles.commentHeader}>
+          <div className={styles.authorInfo}>
+            <div className={avatarClass}>
+              {(comment.userName || '用户').charAt(0).toUpperCase()}
+            </div>
+            <span className={styles.authorName}>
+              {comment.userName || '匿名用户'}
+            </span>
           </div>
-          <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
-            {comment.userName || '匿名用户'}
+          <span className={styles.commentTime}>
+            {formatDate(comment.createTime)}
           </span>
         </div>
-        <span style={{ fontSize: '12px', color: '#999' }}>
-          {formatDate(comment.createTime)}
-        </span>
-      </div>
-      <div style={{ fontSize: '14px', color: '#333', lineHeight: '1.6', paddingLeft: isReply ? '36px' : '40px' }}>
-        {comment.content}
-      </div>
-      <div style={{ paddingLeft: isReply ? '36px' : '40px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button
-          onClick={() => handleToggleLike(comment.id)}
-          disabled={likingComments.has(comment.id)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '4px 12px',
-            border: 'none',
-            borderRadius: '16px',
-            backgroundColor: comment.isLiked ? '#fff1f0' : '#f5f5f5',
-            color: comment.isLiked ? '#ff4d4f' : '#666',
-            fontSize: '13px',
-            cursor: likingComments.has(comment.id) ? 'wait' : 'pointer',
-            transition: 'all 0.3s ease',
-            outline: 'none',
-            userSelect: 'none',
-          }}
-        >
-          <span
-            style={{
-              display: 'inline-block',
-              fontSize: '16px',
-              transition: 'transform 0.3s ease',
-              transform: comment.isLiked ? 'scale(1.2)' : 'scale(1)',
-            }}
-          >
-            {comment.isLiked ? '❤️' : '🤍'}
-          </span>
-          <span>{comment.likes || 0}</span>
-        </button>
-        {!isReply && (
+
+        <div className={bodyClass}>
+          {comment.content}
+        </div>
+
+        <div className={actionRowClass}>
           <button
-            onClick={() => handleReplyClick(comment.id)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 12px',
-              border: 'none',
-              borderRadius: '16px',
-              backgroundColor: replyingTo === comment.id ? '#e6f7ff' : '#f5f5f5',
-              color: replyingTo === comment.id ? '#1890ff' : '#666',
-              fontSize: '13px',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              outline: 'none',
-            }}
+            onClick={() => handleToggleLike(comment.id)}
+            disabled={likingComments.has(comment.id)}
+            className={likeBtnClasses}
           >
-            💬 回复
+            <Heart
+              size={14}
+              fill={comment.isLiked ? 'var(--color-danger)' : 'none'}
+              color={comment.isLiked ? 'var(--color-danger)' : 'var(--color-text-tertiary)'}
+            />
+            <span>{comment.likes || 0}</span>
           </button>
+
+          {!isReply && (
+            <button
+              onClick={() => handleReplyClick(comment.id)}
+              className={replyBtnClasses}
+            >
+              <MessageCircle size={14} /> 回复
+            </button>
+          )}
+        </div>
+
+        {!isReply && replyingTo === comment.id && (
+          <div className={styles.replyArea}>
+            <Input
+              placeholder={`回复 ${comment.userName}...`}
+              value={replyContent}
+              onChange={setReplyContent}
+              rows={2}
+              maxLength={500}
+            />
+            <div className={styles.replyActions}>
+              <Button variant="secondary" size="sm" onClick={handleCancelReply}>
+                取消
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleSubmitReply(comment.id)}
+                loading={submittingReply}
+                disabled={!replyContent.trim()}
+              >
+                发送回复
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {comment.replies && comment.replies.length > 0 && (
+          <div style={{ marginTop: 'var(--space-md)' }}>
+            {comment.replies.map(reply => renderComment(reply, true))}
+          </div>
         )}
       </div>
-
-      {!isReply && replyingTo === comment.id && (
-        <div style={{ paddingLeft: '40px', marginTop: '12px' }}>
-          <TextArea
-            placeholder={`回复 ${comment.userName}...`}
-            value={replyContent}
-            onChange={setReplyContent}
-            rows={2}
-            maxLength={500}
-            showCount
-            style={{ 
-              border: '1px solid #1890ff', 
-              borderRadius: '8px', 
-              padding: '8px',
-              fontSize: '14px',
-              backgroundColor: '#fff',
-            }}
-          />
-          <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <Button 
-              size="small" 
-              onClick={handleCancelReply}
-            >
-              取消
-            </Button>
-            <Button 
-              color="primary" 
-              size="small" 
-              onClick={() => handleSubmitReply(comment.id)}
-              loading={submittingReply}
-              disabled={!replyContent.trim()}
-            >
-              发送回复
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {comment.replies && comment.replies.length > 0 && (
-        <div style={{ marginTop: '12px' }}>
-          {comment.replies.map(reply => renderComment(reply, true))}
-        </div>
-      )}
-    </div>
-  )
+    )
+  }
 
   const totalComments = comments.reduce((total, comment) => {
     return total + 1 + (comment.replies?.length || 0)
   }, 0)
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-        <div
-          onClick={() => navigate(-1)}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginRight: '12px',
-          }}
-        >
-          <LeftOutline fontSize={18} color="#fff" />
-        </div>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} />
+        </button>
+        <h2 className={styles.headerTitle}>
           {book ? `《${book.title}》的评论` : '书籍评论'}
         </h2>
       </div>
 
-      <Card style={{ marginBottom: '16px' }}>
-        <div style={{ marginBottom: '16px' }}>
-          <TextArea
+      <Card className={styles.commentInputCard}>
+        <div className={styles.inputArea}>
+          <Input
             placeholder="写下你的评论..."
             value={commentContent}
             onChange={setCommentContent}
             rows={3}
             maxLength={500}
-            showCount
-            style={{ 
-              border: '1px solid #e5e5e5', 
-              borderRadius: '8px', 
-              padding: '8px',
-              fontSize: '14px',
-            }}
           />
-          <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
-            <Button 
-              color="primary" 
-              size="small" 
+          <div className={styles.inputActions}>
+            <Button
+              variant="primary"
+              size="sm"
               onClick={handleSubmitComment}
               loading={submitting}
               disabled={!commentContent.trim()}
@@ -462,18 +402,16 @@ export default function BookComments() {
       </Card>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px' }}>加载中...</div>
+        <div className={styles.loading}>加载中...</div>
       ) : comments.length === 0 ? (
-        <Empty description="暂无评论，快来抢沙发吧~" style={{ padding: '40px 0' }} />
+        <div className={styles.emptyWrap}>
+          <Empty icon="💬" description="暂无评论，快来抢沙发吧~" />
+        </div>
       ) : (
-        <Card title={`全部评论 (${totalComments})`}>
-          <List>
-            {comments.map((comment) => (
-              <List.Item key={comment.id} style={{ padding: '12px 0' }}>
-                {renderComment(comment)}
-              </List.Item>
-            ))}
-          </List>
+        <Card title={`全部评论 (${totalComments})`} className={styles.commentsCard}>
+          <div className={styles.commentList}>
+            {comments.map((comment) => renderComment(comment))}
+          </div>
         </Card>
       )}
     </div>

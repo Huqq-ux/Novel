@@ -1,0 +1,146 @@
+/* Bookshelf page — 梧桐调 style */
+
+.page {
+  padding-bottom: 60px;
+}
+
+/* === Sticky header section === */
+.headerSection {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--space-lg) var(--space-lg) var(--space-sm);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* === Filter tabs === */
+.filters {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg) var(--space-md);
+}
+
+.filterBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* === Book list === */
+.list {
+  padding: 0 var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.itemInner {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+}
+
+.itemCover {
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.itemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bookTitle {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookAuthor {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+/* === Progress bar === */
+.progressSection {
+  margin-top: var(--space-sm);
+}
+
+.progressBar {
+  height: 4px;
+  background: var(--color-surface);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: var(--space-xs);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width var(--transition-base);
+}
+
+.progressReading {
+  background: var(--color-primary);
+}
+
+.progressFinished {
+  background: var(--color-accent);
+}
+
+/* === Meta row === */
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-xs);
+}
+
+.metaProgress {
+  color: var(--color-text-secondary);
+}
+
+.metaDate {
+  color: var(--color-text-placeholder);
+}
+
+/* === Remove button === */
+.removeWrap {
+  flex-shrink: 0;
+  align-self: center;
+  margin-left: var(--space-xs);
+}
+
+/* === Empty state === */
+.empty {
+  padding: var(--space-3xl) var(--space-lg);
+  text-align: center;
+}

@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { List, Empty, Button, Dialog, Toast } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft } from 'lucide-react'
 import { bookshelfApi } from '../services/api'
+import Button from '../components/Button'
+import Card from '../components/Card'
+import BookCover from '../components/BookCover'
+import Empty from '../components/Empty'
+import Modal from '../components/Modal'
+import Toast from '../components/Toast'
+import styles from './ReadingHistory.module.css'
 
 interface Book {
   id: number
@@ -22,11 +28,18 @@ interface ReadingRecord {
   book: Book
 }
 
+/**
+ * 阅读历史页面
+ * 功能描述：展示用户的阅读历史记录，支持继续阅读和删除记录
+ * 实现逻辑：通过 bookshelf API 获取书架数据作为阅读记录，按最近阅读时间排序展示，
+ * 提供继续阅读跳转和确认删除功能
+ */
 export default function ReadingHistory() {
   const navigate = useNavigate()
   const location = useLocation()
   const [records, setRecords] = useState<ReadingRecord[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteTarget, setDeleteTarget] = useState<ReadingRecord | null>(null)
 
   useEffect(() => {
     loadReadingHistory()
@@ -41,7 +54,7 @@ export default function ReadingHistory() {
       }
     } catch (error) {
       console.error('Failed to load reading history:', error)
-      Toast.show('加载失败')
+      Toast.error('加载失败')
     } finally {
       setLoading(false)
     }
@@ -51,20 +64,22 @@ export default function ReadingHistory() {
     navigate(`/read/${bookId}/${chapterId}`, { state: { from: location.pathname } })
   }
 
-  const handleDelete = async (e: React.MouseEvent, bookId: number, bookTitle: string) => {
+  const handleDelete = (e: React.MouseEvent, record: ReadingRecord) => {
     e.stopPropagation()
-    const result = await Dialog.confirm({
-      content: `确定要删除《${bookTitle}》的阅读记录吗？`,
-    })
-    if (result) {
-      try {
-        await bookshelfApi.removeFromBookshelf(bookId)
-        setRecords(records.filter(r => r.bookId !== bookId))
-        Toast.show('删除成功')
-      } catch (error) {
-        console.error('Failed to delete reading record:', error)
-        Toast.show('删除失败')
-      }
+    setDeleteTarget(record)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      await bookshelfApi.removeFromBookshelf(deleteTarget.bookId)
+      setRecords(records.filter(r => r.bookId !== deleteTarget.bookId))
+      Toast.success('删除成功')
+    } catch (error) {
+      console.error('Failed to delete reading record:', error)
+      Toast.error('删除失败')
+    } finally {
+      setDeleteTarget(null)
     }
   }
 
@@ -88,69 +103,66 @@ export default function ReadingHistory() {
   }
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-        <div
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <button
+          className={styles.backBtn}
           onClick={() => navigate('/user')}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginRight: '12px',
-          }}
+          aria-label="返回"
         >
-          <LeftOutline fontSize={18} color="#fff" />
-        </div>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
-          我的阅读
-        </h2>
+          <ArrowLeft size={18} />
+        </button>
+        <h2 className={styles.headerTitle}>我的阅读</h2>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px' }}>加载中...</div>
+        <div className={styles.loadingState}>加载中...</div>
       ) : records.length === 0 ? (
-        <Empty description="暂无阅读记录" />
+        <div className={styles.emptyWrap}>
+          <Empty description="暂无阅读记录" />
+        </div>
       ) : (
-        <List>
+        <div className={styles.list}>
           {records.map((record) => (
-            <List.Item
+            <Card
               key={record.id}
+              variant="elevated"
               onClick={() => handleContinueReading(record.bookId, record.lastChapterId)}
-              style={{ padding: '12px' }}
             >
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <img
-                  src={record.book?.cover || 'https://placehold.co/80x100/eee/999?text=Book'}
-                  alt={record.book?.title}
-                  style={{
-                    width: '60px',
-                    height: '80px',
-                    objectFit: 'cover',
-                    borderRadius: '4px',
-                  }}
-                />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '4px' }}>
+              <div className={styles.recordCard}>
+                <div className={styles.coverWrap}>
+                  <BookCover
+                    src={record.book?.cover || 'https://placehold.co/80x100/eee/999?text=Book'}
+                    alt={record.book?.title}
+                    width={60}
+                    height={80}
+                  />
+                </div>
+                <div className={styles.recordInfo}>
+                  <div className={styles.bookTitle}>
                     {record.book?.title || '未知书籍'}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>
+                  <div className={styles.bookAuthor}>
                     {record.book?.author || '未知作者'}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                  <div className={styles.progressBarWrap}>
+                    <div className={styles.progressBar}>
+                      <div
+                        className={styles.progressFill}
+                        style={{ width: `${Math.min(record.progress || 0, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.progressRow}>
                     阅读进度: {formatProgress(record.progress)}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
+                  <div className={styles.timeRow}>
                     最近阅读: {formatTime(record.lastReadTime)}
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <Button 
-                      size="small" 
-                      color="primary" 
+                  <div className={styles.actions}>
+                    <Button
+                      size="sm"
+                      variant="primary"
                       onClick={(e) => {
                         e.stopPropagation()
                         handleContinueReading(record.bookId, record.lastChapterId)
@@ -158,21 +170,31 @@ export default function ReadingHistory() {
                     >
                       继续阅读
                     </Button>
-                    <Button 
-                      size="small" 
-                      color="danger"
-                      fill="outline"
-                      onClick={(e) => handleDelete(e, record.bookId, record.book?.title || '未知书籍')}
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      danger
+                      onClick={(e) => handleDelete(e, record)}
                     >
                       删除
                     </Button>
                   </div>
                 </div>
               </div>
-            </List.Item>
+            </Card>
           ))}
-        </List>
+        </div>
       )}
+
+      <Modal
+        visible={!!deleteTarget}
+        title="确认删除"
+        content={`确定要删除《${deleteTarget?.book?.title}》的阅读记录吗？`}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        confirmText="删除"
+        danger
+      />
     </div>
   )
 }

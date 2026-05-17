@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Button, Input, Tabs } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft, Send } from 'lucide-react'
 import { aiApi } from '../services/api'
+import Button from '../components/Button'
+import Input from '../components/Input'
+import styles from './CustomerService.module.css'
 
 interface Message {
   id: number
@@ -12,6 +14,12 @@ interface Message {
 }
 
 type AIModule = 'customer_service' | 'recommend' | 'search'
+
+const MODULE_LABELS: Record<AIModule, string> = {
+  customer_service: 'AI客服',
+  recommend: '智能推荐',
+  search: '智能搜索',
+}
 
 const MODULE_PLACEHOLDERS: Record<AIModule, string> = {
   customer_service: '请描述您遇到的问题...',
@@ -118,101 +126,87 @@ export default function CustomerService() {
   }
 
   const quickQuestions = MODULE_QUICK_QUESTIONS[activeModule]
+  const tabs: AIModule[] = ['customer_service', 'recommend', 'search']
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 84px)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-        <div
-          onClick={() => navigate(-1)}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginRight: '12px',
-          }}
-        >
-          <LeftOutline fontSize={18} color="#fff" />
-        </div>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} />
+        </button>
+        <h2 className={styles.title}>
           AI智能助手
         </h2>
       </div>
 
-      <Tabs
-        activeKey={activeModule}
-        onChange={handleModuleChange}
-        style={{ marginBottom: '12px' }}
-      >
-        <Tabs.Tab title="AI客服" key="customer_service" />
-        <Tabs.Tab title="智能推荐" key="recommend" />
-        <Tabs.Tab title="智能搜索" key="search" />
-      </Tabs>
+      <div className={styles.tabs}>
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            className={`${styles.tab} ${activeModule === tab ? styles.tabActive : ''}`}
+            onClick={() => handleModuleChange(tab)}
+          >
+            {MODULE_LABELS[tab]}
+          </button>
+        ))}
+      </div>
 
-      <Card style={{ flex: 1, overflow: 'auto', marginBottom: '12px' }}>
-        <div style={{ minHeight: '300px' }}>
+      <div className={styles.chatArea}>
+        <div className={styles.chatInner}>
           {messages.map((msg) => (
             <div
               key={msg.id}
-              style={{
-                display: 'flex',
-                justifyContent: msg.type === 'user' ? 'flex-end' : 'flex-start',
-                marginBottom: '12px',
-              }}
+              className={`${styles.message} ${msg.type === 'user' ? styles.messageUser : styles.messageService}`}
             >
               <div
-                style={{
-                  maxWidth: '70%',
-                  padding: '10px 14px',
-                  borderRadius: msg.type === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  backgroundColor: msg.type === 'user' ? '#1677ff' : '#f0f0f0',
-                  color: msg.type === 'user' ? '#fff' : '#333',
-                }}
+                className={`${styles.bubble} ${msg.type === 'user' ? styles.bubbleUser : styles.bubbleService}`}
               >
-                <div style={{ fontSize: '14px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{msg.content}</div>
-                <div style={{ fontSize: '10px', opacity: 0.7, marginTop: '4px' }}>{msg.time}</div>
+                <div className={styles.bubbleContent}>{msg.content}</div>
+                <div className={styles.bubbleTime}>{msg.time}</div>
               </div>
             </div>
           ))}
           {isTyping && (
-            <div style={{ color: '#999', fontSize: '12px', padding: '8px' }}>AI正在思考...</div>
+            <div className={styles.typing}>AI正在思考...</div>
           )}
           <div ref={messagesEndRef} />
         </div>
-      </Card>
-
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {quickQuestions.map((q, i) => (
-            <Button
-              key={i}
-              size="small"
-              fill="outline"
-              onClick={() => {
-                setInputValue(q)
-              }}
-            >
-              {q}
-            </Button>
-          ))}
-        </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <Input
-          placeholder={MODULE_PLACEHOLDERS[activeModule]}
-          value={inputValue}
-          onChange={setInputValue}
-          onEnterPress={sendMessage}
-          style={{ flex: 1 }}
-        />
-        <Button color="primary" onClick={sendMessage} loading={isTyping} disabled={isTyping}>
-          发送
-        </Button>
+      <div className={styles.quickQuestions}>
+        {quickQuestions.map((q, i) => (
+          <Button
+            key={i}
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              setInputValue(q)
+            }}
+          >
+            {q}
+          </Button>
+        ))}
+      </div>
+
+      <div className={styles.inputArea}>
+        <div className={styles.inputWrap}>
+          <Input
+            placeholder={MODULE_PLACEHOLDERS[activeModule]}
+            value={inputValue}
+            onChange={setInputValue}
+            onEnterPress={sendMessage}
+          />
+        </div>
+        <div className={styles.sendBtn}>
+          <Button
+            variant="primary"
+            onClick={sendMessage}
+            loading={isTyping}
+            disabled={isTyping}
+          >
+            <Send size={16} />
+          </Button>
+        </div>
       </div>
     </div>
   )

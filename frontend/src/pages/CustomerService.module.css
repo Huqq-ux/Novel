@@ -1,0 +1,168 @@
+/* CustomerService page — 梧桐调 style */
+
+.page {
+  padding: var(--space-md);
+  padding-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 84px);
+  background: var(--color-bg);
+}
+
+/* === Header === */
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: var(--space-md);
+  border: none;
+  color: var(--color-text-inverse);
+  transition: background var(--transition-fast);
+}
+
+.backBtn:active {
+  background: var(--color-text-primary);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* === Tab bar === */
+.tabs {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+
+.tab {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tabActive {
+  background: var(--color-card);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* === Chat area === */
+.chatArea {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.chatInner {
+  min-height: 300px;
+}
+
+/* === Message bubble === */
+.message {
+  display: flex;
+  margin-bottom: var(--space-md);
+}
+
+.messageUser {
+  justify-content: flex-end;
+}
+
+.messageService {
+  justify-content: flex-start;
+}
+
+.bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: var(--radius-xl);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.bubbleUser {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+.bubbleService {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.bubbleContent {
+  font-size: var(--font-size-base);
+  white-space: pre-wrap;
+}
+
+.bubbleTime {
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
+  margin-top: var(--space-xs);
+  text-align: right;
+}
+
+/* === Typing indicator === */
+.typing {
+  color: var(--color-text-placeholder);
+  font-size: var(--font-size-sm);
+  padding: var(--space-sm);
+  font-style: italic;
+}
+
+/* === Quick questions === */
+.quickQuestions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+/* === Input area === */
+.inputArea {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.inputWrap {
+  flex: 1;
+}
+
+.sendBtn {
+  flex-shrink: 0;
+}

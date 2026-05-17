@@ -1,7 +1,7 @@
 import { useState, useEffect, ReactNode } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Badge } from 'antd-mobile'
 import { authorApi } from '../../services/api'
+import styles from './AdminLayout.module.css'
 
 interface AdminLayoutProps {
   children: ReactNode
@@ -135,170 +135,62 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
-      <aside
-        style={{
-          width: collapsed ? '80px' : '240px',
-          backgroundColor: '#001529',
-          color: '#fff',
-          transition: 'width 0.3s',
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          zIndex: 100,
-        }}
-      >
+    <div className={styles.layout}>
+      <aside className={`${styles.sider} ${collapsed ? styles.siderCollapsed : styles.siderExpanded}`}>
         <div
-          style={{
-            height: '64px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            padding: collapsed ? '0' : '0 24px',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-            cursor: 'pointer',
-          }}
+          className={`${styles.logo} ${collapsed ? styles.logoCollapsed : styles.logoExpanded}`}
           onClick={() => setCollapsed(!collapsed)}
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="#1890ff">
+          <svg className={styles.logoIcon} viewBox="0 0 24 24">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
           </svg>
-          {!collapsed && (
-            <span style={{ marginLeft: '12px', fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>
-              管理后台
-            </span>
-          )}
+          {!collapsed && <span className={styles.logoText}>管理后台</span>}
         </div>
 
-        <nav style={{ flex: 1, padding: '16px 0', overflowY: 'auto' }}>
+        <nav className={styles.nav}>
           {menuItems.map((item) => (
             <div
               key={item.key}
               onClick={() => navigate(item.path)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: collapsed ? '12px 0' : '12px 24px',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                cursor: 'pointer',
-                backgroundColor: isActive(item.path) ? 'rgba(24, 144, 255, 0.2)' : 'transparent',
-                borderRight: isActive(item.path) ? '3px solid #1890ff' : '3px solid transparent',
-                color: isActive(item.path) ? '#fff' : 'rgba(255,255,255,0.65)',
-                transition: 'all 0.3s',
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive(item.path)) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'
-                  e.currentTarget.style.color = '#fff'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive(item.path)) {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.65)'
-                }
-              }}
+              className={`${styles.menuItem} ${collapsed ? styles.menuItemCollapsed : styles.menuItemExpanded} ${isActive(item.path) ? styles.menuItemActive : ''}`}
             >
-              <span style={{ display: 'flex', alignItems: 'center' }}>
-                {item.icon}
-              </span>
+              <span style={{ display: 'flex', alignItems: 'center' }}>{item.icon}</span>
               {!collapsed && (
-                <span style={{ marginLeft: '12px', fontSize: '14px', flex: 1 }}>
-                  {item.label}
-                </span>
-              )}
-              {!collapsed && item.badge && item.badge > 0 && (
-                <Badge content={item.badge} style={{ '--right': '-10px' }} />
+                <>
+                  <span className={styles.menuLabel}>{item.label}</span>
+                  {item.badge && item.badge > 0 && (
+                    <span className={styles.badge}>{item.badge > 99 ? '99+' : item.badge}</span>
+                  )}
+                </>
               )}
             </div>
           ))}
         </nav>
 
-        <div
-          style={{
-            padding: '16px',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-          }}
-        >
+        <div className={styles.footer}>
           <div
             onClick={() => navigate('/user')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              cursor: 'pointer',
-              color: 'rgba(255,255,255,0.65)',
-              padding: '8px',
-              borderRadius: '8px',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'
-              e.currentTarget.style.color = '#fff'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = 'rgba(255,255,255,0.65)'
-            }}
+            className={`${styles.exitBtn} ${collapsed ? styles.exitBtnCollapsed : styles.exitBtnExpanded}`}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
-            {!collapsed && <span style={{ marginLeft: '12px', fontSize: '14px' }}>返回前台</span>}
+            {!collapsed && <span className={styles.exitLabel}>返回前台</span>}
           </div>
         </div>
       </aside>
 
-      <main
-        style={{
-          flex: 1,
-          marginLeft: collapsed ? '80px' : '240px',
-          transition: 'margin-left 0.3s',
-          minHeight: '100vh',
-        }}
-      >
-        <header
-          style={{
-            height: '64px',
-            backgroundColor: '#fff',
-            boxShadow: '0 1px 4px rgba(0,21,41,0.08)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 24px',
-            position: 'sticky',
-            top: 0,
-            zIndex: 99,
-          }}
-        >
-          <div style={{ fontSize: '18px', fontWeight: 600, color: '#262626' }}>
+      <main className={`${styles.main} ${collapsed ? styles.mainCollapsed : styles.mainExpanded}`}>
+        <header className={styles.header}>
+          <div className={styles.headerTitle}>
             {menuItems.find(item => isActive(item.path))?.label || '管理后台'}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                backgroundColor: '#1890ff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                fontWeight: 'bold',
-              }}
-            >
-              A
-            </div>
-          </div>
+          <div className={styles.adminAvatar}>A</div>
         </header>
 
-        <div style={{ padding: '24px' }}>
+        <div className={styles.content}>
           {children}
         </div>
       </main>

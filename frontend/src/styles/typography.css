@@ -1,0 +1,22 @@
+.heading-serif {
+  font-family: var(--font-serif);
+  color: var(--color-text-primary);
+}
+
+.heading-xl { font-size: var(--font-size-2xl); font-weight: bold; }
+.heading-lg { font-size: var(--font-size-xl); font-weight: bold; }
+.heading-md { font-size: var(--font-size-lg); font-weight: bold; }
+
+.body-text {
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.caption { font-size: var(--font-size-sm); color: var(--color-text-tertiary); }
+
+.text-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.text-ellipsis-2 {
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;
+}

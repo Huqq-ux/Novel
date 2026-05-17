@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Toast } from 'antd-mobile'
+import Toast from './Toast'
 import { uploadApi } from '../services/api'
 
 interface ImageUploaderProps {
@@ -28,13 +28,13 @@ export default function ImageUploader({
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      Toast.show('请选择图片文件')
+      Toast.info('请选择图片文件')
       return
     }
 
     const maxBytes = maxSize * 1024 * 1024
     if (file.size > maxBytes) {
-      Toast.show(`图片大小不能超过 ${maxSize}MB`)
+      Toast.error(`图片大小不能超过 ${maxSize}MB`)
       return
     }
 
@@ -49,13 +49,13 @@ export default function ImageUploader({
       const response: any = await uploadApi.uploadCover(file)
       if (response?.code === 200 && response?.data?.url) {
         onChange(response.data.url)
-        Toast.show('上传成功')
+        Toast.success('上传成功')
       } else {
-        Toast.show(response?.message || '上传失败')
+        Toast.error(response?.message || '上传失败')
       }
     } catch (error: any) {
       console.error('Upload failed:', error)
-      Toast.show(error.response?.data?.message || '上传失败')
+      Toast.error(error.response?.data?.message || '上传失败')
     } finally {
       setUploading(false)
     }

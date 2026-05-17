@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Button, Tabs, List, Tag, Dialog, TextArea, Toast, Empty } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft } from 'lucide-react'
 import { authorApi } from '../services/api'
+import Button from '../components/Button'
+import Tag from '../components/Tag'
+import Input from '../components/Input'
+import Toast from '../components/Toast'
+import Empty from '../components/Empty'
+import styles from './AuthorAudit.module.css'
 
 interface Application {
   id: number
@@ -53,7 +58,7 @@ export default function AuthorAudit() {
       }
     } catch (error) {
       console.error('Failed to load applications:', error)
-      Toast.show('加载失败')
+      Toast.error('加载失败')
     } finally {
       setLoading(false)
     }
@@ -67,59 +72,50 @@ export default function AuthorAudit() {
         setAuditComment('')
       }
     } catch (error) {
-      Toast.show('加载详情失败')
+      Toast.error('加载详情失败')
     }
   }
 
   const handleApprove = async (id: number) => {
-    Dialog.confirm({
-      content: '确定通过该申请吗？',
-      onConfirm: async () => {
-        setProcessing(true)
-        try {
-          const response: any = await authorApi.approveApplication(id, auditComment)
-          if (response && response.code === 200) {
-            Toast.show('审核通过')
-            setSelectedApplication(null)
-            loadData()
-          } else {
-            Toast.show(response?.message || '操作失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '操作失败')
-        } finally {
-          setProcessing(false)
-        }
-      },
-    })
+    if (!window.confirm('确定通过该申请吗？')) return
+    setProcessing(true)
+    try {
+      const response: any = await authorApi.approveApplication(id, auditComment)
+      if (response && response.code === 200) {
+        Toast.success('审核通过')
+        setSelectedApplication(null)
+        loadData()
+      } else {
+        Toast.error(response?.message || '操作失败')
+      }
+    } catch (error: any) {
+      Toast.error(error.response?.data?.message || '操作失败')
+    } finally {
+      setProcessing(false)
+    }
   }
 
   const handleReject = async (id: number) => {
     if (!auditComment.trim()) {
-      Toast.show('请填写拒绝原因')
+      Toast.info('请填写拒绝原因')
       return
     }
-
-    Dialog.confirm({
-      content: '确定拒绝该申请吗？',
-      onConfirm: async () => {
-        setProcessing(true)
-        try {
-          const response: any = await authorApi.rejectApplication(id, auditComment)
-          if (response && response.code === 200) {
-            Toast.show('已拒绝申请')
-            setSelectedApplication(null)
-            loadData()
-          } else {
-            Toast.show(response?.message || '操作失败')
-          }
-        } catch (error: any) {
-          Toast.show(error.response?.data?.message || '操作失败')
-        } finally {
-          setProcessing(false)
-        }
-      },
-    })
+    if (!window.confirm('确定拒绝该申请吗？')) return
+    setProcessing(true)
+    try {
+      const response: any = await authorApi.rejectApplication(id, auditComment)
+      if (response && response.code === 200) {
+        Toast.success('已拒绝申请')
+        setSelectedApplication(null)
+        loadData()
+      } else {
+        Toast.error(response?.message || '操作失败')
+      }
+    } catch (error: any) {
+      Toast.error(error.response?.data?.message || '操作失败')
+    } finally {
+      setProcessing(false)
+    }
   }
 
   const getStatusTag = (status: number) => {
@@ -127,129 +123,89 @@ export default function AuthorAudit() {
       case 0:
         return <Tag color="primary">待审核</Tag>
       case 1:
-        return <Tag color="success">已通过</Tag>
+        return <Tag color="accent">已通过</Tag>
       case 2:
         return <Tag color="danger">已拒绝</Tag>
       default:
-        return <Tag>未知</Tag>
+        return <Tag color="default">未知</Tag>
     }
   }
 
   const renderApplicationItem = (app: Application) => (
-    <List.Item
-      key={app.id}
-      onClick={() => handleViewDetail(app.id)}
-      arrow
-      prefix={
-        <div
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: '#1677ff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontSize: '16px',
-          }}
-        >
-          {app.penName?.charAt(0) || app.username?.charAt(0) || '?'}
-        </div>
-      }
-      description={
-        <div>
-          <div style={{ marginBottom: '4px' }}>{app.specialty || '未填写擅长类型'}</div>
-          <div style={{ fontSize: '12px', color: '#999' }}>
-            {new Date(app.createTime).toLocaleString()}
-          </div>
-        </div>
-      }
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span>{app.penName || app.username}</span>
-        {getStatusTag(app.status)}
+    <div key={app.id} className={styles.appItem} onClick={() => handleViewDetail(app.id)}>
+      <div className={styles.appAvatar}>
+        {app.penName?.charAt(0) || app.username?.charAt(0) || '?'}
       </div>
-    </List.Item>
+      <div className={styles.appContent}>
+        <div className={styles.appName}>
+          <span>{app.penName || app.username}</span>
+          {getStatusTag(app.status)}
+        </div>
+        <div className={styles.appMeta}>{app.specialty || '未填写擅长类型'}</div>
+        <div className={styles.appTime}>{new Date(app.createTime).toLocaleString()}</div>
+      </div>
+      <span style={{ color: 'var(--color-text-tertiary)' }}>&gt;</span>
+    </div>
   )
 
   if (loading) {
-    return (
-      <div style={{ padding: '12px', textAlign: 'center', paddingTop: '100px' }}>
-        加载中...
-      </div>
-    )
+    return <div className={styles.loadingWrap}>加载中...</div>
   }
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-        <div
-          onClick={() => navigate('/admin')}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginRight: '12px',
-          }}
-        >
-          <LeftOutline fontSize={18} color="#fff" />
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <div className={styles.backBtn} onClick={() => navigate('/admin')}>
+          <ArrowLeft size={18} color="#fff" />
         </div>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>作者申请审核</h2>
+        <h2 className={styles.headerTitle}>作者申请审核</h2>
       </div>
 
       {selectedApplication ? (
-        <Card
-          title="申请详情"
-          extra={
-            <Button size="small" onClick={() => setSelectedApplication(null)}>
+        <div className={styles.detailCard}>
+          <div className={styles.detailHeader}>
+            <span className={styles.detailTitle}>申请详情</span>
+            <Button variant="text" size="sm" onClick={() => setSelectedApplication(null)}>
               返回列表
             </Button>
-          }
-        >
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>申请人：</span>
-              <span>{selectedApplication.penName || selectedApplication.username}</span>
+          </div>
+
+          <div style={{ marginBottom: 'var(--space-lg)' }}>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>申请人</span>
+              <span className={styles.detailValue}>{selectedApplication.penName || selectedApplication.username}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>真实姓名：</span>
-              <span>{selectedApplication.realName}</span>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>真实姓名</span>
+              <span className={styles.detailValue}>{selectedApplication.realName}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>联系电话：</span>
-              <span>{selectedApplication.phone}</span>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>联系电话</span>
+              <span className={styles.detailValue}>{selectedApplication.phone}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>联系邮箱：</span>
-              <span>{selectedApplication.email}</span>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>联系邮箱</span>
+              <span className={styles.detailValue}>{selectedApplication.email}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>笔名：</span>
-              <span>{selectedApplication.penName}</span>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>笔名</span>
+              <span className={styles.detailValue}>{selectedApplication.penName}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>擅长类型：</span>
-              <span>{selectedApplication.specialty}</span>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>擅长类型</span>
+              <span className={styles.detailValue}>{selectedApplication.specialty}</span>
             </div>
-            <div style={{ marginBottom: '8px' }}>
-              <div style={{ color: '#666', marginBottom: '4px' }}>个人简介：</div>
-              <div style={{ padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                {selectedApplication.introduction}
-              </div>
+            <div className={styles.detailBlock}>
+              <div className={styles.detailBlockLabel}>个人简介</div>
+              <div className={styles.detailBlockContent}>{selectedApplication.introduction}</div>
             </div>
             {selectedApplication.workSamples && selectedApplication.workSamples.length > 0 && (
-              <div style={{ marginBottom: '8px' }}>
-                <div style={{ color: '#666', marginBottom: '4px' }}>作品示例：</div>
-                <div style={{ padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+              <div className={styles.detailBlock}>
+                <div className={styles.detailBlockLabel}>作品示例</div>
+                <div className={styles.detailBlockContent}>
                   {selectedApplication.workSamples.map((sample, index) => (
                     <div key={index} style={{ marginBottom: '4px' }}>
-                      <a href={sample} target="_blank" rel="noopener noreferrer" style={{ color: '#1677ff' }}>
+                      <a href={sample} target="_blank" rel="noopener noreferrer" className={styles.detailLink}>
                         {sample}
                       </a>
                     </div>
@@ -257,47 +213,46 @@ export default function AuthorAudit() {
                 </div>
               </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>申请时间：</span>
-              <span>{new Date(selectedApplication.createTime).toLocaleString()}</span>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>申请时间</span>
+              <span className={styles.detailValue}>{new Date(selectedApplication.createTime).toLocaleString()}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#666' }}>状态：</span>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>状态</span>
               {getStatusTag(selectedApplication.status)}
             </div>
             {selectedApplication.status !== 0 && selectedApplication.auditComment && (
-              <div style={{ marginBottom: '8px' }}>
-                <div style={{ color: '#666', marginBottom: '4px' }}>审核意见：</div>
-                <div style={{ padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                  {selectedApplication.auditComment}
-                </div>
+              <div className={styles.detailBlock}>
+                <div className={styles.detailBlockLabel}>审核意见</div>
+                <div className={styles.detailBlockContent}>{selectedApplication.auditComment}</div>
               </div>
             )}
           </div>
 
           {selectedApplication.status === 0 && (
             <>
-              <div style={{ marginBottom: '16px' }}>
-                <div style={{ color: '#666', marginBottom: '8px' }}>审核意见：</div>
-                <TextArea
+              <div className={styles.auditSection}>
+                <div className={styles.auditLabel}>审核意见</div>
+                <Input
                   placeholder="请输入审核意见（拒绝时必填）"
                   value={auditComment}
                   onChange={setAuditComment}
                   rows={3}
                 />
               </div>
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div className={styles.auditActions}>
                 <Button
-                  color="primary"
-                  style={{ flex: 1 }}
+                  variant="primary"
+                  block
                   loading={processing}
                   onClick={() => handleApprove(selectedApplication.id)}
                 >
                   通过
                 </Button>
                 <Button
-                  color="danger"
-                  style={{ flex: 1 }}
+                  variant="primary"
+                  danger
+                  block
                   loading={processing}
                   onClick={() => handleReject(selectedApplication.id)}
                 >
@@ -306,27 +261,35 @@ export default function AuthorAudit() {
               </div>
             </>
           )}
-        </Card>
+        </div>
       ) : (
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-        >
-          <Tabs.Tab title={`待审核 (${pendingApplications.length})`} key="pending">
-            {pendingApplications.length > 0 ? (
-              <List>{pendingApplications.map(renderApplicationItem)}</List>
-            ) : (
-              <Empty description="暂无待审核申请" />
-            )}
-          </Tabs.Tab>
-          <Tabs.Tab title={`全部 (${applications.length})`} key="all">
-            {applications.length > 0 ? (
-              <List>{applications.map(renderApplicationItem)}</List>
-            ) : (
-              <Empty description="暂无申请记录" />
-            )}
-          </Tabs.Tab>
-        </Tabs>
+        <>
+          <div className={styles.tabBar}>
+            <div
+              className={`${styles.tabItem} ${activeTab === 'pending' ? styles.tabItemActive : ''}`}
+              onClick={() => setActiveTab('pending')}
+            >
+              待审核 ({pendingApplications.length})
+            </div>
+            <div
+              className={`${styles.tabItem} ${activeTab === 'all' ? styles.tabItemActive : ''}`}
+              onClick={() => setActiveTab('all')}
+            >
+              全部 ({applications.length})
+            </div>
+          </div>
+
+          {activeTab === 'pending' && (
+            pendingApplications.length > 0
+              ? pendingApplications.map(renderApplicationItem)
+              : <Empty description="暂无待审核申请" />
+          )}
+          {activeTab === 'all' && (
+            applications.length > 0
+              ? applications.map(renderApplicationItem)
+              : <Empty description="暂无申请记录" />
+          )}
+        </>
       )}
     </div>
   )

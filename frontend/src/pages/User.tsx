@@ -1,8 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { List, Card, Avatar, Button, Input, Form, Dialog, Toast } from 'antd-mobile'
+import {
+  BookOpen, Star, MessageSquare, Bell, Settings,
+  HelpCircle, Shield, Eye, EyeOff, ChevronRight,
+  Coins, CalendarCheck, PenLine, BookText, LogOut,
+} from 'lucide-react'
+import Button from '../components/Button'
+import Card from '../components/Card'
+import Input from '../components/Input'
+import Toast from '../components/Toast'
+import Modal from '../components/Modal'
 import { userApi } from '../services/api'
-import { validatePassword, getPasswordStrengthColor, getPasswordStrengthText } from '../utils/passwordValidation'
+import { validatePassword } from '../utils/passwordValidation'
+import styles from './User.module.css'
 
 interface UserInfo {
   id: number
@@ -12,12 +22,12 @@ interface UserInfo {
   coinBalance?: number
 }
 
-const PasswordInput = ({ 
-  value, 
-  onChange, 
+const PasswordInput = ({
+  value,
+  onChange,
   placeholder,
-  onPasswordChange 
-}: { 
+  onPasswordChange
+}: {
   value?: string
   onChange?: (value: string) => void
   placeholder?: string
@@ -31,53 +41,22 @@ const PasswordInput = ({
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className={styles.passwordWrapper}>
       <Input
         type={visible ? 'text' : 'password'}
         placeholder={placeholder}
         value={value}
         onChange={handleChange}
-        style={{ paddingRight: '40px' }}
-        aria-label={placeholder}
-        aria-describedby={visible ? 'password-visible' : 'password-hidden'}
       />
       <button
         type="button"
         onClick={() => setVisible(!visible)}
         aria-label={visible ? '隐藏密码' : '显示密码'}
         aria-pressed={visible}
-        style={{
-          position: 'absolute',
-          right: '8px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '18px',
-          color: '#999',
-          transition: 'color 0.2s',
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.color = '#1677ff'}
-        onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
+        className={styles.passwordToggle}
       >
-        {visible ? (
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-          </svg>
-        ) : (
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
-          </svg>
-        )}
+        {visible ? <EyeOff size={18} /> : <Eye size={18} />}
       </button>
-      <span id={visible ? 'password-visible' : 'password-hidden'} style={{ display: 'none' }}>
-        {visible ? '密码已显示为明文' : '密码已隐藏'}
-      </span>
     </div>
   )
 }
@@ -87,9 +66,11 @@ export default function User() {
   const [user, setUser] = useState<UserInfo | null>(null)
   const [showLogin, setShowLogin] = useState(false)
   const [isRegister, setIsRegister] = useState(false)
-  const [form] = Form.useForm()
+  const [formValues, setFormValues] = useState({ username: '', password: '', email: '' })
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [passwordStrength, setPasswordStrength] = useState<'weak' | 'medium' | 'strong'>('weak')
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -114,10 +95,38 @@ export default function User() {
     }
   }
 
-  const handleLogin = async (values: { username: string; password: string }) => {
-    console.log('handleLogin called with:', values)
+  const resetForm = () => {
+    setFormValues({ username: '', password: '', email: '' })
+    setFieldErrors({})
+    setPasswordStrength('weak')
+    setPasswordErrors([])
+  }
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {}
+    if (!formValues.username.trim()) {
+      errors.username = '请输入用户名'
+    }
+    if (!formValues.password) {
+      errors.password = '请输入密码'
+    }
+    if (isRegister) {
+      if (!formValues.email.trim()) {
+        errors.email = '请输入邮箱'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email)) {
+        errors.email = '请输入有效的邮箱'
+      }
+    }
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleLogin = async () => {
+    if (!validateForm()) return
+
+    console.log('handleLogin called with:', formValues)
     try {
-      const response: any = await userApi.login(values.username, values.password)
+      const response: any = await userApi.login(formValues.username, formValues.password)
       console.log('login response:', response)
       if (response.code === 200) {
         localStorage.setItem('accessToken', response.data.accessToken)
@@ -125,33 +134,34 @@ export default function User() {
         localStorage.setItem('user', JSON.stringify(response.data.user))
         setUser(response.data.user)
         setShowLogin(false)
-        Toast.show({ icon: 'success', content: '登录成功' })
+        resetForm()
+        Toast.success('登录成功')
       } else {
-        Toast.show({ icon: 'fail', content: response.message || '登录失败' })
+        Toast.error(response.message || '登录失败')
       }
     } catch (error: any) {
       console.error('login error:', error)
-      Toast.show({ icon: 'fail', content: error.response?.data?.message || '登录失败' })
+      Toast.error(error.response?.data?.message || '登录失败')
     }
   }
 
-  const handleRegister = async (values: { username: string; password: string; email: string }) => {
-    const passwordValidation = validatePassword(values.password)
+  const handleRegister = async () => {
+    if (!validateForm()) return
+
+    const passwordValidation = validatePassword(formValues.password)
     if (!passwordValidation.isValid) {
-      Toast.show({ icon: 'fail', content: '密码强度不足' })
+      Toast.error('密码强度不足')
       return
     }
 
     try {
-      const response: any = await userApi.register(values.username, values.password, values.email)
+      const response: any = await userApi.register(formValues.username, formValues.password, formValues.email)
       if (response.code === 200) {
-        Toast.show({ icon: 'success', content: '注册成功，请登录' })
+        Toast.success('注册成功，请登录')
         setIsRegister(false)
-        form.resetFields()
-        setPasswordStrength('weak')
-        setPasswordErrors([])
+        resetForm()
       } else {
-        Toast.show({ icon: 'fail', content: response.message || '注册失败' })
+        Toast.error(response.message || '注册失败')
       }
     } catch (error: any) {
       let errorMessage = '注册失败';
@@ -160,238 +170,300 @@ export default function User() {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      Toast.show({ icon: 'fail', content: errorMessage })
+      Toast.error(errorMessage)
     }
   }
 
   const handleLogout = () => {
-    Dialog.confirm({
-      content: '确定要退出登录吗？',
-      onConfirm: () => {
-        userApi.logout()
-        setUser(null)
-        Toast.show({ icon: 'success', content: '已退出登录' })
-      },
-    })
+    userApi.logout()
+    setUser(null)
+    setShowLogoutConfirm(false)
+    Toast.success('已退出登录')
+  }
+
+  const openLoginModal = () => {
+    resetForm()
+    setShowLogin(true)
+  }
+
+  const closeLoginModal = () => {
+    setShowLogin(false)
+    resetForm()
+  }
+
+  const toggleMode = () => {
+    setIsRegister(!isRegister)
+    resetForm()
   }
 
   const menuItems = [
-    { icon: '📖', title: '我的阅读', desc: '阅读历史', path: '/reading-history' },
-    { icon: '💬', title: '我的评论', desc: '评论记录', path: '/my-comments' },
-    { icon: '❤️', title: '我的收藏', desc: '收藏的小说', path: '/my-favorites' },
-    { icon: '💰', title: '充值中心', desc: '充值书币', path: '/recharge' },
-    { icon: '🎁', title: '每日签到', desc: '领取奖励', path: '/daily-signin' },
-    { icon: '✍️', title: '成为作者', desc: '申请成为作者', path: '/become-author' },
-    { icon: '📚', title: '我的作品', desc: '管理作品', path: '/author-books' },
-    { icon: '🔔', title: '消息通知', desc: '系统消息', path: '/notifications' },
-    { icon: '⚙️', title: '设置', desc: '应用设置', path: '/settings' },
-    { icon: '❓', title: '帮助与反馈', desc: '常见问题', path: '/help-feedback' },
+    { icon: <BookOpen size={20} />, title: '我的阅读', desc: '阅读历史', path: '/reading-history' },
+    { icon: <MessageSquare size={20} />, title: '我的评论', desc: '评论记录', path: '/my-comments' },
+    { icon: <Star size={20} />, title: '我的收藏', desc: '收藏的小说', path: '/my-favorites' },
+    { icon: <Coins size={20} />, title: '充值中心', desc: '充值书币', path: '/recharge' },
+    { icon: <CalendarCheck size={20} />, title: '每日签到', desc: '领取奖励', path: '/daily-signin' },
+    { icon: <PenLine size={20} />, title: '成为作者', desc: '申请成为作者', path: '/become-author' },
+    { icon: <BookText size={20} />, title: '我的作品', desc: '管理作品', path: '/author-books' },
+    { icon: <Bell size={20} />, title: '消息通知', desc: '系统消息', path: '/notifications' },
+    { icon: <Settings size={20} />, title: '设置', desc: '应用设置', path: '/settings' },
+    { icon: <HelpCircle size={20} />, title: '帮助与反馈', desc: '常见问题', path: '/help-feedback' },
   ]
 
   const adminMenuItems = [
-    { icon: '👑', title: '管理后台', desc: '进入管理后台', path: '/admin' },
+    { icon: <Shield size={20} />, title: '管理后台', desc: '进入管理后台', path: '/admin' },
   ]
 
+  const strengthBarClass = {
+    weak: styles.strengthWeak,
+    medium: styles.strengthMedium,
+    strong: styles.strengthStrong,
+  }[passwordStrength]
+
+  const strengthTextClass = {
+    weak: styles.strengthTextWeak,
+    medium: styles.strengthTextMedium,
+    strong: styles.strengthTextStrong,
+  }[passwordStrength]
+
+  const strengthWidth = {
+    weak: 30,
+    medium: 60,
+    strong: 100,
+  }[passwordStrength]
+
+  const strengthLabel = {
+    weak: '弱',
+    medium: '中',
+    strong: '强',
+  }[passwordStrength]
+
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <Card style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Avatar
-            src={user ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}` : 'https://placehold.co/80x80/eee/999?text=User'}
-            style={{ '--size': '64px' }}
+    <div className={styles.page}>
+      {/* Profile Card */}
+      <Card className={styles.profileCard}>
+        <div className={styles.profileRow}>
+          <img
+            className={styles.avatar}
+            src={user
+              ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
+              : 'https://placehold.co/80x80/eee/999?text=User'
+            }
+            alt={user ? user.username : 'User'}
           />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>
+          <div className={styles.userInfo}>
+            <div className={styles.username}>
               {user ? user.username : '游客'}
             </div>
-            <div style={{ fontSize: '14px', color: '#999' }}>
+            <div className={styles.email}>
               {user ? user.email : '点击登录'}
             </div>
             {user && (
-              <div style={{ fontSize: '14px', color: '#ff9500', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span>💰</span>
+              <div className={styles.coinBalance}>
+                <Coins size={14} />
                 <span>书币: {user.coinBalance || 0}</span>
               </div>
             )}
           </div>
-          {user ? (
-            <Button size='small' onClick={handleLogout}>
-              退出
-            </Button>
-          ) : (
-            <Button size='small' color='primary' onClick={() => setShowLogin(true)}>
-              登录
-            </Button>
-          )}
+          <div className={styles.profileActions}>
+            {user ? (
+              <Button
+                variant="text"
+                size="sm"
+                onClick={() => setShowLogoutConfirm(true)}
+              >
+                <LogOut size={16} style={{ marginRight: 4 }} />
+                退出
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={openLoginModal}
+              >
+                登录
+              </Button>
+            )}
+          </div>
         </div>
       </Card>
 
-      <Card title="我的服务" style={{ marginBottom: '16px' }}>
-        <List>
-          {menuItems.map((item, index) => (
-            <List.Item
-              key={index}
-              onClick={() => navigate(item.path)}
-              style={{ padding: '12px 0' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '24px' }}>{item.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{item.title}</div>
-                  <div style={{ fontSize: '12px', color: '#999' }}>{item.desc}</div>
-                </div>
-                <span style={{ color: '#999' }}>→</span>
-              </div>
-            </List.Item>
-          ))}
-        </List>
+      {/* My Services Menu */}
+      <Card title="我的服务" className={styles.menuCard}>
+        {menuItems.map((item, index) => (
+          <div
+            key={index}
+            className={styles.menuItem}
+            onClick={() => navigate(item.path)}
+          >
+            <div className={styles.menuIcon}>
+              {item.icon}
+            </div>
+            <div className={styles.menuText}>
+              <div className={styles.menuTitle}>{item.title}</div>
+              <div className={styles.menuDesc}>{item.desc}</div>
+            </div>
+            <ChevronRight size={18} className={styles.menuArrow} />
+          </div>
+        ))}
       </Card>
 
+      {/* Admin Section */}
       {user?.role === 'admin' && (
-        <Card title="管理员功能" style={{ marginBottom: '16px' }}>
-          <List>
-            {adminMenuItems.map((item, index) => (
-              <List.Item
-                key={index}
-                onClick={() => navigate(item.path)}
-                style={{ padding: '12px 0' }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '24px' }}>{item.icon}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{item.title}</div>
-                    <div style={{ fontSize: '12px', color: '#999' }}>{item.desc}</div>
-                  </div>
-                  <span style={{ color: '#999' }}>→</span>
-                </div>
-              </List.Item>
-            ))}
-          </List>
+        <Card title="管理员功能" className={styles.sectionCard}>
+          {adminMenuItems.map((item, index) => (
+            <div
+              key={index}
+              className={styles.menuItem}
+              onClick={() => navigate(item.path)}
+            >
+              <div className={styles.menuIcon}>
+                {item.icon}
+              </div>
+              <div className={styles.menuText}>
+                <div className={styles.menuTitle}>{item.title}</div>
+                <div className={styles.menuDesc}>{item.desc}</div>
+              </div>
+              <ChevronRight size={18} className={styles.menuArrow} />
+            </div>
+          ))}
         </Card>
       )}
 
-      <Card title="关于">
-        <List>
-          <List.Item style={{ padding: '12px 0' }}>
-            <div style={{ fontSize: '14px' }}>
-              <div>版本: 1.0.0</div>
-              <div style={{ color: '#999', marginTop: '4px' }}>
-                番茄小说 - 免费阅读平台
-              </div>
-            </div>
-          </List.Item>
-        </List>
+      {/* About Section */}
+      <Card title="关于" className={styles.sectionCard}>
+        <div className={styles.aboutContent}>
+          <div className={styles.aboutVersion}>版本: 1.0.0</div>
+          <div className={styles.aboutDesc}>
+            墨语小说 - 免费阅读平台
+          </div>
+        </div>
       </Card>
 
-      <Dialog
+      {/* Login / Register Modal */}
+      <Modal
         visible={showLogin}
         title={isRegister ? '注册' : '登录'}
-        content={
-          <div>
-            <Form
-              form={form}
-              layout='vertical'
-              onFinish={isRegister ? handleRegister : handleLogin}
-            >
-              <Form.Item
-                name='username'
-                label='用户名'
-                rules={[{ required: true, message: '请输入用户名' }]}
-              >
-                <Input placeholder='请输入用户名' aria-label='用户名' />
-              </Form.Item>
-              <Form.Item
-                name='password'
-                label='密码'
-                rules={[{ required: true, message: '请输入密码' }]}
-              >
-                <PasswordInput 
-                  placeholder='请输入密码'
-                  onPasswordChange={handlePasswordChange}
-                />
-              </Form.Item>
-              {isRegister && (
-                <>
-                  {form.getFieldValue('password') && (
-                    <div style={{ marginBottom: '12px' }}>
-                      <div style={{ fontSize: '12px', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                        <span>密码强度</span>
-                        <span style={{ color: getPasswordStrengthColor(passwordStrength) }}>
-                          {getPasswordStrengthText(passwordStrength)}
-                        </span>
-                      </div>
-                      <div style={{ 
-                        height: '6px', 
-                        backgroundColor: '#eee', 
-                        borderRadius: '3px',
-                        overflow: 'hidden'
-                      }}>
-                        <div style={{ 
-                          width: `${passwordStrength === 'strong' ? 100 : passwordStrength === 'medium' ? 60 : 30}%`,
-                          height: '100%',
-                          backgroundColor: getPasswordStrengthColor(passwordStrength),
-                          transition: 'width 0.3s'
-                        }} />
-                      </div>
-                      {passwordErrors.length > 0 && (
-                        <div style={{ fontSize: '12px', color: '#ff4d4f', marginTop: '4px' }}>
-                          {passwordErrors.map((error, index) => (
-                            <div key={index}>• {error}</div>
-                          ))}
-                        </div>
-                      )}
+        onClose={closeLoginModal}
+        showCancel={false}
+        footer={null}
+      >
+        <div className={styles.modalFormBody}>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>用户名</label>
+            <Input
+              placeholder="请输入用户名"
+              value={formValues.username}
+              onChange={(val) => {
+                setFormValues(prev => ({ ...prev, username: val }))
+                if (fieldErrors.username) setFieldErrors(prev => ({ ...prev, username: '' }))
+              }}
+              error={fieldErrors.username || undefined}
+            />
+            {fieldErrors.username && (
+              <div className={styles.formError}>{fieldErrors.username}</div>
+            )}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>密码</label>
+            <PasswordInput
+              placeholder="请输入密码"
+              value={formValues.password}
+              onChange={(val) => {
+                setFormValues(prev => ({ ...prev, password: val }))
+                if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: '' }))
+              }}
+              onPasswordChange={handlePasswordChange}
+            />
+            {fieldErrors.password && (
+              <div className={styles.formError}>{fieldErrors.password}</div>
+            )}
+          </div>
+
+          {isRegister && (
+            <>
+              {formValues.password && (
+                <div className={styles.strengthSection}>
+                  <div className={styles.strengthHeader}>
+                    <span className={styles.strengthLabel}>密码强度</span>
+                    <span className={strengthTextClass}>{strengthLabel}</span>
+                  </div>
+                  <div className={styles.strengthBarBg}>
+                    <div
+                      className={`${styles.strengthBarFill} ${strengthBarClass}`}
+                      style={{ width: `${strengthWidth}%` }}
+                    />
+                  </div>
+                  {passwordErrors.length > 0 && (
+                    <div className={styles.strengthErrors}>
+                      {passwordErrors.map((error, index) => (
+                        <div key={index} className={styles.strengthErrorItem}>• {error}</div>
+                      ))}
                     </div>
                   )}
-                  <Form.Item
-                    name='email'
-                    label='邮箱'
-                    rules={[
-                      { required: true, message: '请输入邮箱' },
-                      { type: 'email', message: '请输入有效的邮箱' },
-                    ]}
-                  >
-                    <Input placeholder='请输入邮箱' aria-label='邮箱' />
-                  </Form.Item>
-                </>
+                </div>
               )}
-              <Button 
-                block 
-                color='primary'
-                onClick={() => form.submit()}
-              >
-                {isRegister ? '注册' : '登录'}
-              </Button>
-            </Form>
-            <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
-              <Button
-                fill='none'
-                style={{ flex: 1 }}
-                onClick={() => {
-                  setShowLogin(false)
-                  form.resetFields()
-                  setPasswordStrength('weak')
-                  setPasswordErrors([])
-                }}
-              >
-                取消
-              </Button>
-              <Button
-                fill='none'
-                style={{ flex: 1 }}
-                onClick={() => {
-                  setIsRegister(!isRegister)
-                  form.resetFields()
-                  setPasswordStrength('weak')
-                  setPasswordErrors([])
-                }}
-              >
-                {isRegister ? '已有账号？去登录' : '没有账号？去注册'}
-              </Button>
-            </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>邮箱</label>
+                <Input
+                  type="email"
+                  placeholder="请输入邮箱"
+                  value={formValues.email}
+                  onChange={(val) => {
+                    setFormValues(prev => ({ ...prev, email: val }))
+                    if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: '' }))
+                  }}
+                  error={fieldErrors.email || undefined}
+                />
+                {fieldErrors.email && (
+                  <div className={styles.formError}>{fieldErrors.email}</div>
+                )}
+              </div>
+            </>
+          )}
+
+          <Button
+            variant="primary"
+            block
+            onClick={isRegister ? handleRegister : handleLogin}
+          >
+            {isRegister ? '注册' : '登录'}
+          </Button>
+
+          <div className={styles.formActions}>
+            <Button
+              variant="secondary"
+              block
+              onClick={closeLoginModal}
+            >
+              取消
+            </Button>
+            <Button
+              variant="text"
+              block
+              onClick={toggleMode}
+            >
+              {isRegister ? '已有账号？去登录' : '没有账号？去注册'}
+            </Button>
           </div>
-        }
-        onClose={() => setShowLogin(false)}
-      />
+        </div>
+      </Modal>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        visible={showLogoutConfirm}
+        title="退出登录"
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        confirmText="确定退出"
+        cancelText="取消"
+        danger
+      >
+        <div className={styles.confirmText}>
+          确定要退出登录吗？
+        </div>
+      </Modal>
     </div>
   )
 }

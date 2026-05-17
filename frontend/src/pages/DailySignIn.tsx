@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Button, Dialog, Toast } from 'antd-mobile'
-import { LeftOutline } from 'antd-mobile-icons'
+import { ArrowLeft } from 'lucide-react'
 import { signInApi } from '../services/api'
+import Button from '../components/Button'
+import Toast from '../components/Toast'
+import styles from './DailySignIn.module.css'
 
 interface SignInStatus {
   todaySigned: boolean
@@ -37,7 +39,7 @@ export default function DailySignIn() {
       }
     } catch (error) {
       console.error('Failed to load sign in status:', error)
-      Toast.show('加载签到状态失败')
+      Toast.error('加载签到状态失败')
     } finally {
       setLoading(false)
     }
@@ -45,20 +47,18 @@ export default function DailySignIn() {
 
   const handleSignIn = async () => {
     if (status.todaySigned) {
-      Toast.show('今日已签到')
+      Toast.info('今日已签到')
       return
     }
 
-    if (signing) {
-      return
-    }
+    if (signing) return
 
     setSigning(true)
     try {
       const response: any = await signInApi.signIn()
       if (response && response.code === 200) {
         setStatus(response.data)
-        
+
         const storedUser = localStorage.getItem('user')
         if (storedUser) {
           try {
@@ -69,21 +69,18 @@ export default function DailySignIn() {
             console.error('Failed to update user balance:', e)
           }
         }
-        
-        Dialog.alert({
-          content: `签到成功！获得 ${response.data.todayReward} 书币`,
-          confirmText: '确定',
-        })
+
+        Toast.success(`签到成功！获得 ${response.data.todayReward} 书币`)
       } else if (response && response.code === 400) {
-        Toast.show('今日已签到')
+        Toast.info('今日已签到')
         loadSignInStatus()
       }
     } catch (error: any) {
       console.error('Failed to sign in:', error)
       if (error.response?.data?.message) {
-        Toast.show(error.response.data.message)
+        Toast.error(error.response.data.message)
       } else {
-        Toast.show('签到失败')
+        Toast.error('签到失败')
       }
     } finally {
       setSigning(false)
@@ -91,99 +88,64 @@ export default function DailySignIn() {
   }
 
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-        <div
-          onClick={() => navigate('/user')}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            marginRight: '12px',
-          }}
-        >
-          <LeftOutline fontSize={18} color="#fff" />
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <div className={styles.backBtn} onClick={() => navigate('/user')}>
+          <ArrowLeft size={18} color="#fff" />
         </div>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>
-          每日签到
-        </h2>
+        <h2 className={styles.headerTitle}>每日签到</h2>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px' }}>加载中...</div>
+        <div className={styles.loadingWrap}>加载中...</div>
       ) : (
         <>
-          <Card style={{ marginBottom: '16px', textAlign: 'center', padding: '20px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎁</div>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
-              连续签到 {status.continuousDays} 天
+          <div className={styles.signInCard}>
+            <div className={styles.signInIcon}>🎁</div>
+            <div className={styles.signInStats}>连续签到 {status.continuousDays} 天</div>
+            <div className={styles.signInSubStats}>累计签到 {status.totalDays} 天</div>
+            <div className={styles.signInBtn}>
+              <Button
+                variant="primary"
+                size="lg"
+                disabled={status.todaySigned || signing}
+                loading={signing}
+                onClick={handleSignIn}
+              >
+                {status.todaySigned ? '今日已签到' : signing ? '签到中...' : '立即签到'}
+              </Button>
             </div>
-            <div style={{ fontSize: '14px', color: '#666', marginBottom: '16px' }}>
-              累计签到 {status.totalDays} 天
-            </div>
-            <Button
-              color="primary"
-              size="large"
-              disabled={status.todaySigned || signing}
-              loading={signing}
-              onClick={handleSignIn}
-              style={{ width: '200px', margin: '0 auto' }}
-            >
-              {status.todaySigned ? '今日已签到' : signing ? '签到中...' : '立即签到'}
-            </Button>
             {status.todaySigned && (
-              <div style={{ fontSize: '12px', color: '#52c41a', marginTop: '8px' }}>
-                ✓ 今日已获得 {status.todayReward} 书币
-              </div>
+              <div className={styles.signedBadge}>✓ 今日已获得 {status.todayReward} 书币</div>
             )}
-          </Card>
+          </div>
 
-          <Card title="签到奖励" style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
+          <div className={styles.rewardsCard}>
+            <div className={styles.rewardsTitle}>签到奖励</div>
+            <div className={styles.rewardsGrid}>
               {status.rewards.map((item) => (
                 <div
                   key={item.day}
-                  style={{
-                    textAlign: 'center',
-                    opacity: item.signed ? 1 : 0.5,
-                  }}
+                  className={`${styles.rewardItem} ${item.signed ? styles.rewardItemSigned : ''}`}
                 >
-                  <div
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      backgroundColor: item.signed ? '#1677ff' : '#f0f0f0',
-                      color: item.signed ? '#fff' : '#999',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      margin: '0 auto 4px',
-                      fontSize: '14px',
-                      fontWeight: 'bold',
-                    }}
-                  >
+                  <div className={`${styles.rewardCircle} ${!item.signed ? styles.rewardCircleUnsigned : ''}`}>
                     {item.signed ? '✓' : item.day}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>{item.reward}币</div>
+                  <div className={styles.rewardDay}>{item.reward}币</div>
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
 
-          <Card title="签到规则">
-            <div style={{ fontSize: '14px', color: '#666', lineHeight: '1.8' }}>
+          <div className={styles.rulesCard}>
+            <div className={styles.rulesTitle}>签到规则</div>
+            <div className={styles.rulesList}>
               <p>1. 每日签到可获得书币奖励</p>
               <p>2. 连续签到天数越多，奖励越丰厚</p>
               <p>3. 连续签到7天可获得额外奖励</p>
               <p>4. 中断签到将重新计算连续天数</p>
             </div>
-          </Card>
+          </div>
         </>
       )}
     </div>

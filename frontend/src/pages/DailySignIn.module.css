@@ -1,0 +1,155 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: var(--space-md);
+  padding-bottom: 60px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: rgba(44, 31, 20, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: var(--space-md);
+}
+
+.headerTitle {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
+.signInCard {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: 32px 20px;
+  text-align: center;
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.signInIcon {
+  font-size: 48px;
+  margin-bottom: var(--space-md);
+}
+
+.signInStats {
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.signInSubStats {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+.signInBtn {
+  width: 200px;
+  margin: 0 auto;
+}
+
+.signedBadge {
+  font-size: var(--font-size-xs);
+  color: var(--color-accent);
+  margin-top: var(--space-sm);
+}
+
+.rewardsCard {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.rewardsTitle {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+}
+
+.rewardsGrid {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-md) 0;
+}
+
+.rewardItem {
+  text-align: center;
+  opacity: 0.5;
+}
+
+.rewardItemSigned {
+  opacity: 1;
+}
+
+.rewardCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 4px;
+  font-size: var(--font-size-base);
+  font-weight: bold;
+}
+
+.rewardCircleUnsigned {
+  background: var(--color-surface);
+  color: var(--color-text-tertiary);
+}
+
+.rewardDay {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.rulesCard {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.rulesTitle {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.rulesList {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+}
+
+.rulesList p {
+  margin-bottom: 4px;
+}
+
+.loadingWrap {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-tertiary);
+}

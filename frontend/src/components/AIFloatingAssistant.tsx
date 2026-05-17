@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Button, Input } from 'antd-mobile'
 import { useAIChat } from '../hooks/useAIChat'
+import Button from './Button'
+import Input from './Input'
 
 export default function AIFloatingAssistant() {
   const [open, setOpen] = useState(false)
@@ -43,11 +44,11 @@ export default function AIFloatingAssistant() {
             width: '48px',
             height: '48px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #1677ff 0%, #4096ff 100%)',
+            background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(22, 119, 255, 0.4)',
+            boxShadow: '0 4px 16px rgba(139, 115, 85, 0.4)',
             cursor: 'pointer',
             zIndex: 999,
             transition: 'transform 0.2s',
@@ -70,8 +71,8 @@ export default function AIFloatingAssistant() {
             width: 'calc(100vw - 24px)',
             maxWidth: '380px',
             height: '520px',
-            borderRadius: '16px',
-            background: '#fff',
+            borderRadius: 'var(--radius-xl)',
+            background: 'var(--color-card)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.18)',
             display: 'flex',
             flexDirection: 'column',
@@ -85,7 +86,7 @@ export default function AIFloatingAssistant() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 16px',
-              background: 'linear-gradient(135deg, #1677ff 0%, #4096ff 100%)',
+              background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
               color: '#fff',
             }}
           >
@@ -107,7 +108,7 @@ export default function AIFloatingAssistant() {
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
             {messages.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '20px 0', color: '#999' }}>
+              <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--color-text-tertiary)' }}>
                 <div style={{ fontSize: '36px', marginBottom: '8px' }}>🤖</div>
                 <div style={{ fontSize: '14px' }}>您好！我是AI小阅，请问有什么可以帮您？</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center', marginTop: '12px' }}>
@@ -117,9 +118,9 @@ export default function AIFloatingAssistant() {
                       onClick={() => setInput(q)}
                       style={{
                         padding: '4px 10px',
-                        borderRadius: '12px',
-                        background: '#f0f5ff',
-                        color: '#1677ff',
+                        borderRadius: 'var(--radius-md)',
+                        background: 'var(--color-primary-light)',
+                        color: 'var(--color-primary)',
                         fontSize: '12px',
                         cursor: 'pointer',
                       }}
@@ -144,8 +145,8 @@ export default function AIFloatingAssistant() {
                     maxWidth: '80%',
                     padding: '8px 12px',
                     borderRadius: msg.type === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-                    backgroundColor: msg.type === 'user' ? '#1677ff' : '#f5f5f5',
-                    color: msg.type === 'user' ? '#fff' : '#333',
+                    backgroundColor: msg.type === 'user' ? 'var(--color-primary)' : 'var(--color-surface)',
+                    color: msg.type === 'user' ? '#fff' : 'var(--color-text-primary)',
                     fontSize: '13px',
                     lineHeight: '1.5',
                     whiteSpace: 'pre-wrap',
@@ -168,8 +169,8 @@ export default function AIFloatingAssistant() {
                     maxWidth: '80%',
                     padding: '8px 12px',
                     borderRadius: '14px 14px 14px 4px',
-                    backgroundColor: '#f5f5f5',
-                    color: '#333',
+                    backgroundColor: 'var(--color-surface)',
+                    color: 'var(--color-text-primary)',
                     fontSize: '13px',
                     lineHeight: '1.5',
                     whiteSpace: 'pre-wrap',
@@ -180,7 +181,7 @@ export default function AIFloatingAssistant() {
                     display: 'inline-block',
                     width: '2px',
                     height: '14px',
-                    backgroundColor: '#1677ff',
+                    backgroundColor: 'var(--color-primary)',
                     marginLeft: '2px',
                     animation: 'blink 1s infinite',
                     verticalAlign: 'text-bottom',
@@ -189,7 +190,7 @@ export default function AIFloatingAssistant() {
               </div>
             )}
             {loading && !streamingContent && (
-              <div style={{ color: '#999', fontSize: '12px', padding: '4px 8px' }}>AI正在思考...</div>
+              <div style={{ color: 'var(--color-text-tertiary)', fontSize: '12px', padding: '4px 8px' }}>AI正在思考...</div>
             )}
             <div ref={endRef} />
           </div>
@@ -199,8 +200,8 @@ export default function AIFloatingAssistant() {
               display: 'flex',
               gap: '8px',
               padding: '10px 12px',
-              borderTop: '1px solid #f0f0f0',
-              background: '#fafafa',
+              borderTop: '1px solid var(--color-divider)',
+              background: 'var(--color-bg)',
             }}
           >
             <Input
@@ -208,11 +209,10 @@ export default function AIFloatingAssistant() {
               value={input}
               onChange={setInput}
               onEnterPress={handleSend}
-              style={{ flex: 1, '--font-size': '13px' } as any}
             />
             <Button
-              color="primary"
-              size="small"
+              variant="primary"
+              size="sm"
               onClick={handleSend}
               loading={loading}
               disabled={loading || !input.trim()}
