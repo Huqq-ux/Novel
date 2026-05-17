@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Toast } from 'antd-mobile'
+import Toast from './Toast'
 import { ratingApi } from '../services/api'
 
 interface RatingStats {
@@ -55,7 +55,7 @@ export default function BookRating({ bookId, onRatingChange }: BookRatingProps) 
   const handleSubmitRating = async (rating: number) => {
     const token = localStorage.getItem('token')
     if (!token) {
-      Toast.show('请先登录')
+      Toast.info('请先登录')
       return
     }
 
@@ -67,13 +67,13 @@ export default function BookRating({ bookId, onRatingChange }: BookRatingProps) 
         if (response.data?.stats) {
           setStats(response.data.stats)
         }
-        Toast.show('评分成功')
+        Toast.success('评分成功')
         onRatingChange?.(rating)
       } else {
-        Toast.show(response?.message || '评分失败')
+        Toast.error(response?.message || '评分失败')
       }
     } catch (error: any) {
-      Toast.show(error.response?.data?.message || '评分失败')
+      Toast.error(error.response?.data?.message || '评分失败')
     } finally {
       setSubmitting(false)
     }
