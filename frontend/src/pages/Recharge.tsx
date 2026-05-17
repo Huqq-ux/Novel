@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Toast, Dialog } from 'antd-mobile'
 import { coinApi } from '../services/api'
+import Button from '../components/Button'
+import Toast from '../components/Toast'
+import styles from './Recharge.module.css'
 
 interface RechargePackage {
   id: number
@@ -57,7 +59,7 @@ export default function Recharge() {
 
   const handleRecharge = async () => {
     if (!selectedPackage) {
-      Toast.show('请选择充值套餐')
+      Toast.info('请选择充值套餐')
       return
     }
 
@@ -78,19 +80,15 @@ export default function Recharge() {
           localStorage.setItem('user', JSON.stringify(user))
         }
 
-        Dialog.alert({
-          content: `充值成功！获得 ${response.data?.amount || pkg.coins + pkg.bonus} 书币`,
-          confirmText: '确定',
-        })
-
+        Toast.success(`充值成功！获得 ${response.data?.amount || pkg.coins + pkg.bonus} 书币`)
         loadData()
         setSelectedPackage(null)
       } else {
-        Toast.show(response?.message || '充值失败')
+        Toast.error(response?.message || '充值失败')
       }
     } catch (error: any) {
       console.error('Failed to recharge:', error)
-      Toast.show(error.response?.data?.message || '充值失败')
+      Toast.error(error.response?.data?.message || '充值失败')
     } finally {
       setLoading(false)
     }
@@ -108,228 +106,89 @@ export default function Recharge() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <div
-        style={{
-          position: 'sticky',
-          top: 0,
-          background: '#fff',
-          padding: '12px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          borderBottom: '1px solid #eee',
-          zIndex: 100,
-        }}
-      >
-        <div
-          onClick={() => navigate(-1)}
-          style={{ fontSize: '24px', marginRight: '12px', cursor: 'pointer' }}
-        >
-          ←
-        </div>
-        <div style={{ fontSize: '18px', fontWeight: 'bold' }}>充值中心</div>
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <div className={styles.backBtn} onClick={() => navigate(-1)}>←</div>
+        <div className={styles.headerTitle}>充值中心</div>
       </div>
 
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: '24px 16px',
-          color: '#fff',
-          textAlign: 'center',
-        }}
-      >
-        <div style={{ fontSize: '14px', marginBottom: '8px', opacity: 0.9 }}>
-          当前书币余额
-        </div>
-        <div style={{ fontSize: '36px', fontWeight: 'bold' }}>
-          {balance.toLocaleString()}
-        </div>
+      <div className={styles.balanceBanner}>
+        <div className={styles.balanceLabel}>当前书币余额</div>
+        <div className={styles.balanceValue}>{balance.toLocaleString()}</div>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          background: '#fff',
-          borderBottom: '1px solid #eee',
-        }}
-      >
+      <div className={styles.tabBar}>
         <div
+          className={`${styles.tabItem} ${activeTab === 'packages' ? styles.tabItemActive : ''}`}
           onClick={() => setActiveTab('packages')}
-          style={{
-            flex: 1,
-            padding: '12px',
-            textAlign: 'center',
-            borderBottom:
-              activeTab === 'packages' ? '2px solid #667eea' : 'none',
-            color: activeTab === 'packages' ? '#667eea' : '#666',
-            fontWeight: activeTab === 'packages' ? 'bold' : 'normal',
-            cursor: 'pointer',
-          }}
         >
           充值套餐
         </div>
         <div
+          className={`${styles.tabItem} ${activeTab === 'records' ? styles.tabItemActive : ''}`}
           onClick={() => setActiveTab('records')}
-          style={{
-            flex: 1,
-            padding: '12px',
-            textAlign: 'center',
-            borderBottom:
-              activeTab === 'records' ? '2px solid #667eea' : 'none',
-            color: activeTab === 'records' ? '#667eea' : '#666',
-            fontWeight: activeTab === 'records' ? 'bold' : 'normal',
-            cursor: 'pointer',
-          }}
         >
           充值记录
         </div>
       </div>
 
       {activeTab === 'packages' && (
-        <div style={{ padding: '16px' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '12px',
-            }}
-          >
+        <div style={{ padding: 'var(--space-lg)' }}>
+          <div className={styles.packagesGrid}>
             {packages.map((pkg) => (
               <div
                 key={pkg.id}
+                className={`${styles.packageCard} ${selectedPackage === pkg.id ? styles.packageCardSelected : ''}`}
                 onClick={() => setSelectedPackage(pkg.id)}
-                style={{
-                  background:
-                    selectedPackage === pkg.id ? '#e8f4ff' : '#fff',
-                  border:
-                    selectedPackage === pkg.id
-                      ? '2px solid #667eea'
-                      : '1px solid #eee',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
               >
-                <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#333' }}>
-                  {pkg.coins}
-                </div>
-                <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
-                  书币
-                </div>
+                <div className={styles.packageCoins}>{pkg.coins}</div>
+                <div className={styles.packageLabel}>书币</div>
                 {pkg.bonus > 0 && (
-                  <div
-                    style={{
-                      background: '#ff6b6b',
-                      color: '#fff',
-                      fontSize: '11px',
-                      padding: '2px 8px',
-                      borderRadius: '10px',
-                      display: 'inline-block',
-                      marginTop: '6px',
-                    }}
-                  >
-                    送 {pkg.bonus} 书币
-                  </div>
+                  <div className={styles.packageBonus}>送 {pkg.bonus} 书币</div>
                 )}
-                <div
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    color: '#ff6b6b',
-                    marginTop: '8px',
-                  }}
-                >
-                  ¥{pkg.price}
-                </div>
+                <div className={styles.packagePrice}>¥{pkg.price}</div>
               </div>
             ))}
           </div>
 
-          <div
-            style={{
-              marginTop: '24px',
-              padding: '16px',
-              background: '#fff9e6',
-              borderRadius: '8px',
-              fontSize: '13px',
-              color: '#996600',
-            }}
-          >
-            <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>温馨提示</div>
-            <div>• 书币可用于解锁付费章节</div>
-            <div>• 充值后书币立即到账</div>
-            <div>• 书币一经充值，不支持退款</div>
+          <div className={styles.tipsCard}>
+            <div className={styles.tipsTitle}>温馨提示</div>
+            <p>• 书币可用于解锁付费章节</p>
+            <p>• 充值后书币立即到账</p>
+            <p>• 书币一经充值，不支持退款</p>
           </div>
 
-          <Button
-            block
-            color="primary"
-            size="large"
-            style={{ marginTop: '24px', borderRadius: '24px' }}
-            onClick={handleRecharge}
-            loading={loading}
-            disabled={!selectedPackage || loading}
-          >
-            {selectedPackage ? '立即充值' : '请选择套餐'}
-          </Button>
+          <div className={styles.submitBtn}>
+            <Button
+              variant="primary"
+              size="lg"
+              block
+              onClick={handleRecharge}
+              loading={loading}
+              disabled={!selectedPackage || loading}
+            >
+              {selectedPackage ? '立即充值' : '请选择套餐'}
+            </Button>
+          </div>
         </div>
       )}
 
       {activeTab === 'records' && (
-        <div style={{ padding: '16px' }}>
+        <div className={styles.records}>
           {records.length === 0 ? (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: '40px',
-                color: '#999',
-              }}
-            >
-              暂无充值记录
-            </div>
+            <div className={styles.recordsEmpty}>暂无充值记录</div>
           ) : (
-            <div style={{ background: '#fff', borderRadius: '12px' }}>
-              {records.map((record, index) => (
-                <div
-                  key={record.id}
-                  style={{
-                    padding: '16px',
-                    borderBottom:
-                      index < records.length - 1 ? '1px solid #f0f0f0' : 'none',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 'bold', color: '#333' }}>
-                        充值 {record.amount} 书币
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
-                        {formatDate(record.createTime)}
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        background: record.status === 1 ? '#e6f7e6' : '#fee',
-                        color: record.status === 1 ? '#52c41a' : '#ff4d4f',
-                        padding: '4px 12px',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                      }}
-                    >
-                      {record.status === 1 ? '成功' : '失败'}
-                    </div>
-                  </div>
+            records.map((record) => (
+              <div key={record.id} className={styles.recordItem}>
+                <div>
+                  <div className={styles.recordAmount}>充值 {record.amount} 书币</div>
+                  <div className={styles.recordTime}>{formatDate(record.createTime)}</div>
                 </div>
-              ))}
-            </div>
+                <div className={`${styles.recordStatus} ${record.status === 1 ? styles.recordStatusSuccess : styles.recordStatusFail}`}>
+                  {record.status === 1 ? '成功' : '失败'}
+                </div>
+              </div>
+            ))
           )}
         </div>
       )}

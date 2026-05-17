@@ -1,0 +1,119 @@
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: var(--space-md);
+  padding-bottom: 60px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: rgba(44, 31, 20, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: var(--space-md);
+}
+
+.headerTitle {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
+.unreadBadge {
+  margin-left: var(--space-sm);
+}
+
+.notificationItem {
+  display: flex;
+  align-items: flex-start;
+  padding: var(--space-lg);
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-divider);
+  cursor: pointer;
+}
+
+.notificationItemUnread {
+  background: var(--color-primary-light);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-right: var(--space-md);
+}
+
+.avatarRead {
+  background: var(--color-border);
+}
+
+.notifContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.notifTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 4px;
+}
+
+.notifTitleText {
+  font-weight: bold;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+}
+
+.notifTitleTextRead {
+  font-weight: normal;
+}
+
+.notifBody {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notifTime {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-placeholder);
+}
+
+.loadingWrap {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-tertiary);
+}
+
+.loadMore {
+  text-align: center;
+  padding: var(--space-lg);
+}
