@@ -1,0 +1,20 @@
+.sentinel { height: 1px; }
+
+.footer {
+  text-align: center;
+  padding: var(--space-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
