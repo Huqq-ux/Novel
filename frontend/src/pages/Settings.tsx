@@ -119,7 +119,7 @@ export default function Settings() {
           </div>
           <div className={styles.settingRow}>
             <span className={styles.rowLabel}>开发者</span>
-            <span className={styles.rowExtra}>番茄小说团队</span>
+            <span className={styles.rowExtra}>墨语小说团队</span>
           </div>
         </Card>
       </div>

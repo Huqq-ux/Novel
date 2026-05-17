@@ -17,7 +17,7 @@ interface SystemSettings {
 
 export default function SystemSettings() {
   const [settings, setSettings] = useState<SystemSettings>({
-    siteName: '番茄小说',
+    siteName: '墨语小说',
     siteDescription: '免费阅读平台',
     allowRegister: true,
     allowComment: true,
@@ -41,7 +41,7 @@ export default function SystemSettings() {
 
   const handleReset = () => {
     setSettings({
-      siteName: '番茄小说',
+      siteName: '墨语小说',
       siteDescription: '免费阅读平台',
       allowRegister: true,
       allowComment: true,
