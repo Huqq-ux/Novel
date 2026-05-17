@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { Card, Button, List, Toast } from 'antd-mobile'
-import { LeftOutline, MessageOutline } from 'antd-mobile-icons'
+import { ArrowLeft, MessageCircle, Bookmark } from 'lucide-react'
 import { bookApi, bookshelfApi, commentApi } from '../services/api'
 import { useBookshelfStore } from '../store/bookshelf'
 import type { Book, Chapter } from '../types'
 import BookRating from '../components/BookRating'
+import BookCover from '../components/BookCover'
+import Toast from '../components/Toast'
+import styles from './BookDetail.module.css'
 
 export default function BookDetail() {
   const { id } = useParams<{ id: string }>()
@@ -16,6 +18,7 @@ export default function BookDetail() {
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [commentCount, setCommentCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState(false)
   const { isInBookshelf, addToBookshelf, getLastChapterId } = useBookshelfStore()
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function BookDetail() {
       }
     } catch (error) {
       console.error('Failed to load book detail:', error)
-      Toast.show('加载失败')
+      Toast.error('加载失败')
     } finally {
       setLoading(false)
     }
@@ -67,7 +70,7 @@ export default function BookDetail() {
     try {
       const response: any = await bookshelfApi.addToBookshelf(book.id)
       if (response && response.code === 401) {
-        Toast.show('请先登录')
+        Toast.info('请先登录')
         return
       }
       addToBookshelf({
@@ -78,13 +81,13 @@ export default function BookDetail() {
         lastReadTime: new Date().toISOString(),
         progress: 0,
       })
-      Toast.show('已加入书架')
+      Toast.success('已加入书架')
     } catch (error: any) {
       console.error('Failed to add to bookshelf:', error)
       if (error.response?.status === 401 || error.response?.data?.code === 401) {
-        Toast.show('请先登录')
+        Toast.info('请先登录')
       } else {
-        Toast.show('添加失败')
+        Toast.error('添加失败')
       }
     }
   }
@@ -106,129 +109,112 @@ export default function BookDetail() {
   }
 
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>加载中...</div>
+    return (
+      <div className={styles.loadingWrap}>
+        <div style={{
+          width: 24, height: 24,
+          border: '2px solid var(--color-border)',
+          borderTopColor: 'var(--color-primary)',
+          borderRadius: '50%',
+          animation: 'spin 0.6s linear infinite',
+        }} />
+      </div>
+    )
   }
 
   if (!book) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>书籍不存在</div>
+    return <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-tertiary)' }}>书籍不存在</div>
   }
 
+  const description = book.description || ''
+  const displayDesc = expanded ? description : description.slice(0, 120)
+  const inShelf = isInBookshelf(book.id)
+
   return (
-    <div style={{ padding: '12px', paddingBottom: '60px' }}>
-      <div
-        onClick={() => navigate(fromPath.current)}
-        style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          marginBottom: '12px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-        }}
-      >
-        <LeftOutline fontSize={18} color="#fff" />
+    <div style={{ paddingBottom: '60px' }}>
+      <div className={styles.hero}>
+        <div className={styles.backBtn} onClick={() => navigate(fromPath.current)}>
+          <ArrowLeft size={16} />
+        </div>
+        <div className={styles.cover}>
+          <BookCover src={book.cover} alt={book.title} width="100px" height="140px" />
+        </div>
+        <div className={styles.title}>{book.title}</div>
+        <div className={styles.author}>{book.author} · {book.category} · {book.totalWords || book.wordCount || 0}万字</div>
+        <div className={styles.tags}>
+          <span className={styles.heroTag}>⭐ {book.rating || '新书'}</span>
+          {book.isFinished ? <span className={styles.heroTag}>已完结</span> : <span className={styles.heroTag}>连载中</span>}
+        </div>
       </div>
 
-      <Card style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: '16px' }}>
-          <img
-            src={book.cover || 'https://placehold.co/120x160/eee/999?text=Book'}
-            alt={book.title}
-            style={{
-              width: '120px',
-              height: '160px',
-              objectFit: 'cover',
-              borderRadius: '4px',
-            }}
-          />
-          <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>
-              {book.title}
-            </h2>
-            <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
-              作者: {book.author}
-            </div>
-            <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
-              分类: {book.category}
-            </div>
-            <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
-              字数: {book.totalWords || book.wordCount || 0}
-            </div>
-            <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
-              状态: {book.isFinished ? '已完结' : '连载中'}
-            </div>
-            {book.priceType === 1 && (
-              <div style={{ fontSize: '14px', color: '#ff9500', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span>💰</span>
-                <span>付费书籍 · 前{book.freeChapterCount || 0}章免费</span>
-              </div>
-            )}
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Button color="primary" size="small" onClick={handleStartReading}>
-                {getLastChapterId(book.id) ? '继续阅读' : '开始阅读'}
-              </Button>
-              {!isInBookshelf(book.id) && (
-                <Button size="small" onClick={handleAddToBookshelf}>
-                  加入书架
-                </Button>
-              )}
-            </div>
+      <div className={styles.actions}>
+        <button className={styles.primaryAction} onClick={handleStartReading}>
+          📖 {getLastChapterId(book.id) ? '继续阅读' : '开始阅读'}
+        </button>
+        {!inShelf && (
+          <div className={styles.iconAction} onClick={handleAddToBookshelf}>
+            <Bookmark size={20} color="var(--color-primary)" />
+          </div>
+        )}
+        <div className={styles.iconAction} onClick={handleViewComments}>
+          <MessageCircle size={20} color="var(--color-text-tertiary)" />
+        </div>
+      </div>
+
+      {book.priceType === 1 && (
+        <div className={styles.section}>
+          <div className={styles.infoCard} style={{ marginBottom: '0', color: 'var(--color-primary-dark)' }}>
+            💰 付费书籍 · 前{book.freeChapterCount || 0}章免费
           </div>
         </div>
-      </Card>
+      )}
 
-      <Card title="内容简介" style={{ marginBottom: '16px' }}>
-        <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#333' }}>
-          {book.description}
-        </p>
-      </Card>
+      <div className={styles.section}>
+        <div className={styles.infoCard}>
+          <div className={styles.infoTitle}>作品简介</div>
+          <div className={styles.infoContent}>
+            {displayDesc}
+            {description.length > 120 && (
+              <span className={styles.expandBtn} onClick={() => setExpanded(!expanded)}>
+                {expanded ? ' 收起' : '... 展开'}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
 
-      <div style={{ marginBottom: '16px' }}>
+      <div className={styles.section}>
         <BookRating bookId={book.id} />
       </div>
 
-      <Card 
-        style={{ marginBottom: '16px', cursor: 'pointer' }}
-        onClick={handleViewComments}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <MessageOutline fontSize={18} color="#1677ff" />
-            <span style={{ fontSize: '15px', fontWeight: '500' }}>读者评论</span>
+      <div className={styles.section}>
+        <div className={styles.commentRow} onClick={handleViewComments}>
+          <div className={styles.commentRowLeft}>
+            <MessageCircle size={18} color="var(--color-primary)" />
+            <span>读者评论</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#999' }}>
-            <span style={{ fontSize: '14px' }}>{commentCount} 条</span>
-            <span style={{ fontSize: '12px' }}>&gt;</span>
+          <div className={styles.commentRowRight}>
+            <span>{commentCount} 条</span>
+            <span>&gt;</span>
           </div>
         </div>
-      </Card>
+      </div>
 
-      <Card title="目录">
-        <List>
+      {chapters.length > 0 && (
+        <div className={styles.section}>
+          <div className={styles.infoTitle} style={{ paddingLeft: 'var(--space-md)', marginBottom: '8px' }}>📋 目录</div>
           {chapters.map((chapter, index) => (
-            <List.Item
-              key={chapter.id}
-              onClick={() => handleChapterClick(chapter.id)}
-              style={{ padding: '12px 0' }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                <div style={{ fontSize: '14px' }}>
-                  第{index + 1}章 {chapter.title}
-                </div>
+            <div key={chapter.id} className={styles.chapterItem} onClick={() => handleChapterClick(chapter.id)}>
+              <span className={styles.chapterTitle}>第{index + 1}章 {chapter.title}</span>
+              <span className={styles.chapterMeta}>
                 {book.priceType === 1 && (
-                  <div style={{ fontSize: '12px', color: chapter.isFree === 1 ? '#52c41a' : '#ff9500' }}>
-                    {chapter.isFree === 1 ? '免费' : `${chapter.price || 10}书币`}
-                  </div>
+                  chapter.isFree === 1 ? '免费' : `${chapter.price || 10}书币`
                 )}
-              </div>
-            </List.Item>
+              </span>
+            </div>
           ))}
-        </List>
-      </Card>
+        </div>
+      )}
     </div>
   )
 }
