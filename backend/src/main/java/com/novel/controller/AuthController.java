@@ -277,6 +277,8 @@ public class AuthController {
             user.getLastLoginTime(),
             user.getStatus(),
             user.getRole() != null ? user.getRole() : "user",
+            user.getIsAuthor() != null ? user.getIsAuthor() : 0,
+            user.getPenName(),
             user.getCoinBalance() != null ? user.getCoinBalance() : 0
         );
     }

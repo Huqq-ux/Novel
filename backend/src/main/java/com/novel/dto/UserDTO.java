@@ -13,27 +13,15 @@ public class UserDTO {
     private LocalDateTime lastLoginTime;
     private Integer status;
     private String role;
+    private Integer isAuthor;
+    private String penName;
     private Integer coinBalance;
 
     public UserDTO() {}
 
-    public UserDTO(Long id, String username, String email, String avatar, 
-                   String gender, Integer age, LocalDateTime registerTime, 
-                   LocalDateTime lastLoginTime, Integer status) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.avatar = avatar;
-        this.gender = gender;
-        this.age = age;
-        this.registerTime = registerTime;
-        this.lastLoginTime = lastLoginTime;
-        this.status = status;
-    }
-
-    public UserDTO(Long id, String username, String email, String avatar, 
-                   String gender, Integer age, LocalDateTime registerTime, 
-                   LocalDateTime lastLoginTime, Integer status, String role) {
+    public UserDTO(Long id, String username, String email, String avatar,
+                   String gender, Integer age, LocalDateTime registerTime,
+                   LocalDateTime lastLoginTime, Integer status, String role, Integer isAuthor, String penName, Integer coinBalance) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -44,21 +32,8 @@ public class UserDTO {
         this.lastLoginTime = lastLoginTime;
         this.status = status;
         this.role = role;
-    }
-
-    public UserDTO(Long id, String username, String email, String avatar, 
-                   String gender, Integer age, LocalDateTime registerTime, 
-                   LocalDateTime lastLoginTime, Integer status, String role, Integer coinBalance) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.avatar = avatar;
-        this.gender = gender;
-        this.age = age;
-        this.registerTime = registerTime;
-        this.lastLoginTime = lastLoginTime;
-        this.status = status;
-        this.role = role;
+        this.isAuthor = isAuthor;
+        this.penName = penName;
         this.coinBalance = coinBalance;
     }
 
@@ -140,6 +115,22 @@ public class UserDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Integer getIsAuthor() {
+        return isAuthor;
+    }
+
+    public void setIsAuthor(Integer isAuthor) {
+        this.isAuthor = isAuthor;
+    }
+
+    public String getPenName() {
+        return penName;
+    }
+
+    public void setPenName(String penName) {
+        this.penName = penName;
     }
 
     public Integer getCoinBalance() {

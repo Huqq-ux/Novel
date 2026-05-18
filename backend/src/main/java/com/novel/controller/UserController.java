@@ -69,7 +69,11 @@ public class UserController {
             user.getAge(),
             user.getRegisterTime(),
             user.getLastLoginTime(),
-            user.getStatus()
+            user.getStatus(),
+            user.getRole() != null ? user.getRole() : "user",
+            user.getIsAuthor() != null ? user.getIsAuthor() : 0,
+            user.getPenName(),
+            user.getCoinBalance() != null ? user.getCoinBalance() : 0
         );
         return ApiResponse.success(userDTO);
     }

@@ -20,6 +20,7 @@ interface UserInfo {
   username: string
   email: string
   role?: string
+  isAuthor?: number
   coinBalance?: number
 }
 
@@ -213,7 +214,6 @@ export default function User() {
     { icon: <Coins size={20} />, title: '充值中心', desc: '充值书币', path: '/recharge' },
     { icon: <CalendarCheck size={20} />, title: '每日签到', desc: '领取奖励', path: '/daily-signin' },
     { icon: <PenLine size={20} />, title: '成为作者', desc: '申请成为作者', path: '/become-author' },
-    { icon: <BookText size={20} />, title: '我的作品', desc: '管理作品', path: '/author-books' },
     { icon: <Bell size={20} />, title: '消息通知', desc: '系统消息', path: '/notifications' },
     { icon: <Settings size={20} />, title: '设置', desc: '应用设置', path: '/settings' },
     { icon: <HelpCircle size={20} />, title: '帮助与反馈', desc: '常见问题', path: '/help-feedback' },
@@ -299,22 +299,43 @@ export default function User() {
 
       {/* My Services Menu */}
       <Card title="我的服务" className={styles.menuCard}>
-        {menuItems.map((item, index) => (
-          <div
-            key={index}
-            className={styles.menuItem}
-            onClick={() => navigate(item.path)}
-          >
-            <div className={styles.menuIcon}>
-              {item.icon}
+        {menuItems.filter(item => !(item.title === '成为作者' && user?.isAuthor === 1)).flatMap((item) => {
+          const items = [(
+            <div
+              key={item.title}
+              className={styles.menuItem}
+              onClick={() => navigate(item.path)}
+            >
+              <div className={styles.menuIcon}>
+                {item.icon}
+              </div>
+              <div className={styles.menuText}>
+                <div className={styles.menuTitle}>{item.title}</div>
+                <div className={styles.menuDesc}>{item.desc}</div>
+              </div>
+              <ChevronRight size={18} className={styles.menuArrow} />
             </div>
-            <div className={styles.menuText}>
-              <div className={styles.menuTitle}>{item.title}</div>
-              <div className={styles.menuDesc}>{item.desc}</div>
-            </div>
-            <ChevronRight size={18} className={styles.menuArrow} />
-          </div>
-        ))}
+          )]
+          if (item.title === '每日签到' && user?.isAuthor === 1) {
+            items.push(
+              <div
+                key="我的作品"
+                className={styles.menuItem}
+                onClick={() => navigate('/author-books')}
+              >
+                <div className={styles.menuIcon}>
+                  <BookText size={20} />
+                </div>
+                <div className={styles.menuText}>
+                  <div className={styles.menuTitle}>我的作品</div>
+                  <div className={styles.menuDesc}>管理作品</div>
+                </div>
+                <ChevronRight size={18} className={styles.menuArrow} />
+              </div>
+            )
+          }
+          return items
+        })}
       </Card>
 
       {/* Admin Section */}

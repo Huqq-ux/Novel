@@ -4,23 +4,16 @@ import { ArrowLeft } from 'lucide-react'
 import BookCover from '../components/BookCover'
 import Button from '../components/Button'
 import Empty from '../components/Empty'
+import Skeleton from '../components/Skeleton'
 import Toast from '../components/Toast'
+import { bookshelfApi } from '../services/api'
+import type { BookshelfItem } from '../types'
 import styles from './MyFavorites.module.css'
-
-interface Favorite {
-  id: number
-  bookId: number
-  bookTitle: string
-  bookCover: string
-  author: string
-  category: string
-  addTime: string
-}
 
 export default function MyFavorites() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [favorites, setFavorites] = useState<Favorite[]>([])
+  const [favorites, setFavorites] = useState<BookshelfItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -28,17 +21,27 @@ export default function MyFavorites() {
   }, [])
 
   const loadFavorites = async () => {
-    setLoading(false)
-    setFavorites([
-      { id: 1, bookId: 1, bookTitle: '斗破苍穹', bookCover: '', author: '天蚕土豆', category: '玄幻', addTime: '2024-01-15' },
-      { id: 2, bookId: 2, bookTitle: '完美世界', bookCover: '', author: '辰东', category: '玄幻', addTime: '2024-01-10' },
-      { id: 3, bookId: 3, bookTitle: '遮天', bookCover: '', author: '辰东', category: '玄幻', addTime: '2024-01-05' },
-    ])
+    setLoading(true)
+    try {
+      const res: any = await bookshelfApi.getBookshelf()
+      if (res?.code === 200 && res?.data) {
+        setFavorites(res.data)
+      }
+    } catch {
+      Toast.error('加载收藏失败')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleRemove = (id: number) => {
-    setFavorites(favorites.filter(f => f.id !== id))
-    Toast.show({ content: '已取消收藏' })
+  const handleRemove = async (bookId: number) => {
+    try {
+      await bookshelfApi.removeFromBookshelf(bookId)
+      setFavorites(favorites.filter(f => f.bookId !== bookId))
+      Toast.success('已取消收藏')
+    } catch {
+      Toast.error('操作失败')
+    }
   }
 
   return (
@@ -53,7 +56,18 @@ export default function MyFavorites() {
       </div>
 
       {loading ? (
-        <div className={styles.loading}>加载中...</div>
+        <div className={styles.list}>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className={styles.favoriteCard}>
+              <Skeleton width={60} height={80} type="rect" />
+              <div className={styles.favoriteInfo} style={{ flex: 1 }}>
+                <Skeleton width="60%" height={18} />
+                <Skeleton width="40%" height={14} />
+                <Skeleton width="30%" height={14} />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : favorites.length === 0 ? (
         <Empty
           description="暂无收藏"
@@ -68,28 +82,28 @@ export default function MyFavorites() {
             >
               <div className={styles.coverWrap}>
                 <BookCover
-                  src={item.bookCover}
-                  alt={item.bookTitle}
+                  src={item.book?.cover || ''}
+                  alt={item.book?.title || ''}
                   width={60}
                   height={80}
-                  title={item.bookTitle}
+                  title={item.book?.title || ''}
                 />
               </div>
               <div className={styles.favoriteInfo}>
                 <div className={styles.favoriteTitle}>
-                  {item.bookTitle}
+                  {item.book?.title || '未知'}
                 </div>
                 <div className={styles.favoriteAuthor}>
-                  {item.author} - {item.category}
+                  {item.book?.author || '未知'} - {item.book?.category || '未知'}
                 </div>
                 <div className={styles.favoriteDate}>
-                  {'收藏于 ' + item.addTime}
+                  最近阅读: {item.lastReadTime ? new Date(item.lastReadTime).toLocaleDateString('zh-CN') : '-'}
                 </div>
                 <div className={styles.favoriteAction}>
                   <Button
                     size="sm"
                     variant="secondary"
-                    onClick={(e) => { e.stopPropagation(); handleRemove(item.id) }}
+                    onClick={(e) => { e.stopPropagation(); handleRemove(item.bookId) }}
                   >
                     取消收藏
                   </Button>
