@@ -99,8 +99,7 @@ public class ImageIntegrityService {
                 "title", book.getTitle(),
                 "cover", book.getCover() != null ? book.getCover() : "",
                 "category", book.getCategory() != null ? book.getCategory() : "",
-                "author", book.getAuthor() != null ? book.getAuthor() : "",
-                "suggestedCover", imageValidator.getFallbackCoverUrl(book.getTitle(), book.getCategory())
+                "author", book.getAuthor() != null ? book.getAuthor() : ""
             ))
             .toList();
     }
@@ -114,11 +113,10 @@ public class ImageIntegrityService {
         for (Book book : books) {
             String cover = book.getCover();
             if (cover == null || cover.isEmpty() || !imageValidator.isValidImageUrl(cover)) {
-                String newCover = imageValidator.getFallbackCoverUrl(book.getTitle(), book.getCategory());
-                book.setCover(newCover);
+                book.setCover("");
                 bookMapper.updateById(book);
                 fixed++;
-                logger.info("Fixed cover for book {}: {}", book.getId(), newCover);
+                logger.info("Cleared invalid cover for book {}: {}", book.getId(), book.getTitle());
             }
         }
 

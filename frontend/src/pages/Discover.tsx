@@ -307,8 +307,9 @@ export default function Discover() {
                   >
                     <div className={styles.bookCoverWrap}>
                       <BookCover
-                        src={book.cover || 'https://placehold.co/150x200/eee/999?text=Book'}
+                        src={book.cover}
                         alt={book.title}
+                        title={book.title}
                       />
                       {book.isFinished && (
                         <div className={styles.finishedBadge}>

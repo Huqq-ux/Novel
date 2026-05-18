@@ -10,7 +10,8 @@ import Card from '../components/Card'
 import Input from '../components/Input'
 import Toast from '../components/Toast'
 import Modal from '../components/Modal'
-import { userApi } from '../services/api'
+import { userApi, bookshelfApi } from '../services/api'
+import { useBookshelfStore } from '../store/bookshelf'
 import { validatePassword } from '../utils/passwordValidation'
 import styles from './User.module.css'
 
@@ -71,6 +72,7 @@ export default function User() {
   const [passwordStrength, setPasswordStrength] = useState<'weak' | 'medium' | 'strong'>('weak')
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const { clearBookshelf, setBookshelf } = useBookshelfStore()
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -133,6 +135,12 @@ export default function User() {
         localStorage.setItem('refreshToken', response.data.refreshToken)
         localStorage.setItem('user', JSON.stringify(response.data.user))
         setUser(response.data.user)
+        clearBookshelf()
+        bookshelfApi.getBookshelf().then((res: any) => {
+          if (res?.code === 200 && res?.data) {
+            setBookshelf(res.data)
+          }
+        }).catch(() => {})
         setShowLogin(false)
         resetForm()
         Toast.success('登录成功')
@@ -157,6 +165,7 @@ export default function User() {
     try {
       const response: any = await userApi.register(formValues.username, formValues.password, formValues.email)
       if (response.code === 200) {
+        clearBookshelf()
         Toast.success('注册成功，请登录')
         setIsRegister(false)
         resetForm()
@@ -176,6 +185,7 @@ export default function User() {
 
   const handleLogout = () => {
     userApi.logout()
+    clearBookshelf()
     setUser(null)
     setShowLogoutConfirm(false)
     Toast.success('已退出登录')

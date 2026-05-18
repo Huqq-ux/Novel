@@ -72,6 +72,7 @@ export default function MyFavorites() {
                   alt={item.bookTitle}
                   width={60}
                   height={80}
+                  title={item.bookTitle}
                 />
               </div>
               <div className={styles.favoriteInfo}>

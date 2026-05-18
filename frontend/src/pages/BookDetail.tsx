@@ -19,7 +19,18 @@ export default function BookDetail() {
   const [commentCount, setCommentCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
-  const { isInBookshelf, addToBookshelf, getLastChapterId } = useBookshelfStore()
+  const { isInBookshelf, addToBookshelf, getLastChapterId, setBookshelf } = useBookshelfStore()
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      bookshelfApi.getBookshelf().then((res: any) => {
+        if (res?.code === 200 && res?.data) {
+          setBookshelf(res.data)
+        }
+      }).catch(() => {})
+    }
+  }, [])
 
   useEffect(() => {
     if (id) {
@@ -137,7 +148,7 @@ export default function BookDetail() {
           <ArrowLeft size={16} />
         </div>
         <div className={styles.cover}>
-          <BookCover src={book.cover} alt={book.title} width="100px" height="140px" />
+          <BookCover src={book.cover} alt={book.title} width="100px" height="140px" title={book.title} author={book.author} category={book.category} />
         </div>
         <div className={styles.title}>{book.title}</div>
         <div className={styles.author}>{book.author} · {book.category} · {book.totalWords || book.wordCount || 0}万字</div>

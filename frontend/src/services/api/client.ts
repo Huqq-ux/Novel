@@ -82,6 +82,7 @@ api.interceptors.response.use(
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('user')
+        localStorage.removeItem('bookshelf-storage')
         window.location.href = '/user'
         return Promise.reject(error)
       }
@@ -101,6 +102,7 @@ api.interceptors.response.use(
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('user')
+        localStorage.removeItem('bookshelf-storage')
         window.location.href = '/user'
         return Promise.reject(refreshError)
       } finally {

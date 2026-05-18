@@ -132,10 +132,11 @@ export default function ReadingHistory() {
               <div className={styles.recordCard}>
                 <div className={styles.coverWrap}>
                   <BookCover
-                    src={record.book?.cover || 'https://placehold.co/80x100/eee/999?text=Book'}
+                    src={record.book?.cover}
                     alt={record.book?.title}
                     width={60}
                     height={80}
+                    title={record.book?.title}
                   />
                 </div>
                 <div className={styles.recordInfo}>

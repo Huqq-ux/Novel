@@ -160,10 +160,11 @@ export default function PaidBooks() {
               >
                 <div className={styles.coverWrap}>
                   <BookCover
-                    src={book.cover || 'https://placehold.co/80x112/eee/999?text=Book'}
+                    src={book.cover}
                     alt={book.title}
                     width={80}
                     height={112}
+                    title={book.title}
                   />
                   <div className={styles.paidBadge}>
                     <Tag color="primary">付费</Tag>

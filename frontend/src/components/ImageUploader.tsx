@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import Toast from './Toast'
 import { uploadApi } from '../services/api'
+import styles from './ImageUploader.module.css'
 
 interface ImageUploaderProps {
   value?: string
@@ -65,89 +66,40 @@ export default function ImageUploader({
     }
   }
 
-  const handleClear = (e: React.MouseEvent) => {
+  const handleClear = async (e: React.MouseEvent) => {
     e.stopPropagation()
+    const oldValue = value || preview
     setPreview(null)
     onChange('')
+    if (oldValue && oldValue.startsWith('/uploads/')) {
+      try {
+        await uploadApi.deleteFile(oldValue)
+      } catch {
+        // 清理失败不阻塞用户操作
+      }
+    }
   }
 
   return (
-    <div
-      onClick={handleClick}
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '160px',
-        border: '2px dashed #ddd',
-        borderRadius: '8px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        overflow: 'hidden',
-        background: preview ? 'transparent' : '#f9f9f9',
-      }}
-    >
+    <div onClick={handleClick} className={styles.container}>
       {preview ? (
         <>
-          <img
-            src={preview}
-            alt="封面预览"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
-          <div
-            onClick={handleClear}
-            style={{
-              position: 'absolute',
-              top: '8px',
-              right: '8px',
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              background: 'rgba(0, 0, 0, 0.6)',
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '14px',
-            }}
-          >
-            ×
-          </div>
+          <img src={preview} alt="封面预览" className={styles.previewImg} />
+          <div onClick={handleClear} className={styles.clearBtn}>×</div>
         </>
       ) : (
-        <div style={{ textAlign: 'center', color: '#999' }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📷</div>
-          <div style={{ fontSize: '14px' }}>{placeholder}</div>
-          <div style={{ fontSize: '12px', marginTop: '4px' }}>
-            支持 JPG、PNG、GIF、WEBP
-          </div>
+        <div className={styles.placeholder}>
+          <div className={styles.placeholderIcon}>📷</div>
+          <div className={styles.placeholderText}>{placeholder}</div>
+          <div className={styles.placeholderHint}>支持 JPG、PNG、GIF、WEBP</div>
         </div>
       )}
 
       {uploading && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(255, 255, 255, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <div style={{ textAlign: 'center' }}>
-            <div className="spinner" />
-            <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
-              上传中...
-            </div>
+        <div className={styles.overlay}>
+          <div className={styles.spinnerWrap}>
+            <div className={styles.spinner} />
+            <div className={styles.spinnerText}>上传中...</div>
           </div>
         </div>
       )}
@@ -159,22 +111,6 @@ export default function ImageUploader({
         onChange={handleFileChange}
         style={{ display: 'none' }}
       />
-
-      <style>{`
-        .spinner {
-          width: 24px;
-          height: 24px;
-          border: 3px solid #f3f3f3;
-          border-top: 3px solid #1677ff;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin: 0 auto;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   )
 }

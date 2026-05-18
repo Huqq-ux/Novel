@@ -3,6 +3,7 @@
   overflow: hidden;
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--color-primary-light), var(--color-surface));
+  flex-shrink: 0;
 }
 
 .image {
@@ -15,12 +16,16 @@
 .loading { opacity: 0; }
 .loaded { opacity: 1; }
 
-.placeholder {
+.fallback {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-placeholder);
-  font-size: var(--font-size-sm);
+}
+
+.fallbackSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }

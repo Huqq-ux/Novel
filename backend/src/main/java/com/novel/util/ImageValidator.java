@@ -89,25 +89,11 @@ public class ImageValidator {
     }
 
     public String getDefaultCoverUrl(String title) {
-        if (title == null || title.isEmpty()) {
-            return "https://placehold.co/200x280/667eea/fff?text=Book";
-        }
-        
-        String encodedTitle = title.replaceAll("[^a-zA-Z0-9\\u4e00-\\u9fa5]", "");
-        String displayText = encodedTitle.length() > 4 
-                ? encodedTitle.substring(0, 4) 
-                : encodedTitle;
-        
-        return "https://placehold.co/200x280/667eea/fff?text=" + displayText;
+        return null;
     }
 
     public String getFallbackCoverUrl(String title, String category) {
-        String color = getColorByCategory(category);
-        String displayText = title != null && title.length() > 0 
-                ? title.substring(0, Math.min(2, title.length()))
-                : "书";
-        
-        return String.format("https://placehold.co/200x280/%s/fff?text=%s", color, displayText);
+        return null;
     }
 
     private String getColorByCategory(String category) {

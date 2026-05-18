@@ -142,13 +142,11 @@ export default function Bookshelf() {
                 <div className={styles.itemInner}>
                   <div className={styles.itemCover}>
                     <BookCover
-                      src={
-                        item.book?.cover ||
-                        'https://placehold.co/80x100/eee/999?text=Book'
-                      }
+                      src={item.book?.cover}
                       alt={item.book?.title}
                       width={80}
                       height={100}
+                      title={item.book?.title}
                     />
                   </div>
                   <div className={styles.itemInfo}>

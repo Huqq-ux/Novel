@@ -132,7 +132,7 @@ export default function Home() {
                   onClick={() => navigate(`/book/${book.id}`, { state: { from: location.pathname + location.search } })}
                 >
                   <div className={styles.bookCoverWrap}>
-                    <BookCover src={book.cover} alt={book.title} height="130px" />
+                    <BookCover src={book.cover} alt={book.title} height="130px" title={book.title} author={book.author} category={book.category} />
                     {book.isFinished && <span className={styles.finishedBadge}>完结</span>}
                   </div>
                   <div className={styles.bookInfo}>

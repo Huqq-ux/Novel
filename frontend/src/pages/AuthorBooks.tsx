@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, BookOpen, FileText } from 'lucide-react'
 import { authorBookApi } from '../services/api'
 import ImageUploader from '../components/ImageUploader'
+import BookCover from '../components/BookCover'
 import Button from '../components/Button'
 import Tag from '../components/Tag'
 import Toast from '../components/Toast'
@@ -263,18 +264,7 @@ export default function AuthorBooks() {
           {books.map((book) => (
             <div key={book.id} className={styles.bookCard}>
               <div className={styles.bookCardInner}>
-                {book.cover ? (
-                  <img
-                    src={book.cover}
-                    alt={book.title}
-                    className={styles.coverImg}
-                    style={{ width: 80, height: 112 }}
-                  />
-                ) : (
-                  <div className={styles.coverPlaceholder}>
-                    <BookOpen size={32} />
-                  </div>
-                )}
+                <BookCover src={book.cover} alt={book.title} width={80} height={112} title={book.title} />
                 <div className={styles.bookInfo}>
                   <div className={styles.bookTitle}>
                     {book.title}

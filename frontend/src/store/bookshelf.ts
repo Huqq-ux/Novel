@@ -11,6 +11,7 @@ interface BookshelfStore {
   isInBookshelf: (bookId: number) => boolean
   getLastChapterId: (bookId: number) => number | null
   getBookshelfItem: (bookId: number) => BookshelfItem | undefined
+  clearBookshelf: () => void
 }
 
 export const useBookshelfStore = create<BookshelfStore>()(
@@ -84,6 +85,10 @@ export const useBookshelfStore = create<BookshelfStore>()(
        */
       getBookshelfItem: (bookId) => {
         return get().bookshelf.find((b) => b.bookId === bookId)
+      },
+      clearBookshelf: () => {
+        set({ bookshelf: [] })
+        localStorage.removeItem('bookshelf-storage')
       },
     }),
     {

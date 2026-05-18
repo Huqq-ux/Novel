@@ -148,10 +148,11 @@ export default function SearchPage() {
           <div className={styles.resultContent}>
             <div className={styles.resultCover}>
               <BookCover
-                src={book.cover || 'https://placehold.co/80x100/eee/999?text=Book'}
+                src={book.cover}
                 alt={book.title}
                 width="100%"
                 height="100%"
+                title={book.title}
               />
             </div>
             <div className={styles.resultInfo}>

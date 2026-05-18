@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import CustomToast from '../../components/Toast'
+import BookCover from '../../components/BookCover'
 import { adminApi } from '../../services/api'
 
 const Toast = {
@@ -339,23 +340,7 @@ export default function BookManagement() {
                           flexShrink: 0,
                         }}
                       >
-                        {book.cover ? (
-                          <img src={book.cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <div
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'var(--color-text-tertiary)',
-                              fontSize: '20px',
-                            }}
-                          >
-                            📖
-                          </div>
-                        )}
+                        <BookCover src={book.cover} alt={book.title} width={48} height={64} title={book.title} />
                       </div>
                       <div>
                         <p style={{ margin: 0, fontWeight: 500, fontSize: '15px' }}>{book.title}</p>

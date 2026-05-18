@@ -10,6 +10,7 @@ import com.novel.mapper.ChapterMapper;
 import com.novel.mapper.CommentMapper;
 import com.novel.mapper.UserMapper;
 import com.novel.service.AdminService;
+import com.novel.service.FileUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Autowired
     private CommentMapper commentMapper;
+
+    @Autowired
+    private FileUploadService fileUploadService;
 
     @Override
     public Page<User> getUsers(int page, int pageSize, String keyword, String role, Integer status) {
@@ -191,8 +195,13 @@ public class AdminServiceImpl implements AdminService {
         if (book == null) {
             throw new IllegalArgumentException("书籍不存在");
         }
+
+        String cover = book.getCover();
         int deleted = bookMapper.deleteById(id);
         if (deleted > 0) {
+            if (cover != null && !cover.isEmpty()) {
+                fileUploadService.deleteFile(cover);
+            }
             return "书籍已删除";
         }
         throw new RuntimeException("删除失败");
