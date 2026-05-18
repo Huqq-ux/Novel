@@ -20,4 +20,8 @@ export const aiApi = {
   getSession: (sessionId: string) => {
     return aiApiClient.get(`/session/${sessionId}`)
   },
+
+  generateCover: (data: { title: string; category?: string; author?: string; description?: string }): Promise<Blob> => {
+    return aiApiClient.post('/generate-cover', data, { responseType: 'blob' })
+  },
 }

@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.api.chat import router as chat_router
 from app.api.admin import router as admin_router
+from app.api.cover_generation import router as cover_router
 from app.core.vector_store import vector_store
 
 logging.basicConfig(
@@ -49,6 +50,7 @@ app.add_middleware(
 
 app.include_router(chat_router, prefix="/api/ai", tags=["AI对话"])
 app.include_router(admin_router, prefix="/api/ai/admin", tags=["系统管理"])
+app.include_router(cover_router, prefix="/api/ai", tags=["封面生成"])
 
 
 @app.get("/")

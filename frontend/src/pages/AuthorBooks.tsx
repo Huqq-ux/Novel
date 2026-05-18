@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, BookOpen, FileText } from 'lucide-react'
-import { authorBookApi } from '../services/api'
+import { ArrowLeft, BookOpen, FileText, Sparkles } from 'lucide-react'
+import { authorBookApi, aiApi, uploadApi } from '../services/api'
 import ImageUploader from '../components/ImageUploader'
 import BookCover from '../components/BookCover'
 import Button from '../components/Button'
@@ -69,6 +69,53 @@ export default function AuthorBooks() {
     price: 10,
     isFree: 1,
   })
+
+  const [generating, setGenerating] = useState(false)
+  const [aiCoverBlob, setAiCoverBlob] = useState<Blob | null>(null)
+  const [aiCoverPreview, setAiCoverPreview] = useState<string | null>(null)
+
+  const handleGenerateCover = async () => {
+    if (!formData.title.trim()) {
+      Toast.info('请先输入书名')
+      return
+    }
+    setGenerating(true)
+    try {
+      const blob = await aiApi.generateCover({
+        title: formData.title,
+        category: formData.category,
+        description: formData.description,
+      })
+      setAiCoverBlob(blob)
+      const url = URL.createObjectURL(blob)
+      setAiCoverPreview(url)
+    } catch (e: any) {
+      Toast.error('封面生成失败，请重试')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  const handleUseAiCover = async () => {
+    if (!aiCoverBlob) return
+    const file = new File([aiCoverBlob], `ai-cover-${Date.now()}.jpg`, { type: 'image/jpeg' })
+    try {
+      const response: any = await uploadApi.uploadCover(file)
+      if (response?.code === 200 && response?.data?.url) {
+        setFormData(prev => ({ ...prev, cover: response.data.url }))
+        setAiCoverBlob(null)
+        if (aiCoverPreview) {
+          URL.revokeObjectURL(aiCoverPreview)
+          setAiCoverPreview(null)
+        }
+        Toast.success('封面已应用')
+      } else {
+        Toast.error('封面上传失败')
+      }
+    } catch (e: any) {
+      Toast.error('封面上传失败')
+    }
+  }
 
   useEffect(() => {
     loadBooks()
@@ -324,7 +371,12 @@ export default function AuthorBooks() {
 
       {/* Create book modal */}
       {showCreateModal && (
-        <div className={styles.overlay} onClick={() => setShowCreateModal(false)}>
+        <div className={styles.overlay} onClick={() => {
+          if (aiCoverPreview) URL.revokeObjectURL(aiCoverPreview)
+          setAiCoverPreview(null)
+          setAiCoverBlob(null)
+          setShowCreateModal(false)
+        }}>
           <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
             <div className={styles.dialogHeader}>
               创建新作品
@@ -372,6 +424,28 @@ export default function AuthorBooks() {
                   onChange={(url) => setFormData({ ...formData, cover: url })}
                   placeholder="点击上传封面图片"
                 />
+                <div style={{ marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    loading={generating}
+                    onClick={handleGenerateCover}
+                  >
+                    <Sparkles size={14} style={{ marginRight: '4px' }} />
+                    AI 生成封面
+                  </Button>
+                  {aiCoverPreview && (
+                    <>
+                      <div style={{
+                        width: '60px', height: '84px', borderRadius: '4px', overflow: 'hidden',
+                        border: '2px solid var(--color-primary)',
+                      }}>
+                        <img src={aiCoverPreview} alt="AI预览" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <Button size="sm" onClick={handleUseAiCover}>使用此封面</Button>
+                    </>
+                  )}
+                </div>
               </div>
 
               <div className={styles.formRow}>
@@ -416,7 +490,12 @@ export default function AuthorBooks() {
                 <Button
                   block
                   variant="secondary"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    if (aiCoverPreview) URL.revokeObjectURL(aiCoverPreview)
+                    setAiCoverPreview(null)
+                    setAiCoverBlob(null)
+                    setShowCreateModal(false)
+                  }}
                 >
                   取消
                 </Button>
