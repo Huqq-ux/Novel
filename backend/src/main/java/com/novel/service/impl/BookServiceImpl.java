@@ -86,16 +86,16 @@ public class BookServiceImpl implements BookService {
         
         if (sort != null && !sort.isEmpty()) {
             if ("clickCount".equals(sort)) {
-                queryWrapper.orderByDesc("click_count");
+                queryWrapper.orderByDesc("click_count").orderByDesc("id");
             } else if ("createTime".equals(sort)) {
-                queryWrapper.orderByDesc("create_time");
+                queryWrapper.orderByDesc("create_time").orderByDesc("id");
             } else if ("rating".equals(sort)) {
-                queryWrapper.orderByDesc("rating");
+                queryWrapper.orderByDesc("rating").orderByDesc("id");
             } else {
-                queryWrapper.orderByDesc("create_time");
+                queryWrapper.orderByDesc("create_time").orderByDesc("id");
             }
         } else {
-            queryWrapper.orderByDesc("create_time");
+            queryWrapper.orderByDesc("create_time").orderByDesc("id");
         }
         
         return bookMapper.selectPage(bookPage, queryWrapper);

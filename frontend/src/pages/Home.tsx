@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { bookApi } from '../services/api'
@@ -21,7 +21,9 @@ export default function Home() {
   const [books, setBooks] = useState<Book[]>([])
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
+  const [, setPage] = useState(1)
+  const loadingRef = useRef(false)
+  const pageRef = useRef(1)
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
@@ -29,7 +31,8 @@ export default function Home() {
   const sort = searchParams.get('sort')
 
   const fetchBooks = useCallback(async (pageNum: number, cat: string | null, s: string | null, append: boolean) => {
-    if (loading) return
+    if (loadingRef.current) return
+    loadingRef.current = true
     setLoading(true)
     try {
       const params: any = { page: pageNum, size: 10 }
@@ -41,28 +44,37 @@ export default function Home() {
 
       const res: any = await bookApi.getBooks(params)
       if (res?.code === 200 && res.data?.records) {
-        setBooks(prev => append ? [...prev, ...res.data.records] : res.data.records)
+        setBooks(prev => {
+          if (!append) return res.data.records
+          const existingIds = new Set(prev.map(b => b.id))
+          const newBooks = res.data.records.filter((b: Book) => !existingIds.has(b.id))
+          return [...prev, ...newBooks]
+        })
         setHasMore(res.data.records.length >= 10)
       }
     } catch (error) {
       console.error('Failed to load books:', error)
     } finally {
+      loadingRef.current = false
       setLoading(false)
     }
-  }, [loading])
+  }, [])
 
   const loadMore = useCallback(async () => {
-    const nextPage = page + 1
+    const nextPage = pageRef.current + 1
+    pageRef.current = nextPage
     setPage(nextPage)
     await fetchBooks(nextPage, category, sort, true)
-  }, [page, category, sort, fetchBooks])
+  }, [category, sort, fetchBooks])
 
   const handleRefresh = async () => {
+    pageRef.current = 1
     setPage(1)
     await fetchBooks(1, category, sort, false)
   }
 
   useEffect(() => {
+    pageRef.current = 1
     setPage(1)
     setBooks([])
     setHasMore(true)
