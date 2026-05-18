@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import Card from '../components/Card'
@@ -6,33 +6,51 @@ import Modal from '../components/Modal'
 import Toast from '../components/Toast'
 import styles from './Settings.module.css'
 
-/**
- * 设置页面
- * 功能描述：提供阅读偏好设置、存储管理和应用信息查看
- * 实现逻辑：通过本地 state 管理各项设置开关，字体大小通过 Modal 选择器切换
- */
+function getInitialDarkMode(): boolean {
+  const saved = localStorage.getItem('theme')
+  if (saved) return saved === 'dark'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+}
+
+function getInitialFontSize(): string {
+  return localStorage.getItem('fontSize') || 'medium'
+}
+
 export default function Settings() {
   const navigate = useNavigate()
-  const [settings, setSettings] = useState({
-    darkMode: false,
-    autoDownload: true,
-    wifiOnly: true,
-    fontSize: 'medium',
-    cacheSize: '50MB',
-  })
+  const [darkMode, setDarkMode] = useState(getInitialDarkMode)
+  const [fontSize, setFontSize] = useState(getInitialFontSize)
+  const [autoDownload, setAutoDownload] = useState(true)
+  const [wifiOnly, setWifiOnly] = useState(true)
   const [showPicker, setShowPicker] = useState(false)
   const [showClearDialog, setShowClearDialog] = useState(false)
 
+  useEffect(() => {
+    const theme = darkMode ? 'dark' : 'light'
+    localStorage.setItem('theme', theme)
+    if (darkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+    } else {
+      document.documentElement.removeAttribute('data-theme')
+    }
+  }, [darkMode])
+
   const fontSizeOptions = [
-    { label: '小', value: 'small' },
-    { label: '中', value: 'medium' },
-    { label: '大', value: 'large' },
+    { label: '小', value: 'small', demoSize: 12 },
+    { label: '中', value: 'medium', demoSize: 14 },
+    { label: '大', value: 'large', demoSize: 16 },
   ]
 
   const handleFontSizeChange = (value: string) => {
-    setSettings({ ...settings, fontSize: value })
+    setFontSize(value)
+    localStorage.setItem('fontSize', value)
+    if (value === 'medium') {
+      document.documentElement.removeAttribute('data-font-size')
+    } else {
+      document.documentElement.setAttribute('data-font-size', value)
+    }
     setShowPicker(false)
-    Toast.success('设置已保存')
+    Toast.success('字体大小已设置为' + fontSizeOptions.find(o => o.value === value)?.label)
   }
 
   const handleClearCache = () => {
@@ -62,24 +80,24 @@ export default function Settings() {
           <div className={styles.settingRow}>
             <span className={styles.rowLabel}>深色模式</span>
             <button
-              className={`${styles.toggle} ${settings.darkMode ? styles.toggleChecked : ''}`}
-              onClick={() => setSettings({ ...settings, darkMode: !settings.darkMode })}
+              className={`${styles.toggle} ${darkMode ? styles.toggleChecked : ''}`}
+              onClick={() => setDarkMode(!darkMode)}
               aria-label="切换深色模式"
             />
           </div>
           <div className={styles.settingRow}>
             <span className={styles.rowLabel}>自动下载章节</span>
             <button
-              className={`${styles.toggle} ${settings.autoDownload ? styles.toggleChecked : ''}`}
-              onClick={() => setSettings({ ...settings, autoDownload: !settings.autoDownload })}
+              className={`${styles.toggle} ${autoDownload ? styles.toggleChecked : ''}`}
+              onClick={() => setAutoDownload(!autoDownload)}
               aria-label="切换自动下载章节"
             />
           </div>
           <div className={styles.settingRow}>
             <span className={styles.rowLabel}>仅WiFi下载</span>
             <button
-              className={`${styles.toggle} ${settings.wifiOnly ? styles.toggleChecked : ''}`}
-              onClick={() => setSettings({ ...settings, wifiOnly: !settings.wifiOnly })}
+              className={`${styles.toggle} ${wifiOnly ? styles.toggleChecked : ''}`}
+              onClick={() => setWifiOnly(!wifiOnly)}
               aria-label="切换仅WiFi下载"
             />
           </div>
@@ -87,9 +105,9 @@ export default function Settings() {
             className={`${styles.settingRow} ${styles.rowClickable}`}
             onClick={() => setShowPicker(true)}
           >
-            <span className={styles.rowLabel}>阅读字体大小</span>
+            <span className={styles.rowLabel}>字体大小</span>
             <span className={styles.rowExtra}>
-              {fontSizeOptions.find(o => o.value === settings.fontSize)?.label}
+              {fontSizeOptions.find(o => o.value === fontSize)?.label}
               <ChevronRight size={14} />
             </span>
           </div>
@@ -100,7 +118,7 @@ export default function Settings() {
         <Card variant="elevated" title="存储管理">
           <div className={styles.settingRow}>
             <span className={styles.rowLabel}>缓存大小</span>
-            <span className={styles.rowExtra}>{settings.cacheSize}</span>
+            <span className={styles.rowExtra}>50MB</span>
           </div>
           <div className={styles.settingRow}>
             <span className={styles.rowLabel}>清除缓存</span>
@@ -134,10 +152,11 @@ export default function Settings() {
             {fontSizeOptions.map((option) => (
               <button
                 key={option.value}
-                className={`${styles.pickerOption} ${settings.fontSize === option.value ? styles.pickerOptionActive : ''}`}
+                className={`${styles.pickerOption} ${fontSize === option.value ? styles.pickerOptionActive : ''}`}
                 onClick={() => handleFontSizeChange(option.value)}
               >
-                {option.label}
+                <span style={{ fontSize: option.demoSize, fontWeight: 500 }}>Aa</span>
+                <span style={{ fontSize: 'var(--font-size-base)', marginTop: 4 }}>{option.label}</span>
               </button>
             ))}
           </div>

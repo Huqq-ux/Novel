@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { Home, Book as BookIcon, Compass, User as UserIcon } from 'lucide-react'
 import { Home as HomePage, Bookshelf, Discover, User } from './pages'
@@ -57,6 +57,20 @@ function AppContent() {
     { key: 'discover', title: '发现', icon: <Compass size={20} /> },
     { key: 'user', title: '我的', icon: <UserIcon size={20} /> },
   ]
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark')
+    } else if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+    }
+
+    const savedFontSize = localStorage.getItem('fontSize')
+    if (savedFontSize && savedFontSize !== 'medium') {
+      document.documentElement.setAttribute('data-font-size', savedFontSize)
+    }
+  }, [])
 
   const isAdminRoute = location.pathname.startsWith('/admin')
   const showTabBar = !location.pathname.startsWith('/read') && !isAdminRoute

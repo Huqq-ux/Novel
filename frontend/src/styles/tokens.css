@@ -69,3 +69,56 @@
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
 }
+
+[data-theme="dark"] {
+  --color-primary: #c4a882;
+  --color-primary-hover: #d4b892;
+  --color-primary-dark: #b8996e;
+  --color-primary-light: #3d2e1f;
+
+  --color-accent: #6b9b5e;
+  --color-accent-light: #2a3a24;
+
+  --color-danger: #e57373;
+  --color-danger-light: #3d1f1f;
+  --color-warning: #d4a574;
+  --color-warning-light: #3d2a1a;
+  --color-info: #7ea8bc;
+  --color-info-light: #1a2a32;
+
+  --color-bg: #1a1410;
+  --color-surface: #2c1f14;
+  --color-card: #302318;
+  --color-border: #4a3a2a;
+  --color-divider: #3a2a1a;
+
+  --color-text-primary: #e8dcc8;
+  --color-text-secondary: #b8a890;
+  --color-text-tertiary: #8b7b6a;
+  --color-text-placeholder: #6a5a4a;
+  --color-text-inverse: #1a1410;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+[data-font-size="small"] {
+  --font-size-xs: 9px;
+  --font-size-sm: 10px;
+  --font-size-base: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 21px;
+}
+
+[data-font-size="large"] {
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-md: 18px;
+  --font-size-lg: 20px;
+  --font-size-xl: 23px;
+  --font-size-2xl: 28px;
+}

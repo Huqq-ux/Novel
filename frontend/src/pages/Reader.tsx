@@ -24,7 +24,14 @@ export default function Reader() {
   const [chapter, setChapter] = useState<Chapter | null>(null)
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [loading, setLoading] = useState(true)
-  const [fontSize, setFontSize] = useState(16)
+  const [fontSize, setFontSize] = useState(() => {
+    const saved = localStorage.getItem('fontSize')
+    if (saved) {
+      const map: Record<string, number> = { small: 14, medium: 16, large: 20 }
+      return map[saved] || 16
+    }
+    return 16
+  })
   const [showToolbar, setShowToolbar] = useState(true)
   const [unlockStatus, setUnlockStatus] = useState<UnlockStatus | null>(null)
   const [unlocking, setUnlocking] = useState(false)
