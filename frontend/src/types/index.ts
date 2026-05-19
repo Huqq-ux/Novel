@@ -53,3 +53,10 @@ export interface PageResponse<T> {
   list: T[]
   total: number
 }
+
+export interface Bookmark {
+  bookId: number
+  chapterId: number
+  chapterTitle: string
+  timestamp: number
+}
