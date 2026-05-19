@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, Bookmark, List, Palette } from 'lucide-react'
+import { ArrowLeft, Bookmark as BookmarkIcon, List, Palette } from 'lucide-react'
 import { bookApi, bookshelfApi, unlockApi } from '../services/api'
 import { useBookshelfStore } from '../store/bookshelf'
 import type { Book, Bookmark, Chapter } from '../types'
@@ -451,7 +451,7 @@ export default function Reader() {
           </button>
         </div>
         <button className={styles.settingsBtn} onClick={toggleBookmark}>
-          <Bookmark size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
+          <BookmarkIcon size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
           <span>{isBookmarked ? '已存' : '书签'}</span>
         </button>
         <button className={styles.settingsBtn} onClick={() => navigate(`/book/${bookId}/comments`)}>
