@@ -14,5 +14,6 @@ public interface AuthorBookService {
     Map<String, Object> addChapter(Long userId, Long bookId, Map<String, Object> body);
     String updateChapter(Long userId, Long bookId, Long chapterId, Map<String, Object> body);
     String deleteChapter(Long userId, Long bookId, Long chapterId);
+    String deleteBook(Long userId, Long bookId);
     Map<String, Object> getBookStats(Long userId, Long bookId);
 }

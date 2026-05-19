@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Sparkles, Bot, ArrowLeft, ChevronRight } from 'lucide-react'
-import { bookApi, aiApi } from '../services/api'
+import { bookApi } from '../services/api'
 import type { Book } from '../types'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -107,11 +107,52 @@ export default function Discover() {
     if ((!aiInput.trim() && !selectedCategory) || aiLoading) return
     setAiLoading(true)
     setShowAIRecommend(true)
+    setAiAnswer('')
     try {
       const userId = parseInt(localStorage.getItem('userId') || '0') || undefined
       const message = aiInput.trim() || `推荐${selectedCategory}类的小说`
-      const result = await aiApi.recommend(message, undefined, userId) as any
-      setAiAnswer(result?.response || '抱歉，AI推荐暂时不可用。')
+
+      const response = await fetch('/api/ai/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, user_id: userId }),
+      })
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error('No response body')
+
+      const decoder = new TextDecoder()
+      let fullText = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          try {
+            const data = JSON.parse(line.slice(6))
+            if (data.type === 'token') {
+              fullText += data.content
+              setAiAnswer(fullText)
+            } else if (data.type === 'error') {
+              fullText = `抱歉，服务暂时不可用：${data.message}`
+              setAiAnswer(fullText)
+            }
+          } catch {
+            // skip non-JSON lines
+          }
+        }
+      }
+
+      if (!fullText) {
+        setAiAnswer('抱歉，AI推荐暂时不可用，请稍后再试。')
+      }
     } catch {
       setAiAnswer('抱歉，AI推荐暂时不可用，请稍后再试。')
     } finally {

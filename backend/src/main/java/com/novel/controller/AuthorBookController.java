@@ -171,6 +171,21 @@ public class AuthorBookController {
         }
     }
 
+    @DeleteMapping("/{bookId}")
+    public ApiResponse<String> deleteBook(
+            @CurrentUser Long userId,
+            @PathVariable Long bookId) {
+        if (userId == null) {
+            return ApiResponse.error(401, "请先登录");
+        }
+        try {
+            String msg = authorBookService.deleteBook(userId, bookId);
+            return ApiResponse.success(msg);
+        } catch (IllegalArgumentException e) {
+            return ApiResponse.error(400, e.getMessage());
+        }
+    }
+
     @GetMapping("/{bookId}/stats")
     public ApiResponse<Map<String, Object>> getBookStats(
             @CurrentUser Long userId,

@@ -1,5 +1,6 @@
 import logging
 import random
+import re
 from urllib.parse import quote
 
 import httpx
@@ -25,6 +26,13 @@ CATEGORY_STYLES = {
 }
 
 
+def _safe_ascii(text: str) -> str:
+    """Keep only ASCII characters, replace others with space. Returns empty string if result is all whitespace."""
+    result = text.encode("ascii", errors="replace").decode("ascii")
+    letters = re.findall(r"[a-zA-Z0-9]+", result)
+    return " ".join(letters)
+
+
 class CoverGenerationRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=100, description="书名")
     category: str | None = Field(None, description="分类")
@@ -36,13 +44,22 @@ def build_prompt(req: CoverGenerationRequest) -> str:
     style = CATEGORY_STYLES.get(req.category, "beautiful book cover, artistic style, elegant composition")
     parts = ["book cover illustration"]
 
-    parts.append(f'title: "{req.title}"')
+    safe_title = _safe_ascii(req.title)
+    if safe_title:
+        parts.append(f'novel titled {safe_title}')
+    else:
+        parts.append("novel")
+
     parts.append(style)
 
     if req.author:
-        parts.append(f"author: {req.author}")
+        safe_author = _safe_ascii(req.author)
+        if safe_author:
+            parts.append(f"author: {safe_author}")
     if req.description:
-        parts.append(f"story: {req.description[:200]}")
+        safe_desc = _safe_ascii(req.description)
+        if safe_desc:
+            parts.append(f"story: {safe_desc[:200]}")
 
     parts.append("vertical orientation, book cover design, high quality, professional illustration")
     parts.append("no text on image, no letters, no typography, no words, clean visual")

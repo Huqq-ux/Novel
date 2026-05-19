@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, BookOpen, FileText, Sparkles } from 'lucide-react'
 import { authorBookApi, aiApi, uploadApi } from '../services/api'
@@ -53,6 +53,7 @@ export default function AuthorBooks() {
 
   // Delete confirmation
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
+  const [deleteBookId, setDeleteBookId] = useState<number | null>(null)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -71,8 +72,7 @@ export default function AuthorBooks() {
   })
 
   const [generating, setGenerating] = useState(false)
-  const [aiCoverBlob, setAiCoverBlob] = useState<Blob | null>(null)
-  const [aiCoverPreview, setAiCoverPreview] = useState<string | null>(null)
+  const aiCoverBlobRef = useRef<Blob | null>(null)
 
   const handleGenerateCover = async () => {
     if (!formData.title.trim()) {
@@ -86,34 +86,19 @@ export default function AuthorBooks() {
         category: formData.category,
         description: formData.description,
       })
-      setAiCoverBlob(blob)
-      const url = URL.createObjectURL(blob)
-      setAiCoverPreview(url)
-    } catch (e: any) {
-      Toast.error('封面生成失败，请重试')
-    } finally {
-      setGenerating(false)
-    }
-  }
-
-  const handleUseAiCover = async () => {
-    if (!aiCoverBlob) return
-    const file = new File([aiCoverBlob], `ai-cover-${Date.now()}.jpg`, { type: 'image/jpeg' })
-    try {
+      aiCoverBlobRef.current = blob
+      const file = new File([blob], `ai-cover-${Date.now()}.jpg`, { type: 'image/jpeg' })
       const response: any = await uploadApi.uploadCover(file)
       if (response?.code === 200 && response?.data?.url) {
         setFormData(prev => ({ ...prev, cover: response.data.url }))
-        setAiCoverBlob(null)
-        if (aiCoverPreview) {
-          URL.revokeObjectURL(aiCoverPreview)
-          setAiCoverPreview(null)
-        }
-        Toast.success('封面已应用')
+        Toast.success('AI 封面已生成并应用')
       } else {
         Toast.error('封面上传失败')
       }
     } catch (e: any) {
-      Toast.error('封面上传失败')
+      Toast.error('封面生成失败，请重试')
+    } finally {
+      setGenerating(false)
     }
   }
 
@@ -246,6 +231,24 @@ export default function AuthorBooks() {
     }
   }
 
+  const confirmDeleteBook = async () => {
+    if (deleteBookId === null) return
+
+    try {
+      const response: any = await authorBookApi.deleteBook(deleteBookId)
+      if (response?.code === 200) {
+        Toast.success('删除成功')
+        loadBooks()
+      } else {
+        Toast.show({ content: response?.message || '删除失败' })
+      }
+    } catch (error: any) {
+      Toast.show({ content: error.response?.data?.message || '删除失败' })
+    } finally {
+      setDeleteBookId(null)
+    }
+  }
+
   const confirmDeleteChapter = async () => {
     if (!currentBook || deleteTargetId === null) return
 
@@ -363,6 +366,14 @@ export default function AuthorBooks() {
                 >
                   {book.isFinished ? '设为连载' : '设为完结'}
                 </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  danger
+                  onClick={() => setDeleteBookId(book.id)}
+                >
+                  删除作品
+                </Button>
               </div>
             </div>
           ))}
@@ -372,9 +383,6 @@ export default function AuthorBooks() {
       {/* Create book modal */}
       {showCreateModal && (
         <div className={styles.overlay} onClick={() => {
-          if (aiCoverPreview) URL.revokeObjectURL(aiCoverPreview)
-          setAiCoverPreview(null)
-          setAiCoverBlob(null)
           setShowCreateModal(false)
         }}>
           <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
@@ -434,16 +442,10 @@ export default function AuthorBooks() {
                     <Sparkles size={14} style={{ marginRight: '4px' }} />
                     AI 生成封面
                   </Button>
-                  {aiCoverPreview && (
-                    <>
-                      <div style={{
-                        width: '60px', height: '84px', borderRadius: '4px', overflow: 'hidden',
-                        border: '2px solid var(--color-primary)',
-                      }}>
-                        <img src={aiCoverPreview} alt="AI预览" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      </div>
-                      <Button size="sm" onClick={handleUseAiCover}>使用此封面</Button>
-                    </>
+                  {generating && (
+                    <span style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', marginLeft: '8px' }}>
+                      生成中...
+                    </span>
                   )}
                 </div>
               </div>
@@ -491,9 +493,6 @@ export default function AuthorBooks() {
                   block
                   variant="secondary"
                   onClick={() => {
-                    if (aiCoverPreview) URL.revokeObjectURL(aiCoverPreview)
-                    setAiCoverPreview(null)
-                    setAiCoverBlob(null)
                     setShowCreateModal(false)
                   }}
                 >
@@ -685,7 +684,7 @@ export default function AuthorBooks() {
         </div>
       )}
 
-      {/* Delete confirmation modal */}
+      {/* Delete chapter confirmation modal */}
       <Modal
         visible={deleteTargetId !== null}
         title="确认删除"
@@ -693,6 +692,17 @@ export default function AuthorBooks() {
         onClose={() => setDeleteTargetId(null)}
         onConfirm={confirmDeleteChapter}
         confirmText="确定"
+        danger
+      />
+
+      {/* Delete book confirmation modal */}
+      <Modal
+        visible={deleteBookId !== null}
+        title="确认删除作品"
+        content="确定要删除这个作品吗？作品下的所有章节也会一并删除，此操作不可恢复。"
+        onClose={() => setDeleteBookId(null)}
+        onConfirm={confirmDeleteBook}
+        confirmText="确定删除"
         danger
       />
     </div>

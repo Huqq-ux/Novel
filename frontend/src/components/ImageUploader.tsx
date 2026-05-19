@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Toast from './Toast'
 import { uploadApi } from '../services/api'
 import styles from './ImageUploader.module.css'
@@ -19,6 +19,10 @@ export default function ImageUploader({
   const [uploading, setUploading] = useState(false)
   const [preview, setPreview] = useState<string | null>(value || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setPreview(value || null)
+  }, [value])
 
   const handleClick = () => {
     fileInputRef.current?.click()

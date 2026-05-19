@@ -74,7 +74,7 @@ public class AuthorBookServiceImpl implements AuthorBookService {
 
         Book book = new Book();
         book.setTitle(title);
-        book.setAuthor(user.getPenName() != null ? user.getPenName() : user.getUsername());
+        book.setAuthor(user.getUsername());
         book.setCategory(category);
         book.setDescription(description);
         book.setCover(cover != null ? cover : "https://placehold.co/200x280/667eea/fff?text=" + title.substring(0, Math.min(2, title.length())));
@@ -231,6 +231,19 @@ public class AuthorBookServiceImpl implements AuthorBookService {
         book.setUpdateTime(LocalDateTime.now());
         bookMapper.updateById(book);
         return "章节删除成功";
+    }
+
+    @Override
+    @Transactional
+    public String deleteBook(Long userId, Long bookId) {
+        Book book = validateBookOwnership(userId, bookId);
+
+        QueryWrapper<Chapter> chapterQuery = new QueryWrapper<>();
+        chapterQuery.eq("book_id", bookId);
+        chapterMapper.delete(chapterQuery);
+
+        bookMapper.deleteById(bookId);
+        return "作品删除成功";
     }
 
     @Override

@@ -83,7 +83,7 @@ export default function Bookshelf() {
 
   const filteredBooks = bookshelf.filter((item) => {
     if (filter === 'all') return true
-    const isFinished = item.book?.isFinished || item.progress >= 100
+    const isFinished = item.progress >= 100
     if (filter === 'reading') return !isFinished
     return isFinished
   })
@@ -128,7 +128,7 @@ export default function Bookshelf() {
       ) : (
         <div className={styles.list}>
           {filteredBooks.map((item) => {
-            const isFinished = item.book?.isFinished || item.progress >= 100
+            const isFinished = item.progress >= 100
             return (
               <Card
                 key={item.id}

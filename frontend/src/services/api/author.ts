@@ -104,6 +104,10 @@ export const authorBookApi = {
     return api.delete(`/author/books/${bookId}/chapters/${chapterId}`)
   },
 
+  deleteBook: (bookId: number) => {
+    return api.delete(`/author/books/${bookId}`)
+  },
+
   getBookStats: (bookId: number) => {
     return api.get(`/author/books/${bookId}/stats`)
   },

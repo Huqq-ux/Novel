@@ -7,7 +7,7 @@ const api = axios.create({
 
 const aiApiClient = axios.create({
   baseURL: '/api/ai',
-  timeout: 60000,
+  timeout: 120000,
 })
 
 aiApiClient.interceptors.request.use(

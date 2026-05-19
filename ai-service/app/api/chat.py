@@ -5,6 +5,7 @@ from typing import Optional, AsyncGenerator
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
+from langchain_core.messages import HumanMessage
 
 from app.modules.recommend import recommend_graph
 from app.modules.search import search_graph
@@ -51,7 +52,7 @@ async def recommend(request: ChatRequest):
     ctx.add_message("user", request.message)
 
     initial_state = {
-        "messages": [{"role": "user", "content": request.message}],
+        "messages": [HumanMessage(content=request.message)],
         "user_id": request.user_id,
         "user_preference": "",
         "candidate_books": [],
@@ -95,7 +96,7 @@ async def search(request: ChatRequest):
     ctx.add_message("user", request.message)
 
     initial_state = {
-        "messages": [{"role": "user", "content": request.message}],
+        "messages": [HumanMessage(content=request.message)],
         "query": "",
         "search_results": [],
         "search_type": "",
@@ -138,7 +139,7 @@ async def customer_service_chat(request: ChatRequest):
     ctx.add_message("user", request.message)
 
     initial_state = {
-        "messages": [{"role": "user", "content": request.message}],
+        "messages": [HumanMessage(content=request.message)],
         "user_id": request.user_id,
         "intent": "",
         "entities": {},

@@ -28,7 +28,7 @@ class CustomerServiceState(TypedDict):
     final_response: str
 
 
-CS_SYSTEM_PROMPT = """你是"小说阅读平台"的AI客服助手，名叫"小阅"。你的职责是帮助用户解决使用平台时遇到的问题。
+CS_SYSTEM_PROMPT = """你是"小说阅读平台"的AI客服助手，名叫"小阅"。你的职责是帮助用户解决使用平台时遇到的问题，也可以用你的通用知识回答与阅读、书籍、文学相关的问题。
 
 你的服务范围：
 1. 账号问题：注册、登录、密码重置、账号安全
@@ -41,9 +41,9 @@ CS_SYSTEM_PROMPT = """你是"小说阅读平台"的AI客服助手，名叫"小�
 回答要求：
 - 语气友好、耐心、专业
 - 先确认用户的问题，再给出解决方案
-- 提供具体的操作步骤
-- 如果无法解决，建议联系人工客服
-- 不要编造不确定的信息"""
+- 参考知识库的信息优先使用，知识库没有覆盖的内容，可以用你的通用知识补充
+- 对于平台操作类问题（充值、成为作者等），尽量给出具体步骤
+- 如果确实无法解答，建议联系人工客服"""
 
 INTENT_CLASSIFY_PROMPT = """判断用户的问题意图，从以下选项中选择最匹配的一个：
 - "account"：账号相关问题（登录、注册、密码、安全）
@@ -86,7 +86,7 @@ async def retrieve_knowledge(state: CustomerServiceState) -> dict:
         return {"knowledge_response": "用户打招呼，请友好回应。"}
 
     if not knowledge:
-        return {"knowledge_response": "知识库中暂无相关内容，请根据通用知识回答。"}
+        return {"knowledge_response": "知识库暂无此分类信息，请根据通用知识回答。"}
 
     llm = get_llm(temperature=0.3)
     knowledge_text = "\n".join(f"- {k}：{v}" for k, v in knowledge.items())
@@ -116,7 +116,7 @@ async def generate_cs_response(state: CustomerServiceState) -> dict:
     system_content = CS_SYSTEM_PROMPT
     if context_info:
         system_content += f"\n{context_info}"
-    if knowledge and knowledge != "知识库中暂无相关内容，请根据通用知识回答。":
+    if knowledge and knowledge != "知识库中暂无相关内容，请根据通用知识回答。" and knowledge != "知识库暂无此分类信息，请根据通用知识回答。":
         system_content += f"\n\n参考知识：{knowledge}"
 
     messages = [SystemMessage(content=system_content)] + list(history)
