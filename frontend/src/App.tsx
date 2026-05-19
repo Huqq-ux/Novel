@@ -5,6 +5,7 @@ import { Home as HomePage, Bookshelf, Discover, User } from './pages'
 import AIFloatingAssistant from './components/AIFloatingAssistant'
 import TabBar from './components/TabBar'
 import type { TabItem } from './components/TabBar/types'
+import { userApi } from './services/api'
 
 const BookDetail = lazy(() => import('./pages/BookDetail'))
 const Reader = lazy(() => import('./pages/Reader'))
@@ -70,6 +71,20 @@ function AppContent() {
     if (savedFontSize && savedFontSize !== 'medium') {
       document.documentElement.setAttribute('data-font-size', savedFontSize)
     }
+  }, [])
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken')
+    if (!accessToken) return
+
+    userApi.getUserInfo()
+      .then((res: any) => {
+        if (res?.code === 200 && res?.data) {
+          localStorage.setItem('user', JSON.stringify(res.data))
+          localStorage.setItem('userId', String(res.data.id))
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const isAdminRoute = location.pathname.startsWith('/admin')

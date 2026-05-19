@@ -79,10 +79,13 @@ export default function User() {
     const storedUser = localStorage.getItem('user')
     if (storedUser && storedUser !== 'undefined') {
       try {
-        setUser(JSON.parse(storedUser))
+        const parsedUser = JSON.parse(storedUser)
+        setUser(parsedUser)
+        localStorage.setItem('userId', String(parsedUser.id))
       } catch (e) {
         console.error('Failed to parse user data:', e)
         localStorage.removeItem('user')
+        localStorage.removeItem('userId')
       }
     }
   }, [])
@@ -135,6 +138,7 @@ export default function User() {
         localStorage.setItem('accessToken', response.data.accessToken)
         localStorage.setItem('refreshToken', response.data.refreshToken)
         localStorage.setItem('user', JSON.stringify(response.data.user))
+        localStorage.setItem('userId', String(response.data.user.id))
         setUser(response.data.user)
         clearBookshelf()
         bookshelfApi.getBookshelf().then((res: any) => {
