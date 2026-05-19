@@ -1,12 +1,39 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Bookmark, List, Palette } from 'lucide-react'
 import { bookApi, bookshelfApi, unlockApi } from '../services/api'
 import { useBookshelfStore } from '../store/bookshelf'
-import type { Book, Chapter } from '../types'
+import type { Book, Bookmark, Chapter } from '../types'
 import Button from '../components/Button'
 import Toast from '../components/Toast'
 import styles from './Reader.module.css'
+
+interface ThemePreset {
+  name: string
+  label: string
+  bg: string
+  color: string
+}
+
+const THEMES: ThemePreset[] = [
+  { name: 'white', label: '白', bg: '#fbf9f7', color: '#2c1f14' },
+  { name: 'lightYellow', label: '淡黄', bg: '#f5f0c0', color: '#2c1f14' },
+  { name: 'parchment', label: '羊皮纸', bg: '#f0e4c8', color: '#2c1f14' },
+  { name: 'lightGray', label: '浅灰', bg: '#e8e4df', color: '#2c1f14' },
+  { name: 'darkGray', label: '深灰', bg: '#3a3530', color: '#d4c8b8' },
+  { name: 'black', label: '纯黑', bg: '#1a1a1a', color: '#c8c0b8' },
+]
+
+function loadBookmarks(): Bookmark[] {
+  try {
+    const raw = localStorage.getItem('readerBookmarks')
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
+function saveBookmarks(list: Bookmark[]) {
+  localStorage.setItem('readerBookmarks', JSON.stringify(list))
+}
 
 interface UnlockStatus {
   needUnlock: boolean
@@ -35,6 +62,13 @@ export default function Reader() {
   const [showToolbar, setShowToolbar] = useState(true)
   const [unlockStatus, setUnlockStatus] = useState<UnlockStatus | null>(null)
   const [unlocking, setUnlocking] = useState(false)
+  const [showCatalog, setShowCatalog] = useState(false)
+  const [showThemePicker, setShowThemePicker] = useState(false)
+  const [readerTheme, setReaderTheme] = useState(() => {
+    return localStorage.getItem('readerTheme') || 'white'
+  })
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>(loadBookmarks)
+  const [catalogTab, setCatalogTab] = useState<'chapters' | 'bookmarks'>('chapters')
   const [userBalance, setUserBalance] = useState(0)
   const { updateProgress, isInBookshelf, addToBookshelf } = useBookshelfStore()
 
@@ -196,6 +230,35 @@ export default function Reader() {
     setFontSize(size)
   }
 
+  const isBookmarked = bookmarks.some(
+    b => b.bookId === Number(bookId) && b.chapterId === Number(chapterId)
+  )
+
+  const toggleBookmark = () => {
+    let updated: Bookmark[]
+    if (isBookmarked) {
+      updated = bookmarks.filter(
+        b => !(b.bookId === Number(bookId) && b.chapterId === Number(chapterId))
+      )
+    } else {
+      const newBookmark: Bookmark = {
+        bookId: Number(bookId),
+        chapterId: Number(chapterId),
+        chapterTitle: chapter?.title || '',
+        timestamp: Date.now(),
+      }
+      updated = [newBookmark, ...bookmarks]
+    }
+    setBookmarks(updated)
+    saveBookmarks(updated)
+  }
+
+  const handleThemeChange = (name: string) => {
+    setReaderTheme(name)
+    localStorage.setItem('readerTheme', name)
+    setShowThemePicker(false)
+  }
+
   const handleGoBack = () => {
     const result = window.confirm('确定要退出阅读吗？')
     if (result) {
@@ -213,6 +276,7 @@ export default function Reader() {
 
   const currentIndex = chapters.findIndex((c) => c.id === Number(chapterId))
   const progressPercent = chapters.length > 0 ? Math.round(((currentIndex + 1) / chapters.length) * 100) : 0
+  const currentTheme = THEMES.find(t => t.name === readerTheme)!
 
   if (loading) {
     return (
@@ -298,7 +362,7 @@ export default function Reader() {
   }
 
   return (
-    <div style={{ background: 'var(--color-bg)', minHeight: '100vh', paddingBottom: '80px' }}>
+    <div style={{ background: currentTheme.bg, color: currentTheme.color, minHeight: '100vh', paddingBottom: '80px' }}>
       <div
         style={{
           opacity: showToolbar ? 1 : 0,
@@ -344,25 +408,116 @@ export default function Reader() {
         </button>
       </div>
 
+      {showThemePicker && (
+        <div className={styles.themePicker}>
+          {THEMES.map(t => (
+            <button
+              key={t.name}
+              className={`${styles.themeDot} ${readerTheme === t.name ? styles.themeDotActive : ''}`}
+              style={{ backgroundColor: t.bg, borderColor: t.name === 'black' ? '#555' : 'var(--color-border)' }}
+              onClick={() => handleThemeChange(t.name)}
+              title={t.label}
+            >
+              <span style={{ color: t.color }}>Aa</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className={styles.settingsBar}>
-        <button
-          className={styles.fontSizeBtn}
-          onClick={() => handleFontSizeChange(fontSize - 2)}
-          disabled={fontSize <= 12}
-        >
-          A⁻
+        <button className={styles.settingsBtn} onClick={() => { setShowCatalog(true); setCatalogTab('chapters') }}>
+          <List size={16} />
+          <span>目录</span>
         </button>
-        <span style={{ fontWeight: 600 }}>Aa</span>
-        <button
-          className={styles.fontSizeBtn}
-          onClick={() => handleFontSizeChange(fontSize + 2)}
-          disabled={fontSize >= 24}
-        >
-          A⁺
+        <button className={styles.settingsBtn} onClick={() => setShowThemePicker(!showThemePicker)}>
+          <Palette size={16} />
+          <span>主题</span>
         </button>
-        <span style={{ color: 'var(--color-border)' }}>|</span>
-        <span style={{ cursor: 'pointer' }} onClick={() => navigate(`/book/${bookId}/comments`)}>💬 评论</span>
+        <div className={styles.fontSizeGroup}>
+          <button
+            className={styles.fontSizeBtn}
+            onClick={() => handleFontSizeChange(fontSize - 2)}
+            disabled={fontSize <= 12}
+          >
+            A⁻
+          </button>
+          <span style={{ fontWeight: 600 }}>Aa</span>
+          <button
+            className={styles.fontSizeBtn}
+            onClick={() => handleFontSizeChange(fontSize + 2)}
+            disabled={fontSize >= 24}
+          >
+            A⁺
+          </button>
+        </div>
+        <button className={styles.settingsBtn} onClick={toggleBookmark}>
+          <Bookmark size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
+          <span>{isBookmarked ? '已存' : '书签'}</span>
+        </button>
+        <button className={styles.settingsBtn} onClick={() => navigate(`/book/${bookId}/comments`)}>
+          <span>💬</span>
+          <span>评论</span>
+        </button>
       </div>
+
+      {showCatalog && (
+        <div className={styles.drawerOverlay} onClick={() => setShowCatalog(false)}>
+          <div className={styles.drawer} onClick={e => e.stopPropagation()}>
+            <div className={styles.drawerHandle} />
+            <div className={styles.drawerTabs}>
+              <button
+                className={`${styles.drawerTab} ${catalogTab === 'chapters' ? styles.drawerTabActive : ''}`}
+                onClick={() => setCatalogTab('chapters')}
+              >
+                目录
+              </button>
+              <button
+                className={`${styles.drawerTab} ${catalogTab === 'bookmarks' ? styles.drawerTabActive : ''}`}
+                onClick={() => setCatalogTab('bookmarks')}
+              >
+                书签
+              </button>
+            </div>
+            <div className={styles.drawerBody}>
+              {catalogTab === 'chapters' ? (
+                chapters.map((ch) => (
+                  <div
+                    key={ch.id}
+                    className={`${styles.drawerItem} ${ch.id === Number(chapterId) ? styles.drawerItemActive : ''}`}
+                    onClick={() => {
+                      navigate(`/read/${bookId}/${ch.id}`, { state: { from: fromPath.current } })
+                      setShowCatalog(false)
+                    }}
+                  >
+                    <span className={styles.drawerItemTitle}>{ch.title}</span>
+                    {ch.id === Number(chapterId) && <span className={styles.drawerItemTag}>当前</span>}
+                  </div>
+                ))
+              ) : bookmarks.length === 0 ? (
+                <div className={styles.drawerEmpty}>暂无书签</div>
+              ) : (
+                bookmarks
+                  .filter(b => b.bookId === Number(bookId))
+                  .map((b) => (
+                    <div
+                      key={`${b.bookId}-${b.chapterId}`}
+                      className={`${styles.drawerItem} ${b.chapterId === Number(chapterId) ? styles.drawerItemActive : ''}`}
+                      onClick={() => {
+                        navigate(`/read/${b.bookId}/${b.chapterId}`, { state: { from: fromPath.current } })
+                        setShowCatalog(false)
+                      }}
+                    >
+                      <span className={styles.drawerItemTitle}>{b.chapterTitle}</span>
+                      <span className={styles.drawerItemDate}>
+                        {new Date(b.timestamp).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
