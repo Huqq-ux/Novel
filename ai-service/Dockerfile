@@ -11,8 +11,9 @@ RUN pip install modelscope && \
     python -c "from modelscope import snapshot_download; snapshot_download('BAAI/bge-small-zh-v1.5', local_dir='/app/bge-model')" && \
     pip uninstall -y modelscope
 
-# 先安装 PyTorch CPU 版（~180MB，比 CUDA 版 532MB 小很多）
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu --timeout 600 --retries 10
+# 从本地 wheel 安装 PyTorch CPU 版（预下载好，避免境外下载超时）
+COPY wheels/torch-*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/torch-*.whl && rm /tmp/torch-*.whl
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
