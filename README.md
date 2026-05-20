@@ -28,7 +28,7 @@ Novel/
 │   │   │   ├── AIFloatingAssistant.tsx  # AI 浮动助手
 │   │   │   ├── BookRating.tsx   # 评分面板
 │   │   │   └── ImageUploader.tsx # 图片上传
-│   │   ├── pages/               # 页面组件（30+ 个）
+│   │   ├── pages/               # 页面组件（29 个）
 │   │   │   ├── admin/           # 管理后台（7 个页面）
 │   │   │   ├── Home.tsx         # 首页
 │   │   │   ├── Bookshelf.tsx    # 书架
@@ -55,10 +55,11 @@ Novel/
 │   │   ├── entity/              # 实体类（16 个）
 │   │   ├── mapper/              # MyBatis-Plus Mapper
 │   │   ├── service/             # 业务逻辑层
-│   │   ├── controller/          # REST 控制器（17 个）
+│   │   ├── controller/          # REST 控制器（15 个）
 │   │   ├── dto/                 # 请求/响应 DTO
 │   │   ├── security/            # JWT 过滤器 + 认证
 │   │   ├── util/                # 工具类
+│   │   ├── validation/          # 自定义校验注解
 │   │   └── cache/               # 缓存服务（Cache-Aside + 分布式锁）
 │   └── pom.xml
 ├── ai-service/                  # Python AI 微服务
@@ -68,7 +69,6 @@ Novel/
 │   │   ├── core/                # LLM、向量存储、数据库、上下文管理
 │   │   └── modules/             # LangGraph 工作流模块
 │   └── requirements.txt
-└── novel_database.sql           # 数据库初始化脚本（16 张表）
 ```
 
 ## 技术栈
@@ -145,7 +145,7 @@ Novel/
 CREATE DATABASE novel CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-执行 `novel_database.sql` 初始化表结构和测试数据。
+项目的数据库初始化脚本已由 MyBatis-Plus 管理，启动后端后会自动建表。
 
 ### 2. 启动后端
 
@@ -203,10 +203,9 @@ AI 服务：http://localhost:8001
 
 1. **双 Token 认证**：Access Token（JWT 1h）+ Refresh Token（UUID 7d），axios 拦截器自动静默刷新
 2. **统一 API 响应**：所有接口返回 `ApiResponse<T>`（`{ code, message, data }`）
-3. **Cache-Aside 缓存**：Redis 分级 TTL + 互斥锁防击穿 + 随机过期防雪崩
-4. **缓存架构**：Cache-Aside 模式，分级 TTL（book: 1h, chapter: 30min, list: 5min），互斥锁防击穿、缓存空值防穿透、随机过期防雪崩
-5. **AI 工作流编排**：LangGraph 多节点有向图替代单次 LLM 调用
-6. **自定义组件库**：14 个组件 + CSS Modules + Design Tokens 三层架构
+3. **Cache-Aside 缓存架构**：分级 TTL（book: 1h, chapter: 30min, list: 5min），互斥锁防击穿、缓存空值防穿透、随机过期防雪崩
+4. **AI 工作流编排**：LangGraph 多节点有向图替代单次 LLM 调用（推荐流程：偏好提取 → 向量+DB 检索 → LLM 排序推荐）
+5. **自定义组件库**：14 个组件 + CSS Modules + Design Tokens 三层架构
 
 ## License
 
