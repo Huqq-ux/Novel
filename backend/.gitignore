@@ -30,3 +30,6 @@ application-dev.yml
 .env
 .env.local
 .env.production
+
+# Uploaded files
+uploads/
