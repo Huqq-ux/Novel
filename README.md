@@ -59,7 +59,7 @@ Novel/
 │   │   ├── dto/                 # 请求/响应 DTO
 │   │   ├── security/            # JWT 过滤器 + 认证
 │   │   ├── util/                # 工具类
-│   │   └── module/              # 模块化架构（事件总线 + SPI Facade）
+│   │   └── cache/               # 缓存服务（Cache-Aside + 分布式锁）
 │   └── pom.xml
 ├── ai-service/                  # Python AI 微服务
 │   ├── app/
@@ -204,7 +204,7 @@ AI 服务：http://localhost:8001
 1. **双 Token 认证**：Access Token（JWT 1h）+ Refresh Token（UUID 7d），axios 拦截器自动静默刷新
 2. **统一 API 响应**：所有接口返回 `ApiResponse<T>`（`{ code, message, data }`）
 3. **Cache-Aside 缓存**：Redis 分级 TTL + 互斥锁防击穿 + 随机过期防雪崩
-4. **模块化架构**：Spring Boot 分层基础上叠加事件总线模块系统（ModuleContext + SPI Facade）
+4. **缓存架构**：Cache-Aside 模式，分级 TTL（book: 1h, chapter: 30min, list: 5min），互斥锁防击穿、缓存空值防穿透、随机过期防雪崩
 5. **AI 工作流编排**：LangGraph 多节点有向图替代单次 LLM 调用
 6. **自定义组件库**：14 个组件 + CSS Modules + Design Tokens 三层架构
 
