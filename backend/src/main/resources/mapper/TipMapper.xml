@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.novel.mapper.TipMapper">
+    <select id="selectByBookId" resultType="com.novel.entity.Tip">
+        SELECT * FROM tips WHERE book_id = #{bookId} ORDER BY create_time DESC
+    </select>
+    <select id="selectByAuthorId" resultType="com.novel.entity.Tip">
+        SELECT * FROM tips WHERE author_id = #{authorId} ORDER BY create_time DESC
+    </select>
+</mapper>

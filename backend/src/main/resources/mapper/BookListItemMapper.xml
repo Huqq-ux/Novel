@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.novel.mapper.BookListItemMapper">
+    <resultMap id="itemWithBook" type="com.novel.entity.BookListItem">
+        <id property="id" column="id"/>
+        <result property="listId" column="list_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="addTime" column="add_time"/>
+        <association property="book" javaType="com.novel.entity.Book">
+            <id property="id" column="book_id"/>
+            <result property="title" column="b_title"/>
+            <result property="author" column="b_author"/>
+            <result property="cover" column="b_cover"/>
+            <result property="category" column="b_category"/>
+            <result property="rating" column="b_rating"/>
+        </association>
+    </resultMap>
+    <select id="selectByListId" resultMap="itemWithBook">
+        SELECT bli.id, bli.list_id, bli.book_id, bli.sort_order, bli.add_time,
+               b.title as b_title, b.author as b_author, b.cover as b_cover,
+               b.category as b_category, b.rating as b_rating
+        FROM book_list_items bli LEFT JOIN books b ON bli.book_id = b.id
+        WHERE bli.list_id = #{listId} ORDER BY bli.sort_order ASC, bli.add_time DESC
+    </select>
+    <select id="selectByListIdAndBookId" resultType="com.novel.entity.BookListItem">
+        SELECT * FROM book_list_items WHERE list_id = #{listId} AND book_id = #{bookId}
+    </select>
+    <delete id="deleteByListIdAndBookId">
+        DELETE FROM book_list_items WHERE list_id = #{listId} AND book_id = #{bookId}
+    </delete>
+    <select id="countByListId" resultType="int">
+        SELECT COUNT(*) FROM book_list_items WHERE list_id = #{listId}
+    </select>
+</mapper>

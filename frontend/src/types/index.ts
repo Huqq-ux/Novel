@@ -14,6 +14,7 @@ export interface Book {
   totalWords?: number
   priceType?: number
   freeChapterCount?: number
+  authorId?: number
 }
 
 export interface Chapter {
@@ -55,8 +56,34 @@ export interface PageResponse<T> {
 }
 
 export interface Bookmark {
+  id?: number
   bookId: number
   chapterId: number
   chapterTitle: string
-  timestamp: number
+  position?: number
+  note?: string
+  timestamp?: number
+  createTime?: string
+}
+
+export interface BookList {
+  id?: number
+  userId?: number
+  title: string
+  description?: string
+  cover?: string
+  isPublic?: boolean
+  likeCount?: number
+  bookCount?: number
+  createTime?: string
+  updateTime?: string
+}
+
+export interface BookListItem {
+  id?: number
+  listId: number
+  bookId: number
+  book?: Book
+  sortOrder?: number
+  addTime?: string
 }

@@ -326,6 +326,20 @@ export default function Discover() {
                 </span>
               </div>
             </div>
+            </Card>
+
+          <Card className={styles.rankingCard}>
+            <div className={styles.rankingItem} onClick={() => navigate('/book-lists')}>
+              <div className={styles.rankingItemInner}>
+                <span className={styles.rankingLabel}>
+                  <span className={styles.rankingIcon}>📚</span>
+                  书荒广场
+                </span>
+                <span className={styles.rankingArrow}>
+                  探索书单 <ChevronRight size={14} />
+                </span>
+              </div>
+            </div>
           </Card>
         </>
       )}

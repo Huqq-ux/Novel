@@ -131,6 +131,9 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/coin/packages").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/bookmarks/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/tips/book/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/book-lists/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

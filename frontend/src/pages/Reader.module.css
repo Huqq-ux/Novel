@@ -52,6 +52,13 @@
   display: flex;
   justify-content: space-between;
   padding: var(--space-lg) var(--space-xl);
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  background: inherit;
 }
 
 .navBtn {
@@ -180,8 +187,10 @@
   border-top: 1px solid var(--color-divider);
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   z-index: 100;
@@ -253,8 +262,10 @@
 .themePicker {
   position: fixed;
   bottom: 54px;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
   display: flex;
   justify-content: center;
   gap: var(--space-lg);
@@ -294,11 +305,13 @@
   background: rgba(0, 0, 0, 0.4);
   z-index: 200;
   display: flex;
+  justify-content: center;
   align-items: flex-end;
 }
 
 .drawer {
   width: 100%;
+  max-width: 600px;
   max-height: 60vh;
   background: var(--color-card);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
@@ -395,4 +408,63 @@
   padding: var(--space-3xl);
   color: var(--color-text-placeholder);
   font-size: var(--font-size-base);
+}
+
+/* ---- scroll mode ---- */
+.scrollContainer {
+  min-height: 100vh;
+  padding-bottom: 140px;
+}
+
+.scrollContent {
+  padding: var(--space-2xl) var(--space-xl);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-md);
+  line-height: 2;
+  min-height: 60vh;
+  white-space: pre-wrap;
+}
+
+.scrollNav {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-xl);
+  position: sticky;
+  top: 48px;
+  background: inherit;
+  z-index: 5;
+}
+
+.scrollNavBottom {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-xl);
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  background: inherit;
+}
+
+.scrollTopBtn,
+.scrollBottomBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  border: none;
+  cursor: pointer;
+  background: var(--color-surface);
+  color: var(--color-text-tertiary);
+}
+
+.modeIndicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--space-md) var(--space-xl);
+  border-bottom: 1px solid var(--color-divider);
 }

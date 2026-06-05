@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, Bookmark as BookmarkIcon, List, Palette } from 'lucide-react'
-import { bookApi, bookshelfApi, unlockApi } from '../services/api'
+import { ArrowLeft, Bookmark as BookmarkIcon, List, Palette, ScrollText, Heart } from 'lucide-react'
+import { bookApi, bookshelfApi, unlockApi, bookmarkApi, tipApi } from '../services/api'
 import { useBookshelfStore } from '../store/bookshelf'
 import type { Book, Bookmark, Chapter } from '../types'
 import Button from '../components/Button'
@@ -17,23 +17,12 @@ interface ThemePreset {
 
 const THEMES: ThemePreset[] = [
   { name: 'white', label: '白', bg: '#fbf9f7', color: '#2c1f14' },
-  { name: 'lightYellow', label: '淡黄', bg: '#f5f0c0', color: '#2c1f14' },
-  { name: 'parchment', label: '羊皮纸', bg: '#f0e4c8', color: '#2c1f14' },
-  { name: 'lightGray', label: '浅灰', bg: '#e8e4df', color: '#2c1f14' },
-  { name: 'darkGray', label: '深灰', bg: '#3a3530', color: '#d4c8b8' },
+  { name: 'green', label: '护眼', bg: '#c8d6b8', color: '#2c1f14' },
+  { name: 'parchment', label: '羊皮纸', bg: '#f0e6d3', color: '#2c1f14' },
+  { name: 'lightGray', label: '浅灰', bg: '#d9d2c5', color: '#2c1f14' },
+  { name: 'darkGray', label: '深灰', bg: '#3c3c3c', color: '#d4c8b8' },
   { name: 'black', label: '纯黑', bg: '#1a1a1a', color: '#c8c0b8' },
 ]
-
-function loadBookmarks(): Bookmark[] {
-  try {
-    const raw = localStorage.getItem('readerBookmarks')
-    return raw ? JSON.parse(raw) : []
-  } catch { return [] }
-}
-
-function saveBookmarks(list: Bookmark[]) {
-  localStorage.setItem('readerBookmarks', JSON.stringify(list))
-}
 
 interface UnlockStatus {
   needUnlock: boolean
@@ -67,9 +56,17 @@ export default function Reader() {
   const [readerTheme, setReaderTheme] = useState(() => {
     return localStorage.getItem('readerTheme') || 'white'
   })
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>(loadBookmarks)
+  const [readerMode, setReaderMode] = useState<'page' | 'scroll'>(() => {
+    return (localStorage.getItem('readerMode') as 'page' | 'scroll') || 'page'
+  })
+
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
   const [catalogTab, setCatalogTab] = useState<'chapters' | 'bookmarks'>('chapters')
   const [userBalance, setUserBalance] = useState(0)
+  const [showTipModal, setShowTipModal] = useState(false)
+  const [tipAmount, setTipAmount] = useState(100)
+  const [tipMessage, setTipMessage] = useState('')
+  const [tipping, setTipping] = useState(false)
   const { updateProgress, isInBookshelf, addToBookshelf } = useBookshelfStore()
 
   useEffect(() => {
@@ -86,6 +83,49 @@ export default function Reader() {
       setUserBalance(user.coinBalance || 0)
     }
   }, [])
+
+  useEffect(() => {
+    if (bookId) loadBookmarksFromServer()
+  }, [bookId])
+
+  const loadBookmarksFromServer = async () => {
+    try {
+      const res: any = await bookmarkApi.getBookmarks(Number(bookId))
+      const serverBookmarks: Bookmark[] = (res?.code === 200 && res?.data) ? res.data : []
+
+      const raw = localStorage.getItem('readerBookmarks')
+      if (raw) {
+        try {
+          const localBookmarks: Bookmark[] = JSON.parse(raw)
+          const localForThisBook = localBookmarks.filter(b => b.bookId === Number(bookId))
+          if (localForThisBook.length > 0) {
+            for (const lb of localForThisBook) {
+              const exists = serverBookmarks.some(sb => sb.chapterId === lb.chapterId)
+              if (!exists) {
+                try {
+                  await bookmarkApi.addBookmark({
+                    bookId: lb.bookId,
+                    chapterId: lb.chapterId,
+                    chapterTitle: lb.chapterTitle,
+                    position: lb.position || 0,
+                  })
+                } catch (_) {}
+              }
+            }
+            localStorage.removeItem('readerBookmarks')
+            const fresh: any = await bookmarkApi.getBookmarks(Number(bookId))
+            if (fresh?.code === 200 && fresh?.data) {
+              setBookmarks(fresh.data)
+              return
+            }
+          }
+        } catch (_) {}
+      }
+      setBookmarks(serverBookmarks)
+    } catch (_) {
+      setBookmarks([])
+    }
+  }
 
   const loadBookAndChapter = async () => {
     setLoading(true)
@@ -234,29 +274,78 @@ export default function Reader() {
     b => b.bookId === Number(bookId) && b.chapterId === Number(chapterId)
   )
 
-  const toggleBookmark = () => {
-    let updated: Bookmark[]
+  const toggleBookmark = async () => {
     if (isBookmarked) {
-      updated = bookmarks.filter(
-        b => !(b.bookId === Number(bookId) && b.chapterId === Number(chapterId))
+      const existing = bookmarks.find(
+        b => b.bookId === Number(bookId) && b.chapterId === Number(chapterId)
       )
-    } else {
-      const newBookmark: Bookmark = {
-        bookId: Number(bookId),
-        chapterId: Number(chapterId),
-        chapterTitle: chapter?.title || '',
-        timestamp: Date.now(),
+      if (existing?.id) {
+        await bookmarkApi.deleteBookmark(existing.id)
       }
-      updated = [newBookmark, ...bookmarks]
+      setBookmarks(prev => prev.filter(b => !(b.bookId === Number(bookId) && b.chapterId === Number(chapterId))))
+    } else {
+      try {
+        const res: any = await bookmarkApi.addBookmark({
+          bookId: Number(bookId),
+          chapterId: Number(chapterId),
+          chapterTitle: chapter?.title || '',
+        })
+        if (res?.code === 200 && res?.data) {
+          setBookmarks(prev => [res.data, ...prev])
+        } else if (res?.code === 400) {
+          Toast.info('该章节已添加书签')
+        }
+      } catch (_) {
+        Toast.error('添加书签失败')
+      }
     }
-    setBookmarks(updated)
-    saveBookmarks(updated)
   }
 
   const handleThemeChange = (name: string) => {
     setReaderTheme(name)
     localStorage.setItem('readerTheme', name)
     setShowThemePicker(false)
+  }
+
+  const handleModeChange = () => {
+    const next = readerMode === 'page' ? 'scroll' : 'page'
+    setReaderMode(next)
+    localStorage.setItem('readerMode', next)
+  }
+
+  const handleTip = async () => {
+    const token = localStorage.getItem('accessToken')
+    if (!token) { Toast.info('请先登录'); return }
+    if (!book?.authorId) { Toast.error('作者信息不可用'); return }
+    setTipping(true)
+    try {
+      const res: any = await tipApi.createTip({
+        authorId: book.authorId,
+        bookId: Number(bookId),
+        chapterId: Number(chapterId),
+        amount: tipAmount,
+        message: tipMessage || undefined,
+      })
+      if (res?.code === 200) {
+        Toast.success(`成功打赏 ${tipAmount} 书币`)
+        const remain = res.data?.remainingBalance
+        if (remain !== undefined) {
+          setUserBalance(remain)
+          const userStr = localStorage.getItem('user')
+          if (userStr) {
+            const user = JSON.parse(userStr)
+            user.coinBalance = remain
+            localStorage.setItem('user', JSON.stringify(user))
+          }
+        }
+        setShowTipModal(false)
+        setTipMessage('')
+      } else {
+        Toast.error(res?.message || '打赏失败')
+      }
+    } catch (_: any) {
+      Toast.error('打赏失败')
+    } finally { setTipping(false) }
   }
 
   const handleGoBack = () => {
@@ -362,12 +451,15 @@ export default function Reader() {
   }
 
   return (
-    <div style={{ background: currentTheme.bg, color: currentTheme.color, minHeight: '100vh', paddingBottom: '80px' }}>
+    <div style={{ background: currentTheme.bg, color: currentTheme.color, minHeight: '100vh', paddingBottom: readerMode === 'page' ? '130px' : 0 }}>
       <div
         style={{
-          opacity: showToolbar ? 1 : 0,
-          transform: showToolbar ? 'translateY(0)' : 'translateY(-10px)',
+          opacity: showToolbar || readerMode === 'scroll' ? 1 : 0,
+          transform: showToolbar || readerMode === 'scroll' ? 'translateY(0)' : 'translateY(-10px)',
           transition: 'opacity 0.3s ease, transform 0.3s ease',
+          position: readerMode === 'scroll' ? 'sticky' : 'static' as any,
+          top: 0,
+          zIndex: 10,
         }}
       >
         <div className={styles.toolbar}>
@@ -380,7 +472,7 @@ export default function Reader() {
         </div>
       </div>
 
-      <div className={styles.content} onClick={toggleToolbar} style={{ fontSize: `${fontSize}px` }}>
+      <div className={readerMode === 'scroll' ? styles.scrollContent : styles.content} onClick={readerMode === 'page' ? toggleToolbar : undefined} style={{ fontSize: `${fontSize}px` }}>
         {chapter.content}
       </div>
 
@@ -408,6 +500,58 @@ export default function Reader() {
         </button>
       </div>
 
+      {showTipModal && (
+        <div className={styles.drawerOverlay} onClick={() => setShowTipModal(false)}>
+          <div className={styles.drawer} onClick={e => e.stopPropagation()} style={{ padding: 'var(--space-xl)' }}>
+            <div className={styles.drawerHandle} />
+            <h3 style={{ textAlign: 'center', marginBottom: 'var(--space-lg)', fontFamily: 'var(--font-serif)' }}>打赏作者</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: 'var(--space-lg)' }}>
+              {[50, 100, 200, 500, 1000, 2000].map(amt => (
+                <button
+                  key={amt}
+                  onClick={() => setTipAmount(amt)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: 'var(--radius-md)',
+                    border: tipAmount === amt ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                    background: tipAmount === amt ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                    color: tipAmount === amt ? 'var(--color-primary)' : 'var(--color-text-primary)',
+                    cursor: 'pointer',
+                    fontWeight: tipAmount === amt ? 600 : 400,
+                  }}
+                >
+                  {amt} 书币
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              placeholder="写句鼓励的话（选填）"
+              value={tipMessage}
+              onChange={e => setTipMessage(e.target.value)}
+              maxLength={200}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--color-border)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text-primary)',
+                fontSize: 'var(--font-size-base)',
+                marginBottom: 'var(--space-lg)',
+                boxSizing: 'border-box',
+              }}
+            />
+            <div style={{ marginBottom: 'var(--space-sm)', textAlign: 'center', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-tertiary)' }}>
+              余额: {userBalance} 书币
+            </div>
+            <Button variant="primary" size="lg" block onClick={handleTip} loading={tipping} disabled={tipping || userBalance < tipAmount}>
+              {userBalance < tipAmount ? '余额不足' : `打赏 ${tipAmount} 书币`}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {showThemePicker && (
         <div className={styles.themePicker}>
           {THEMES.map(t => (
@@ -433,6 +577,10 @@ export default function Reader() {
           <Palette size={16} />
           <span>主题</span>
         </button>
+        <button className={styles.settingsBtn} onClick={handleModeChange}>
+          <ScrollText size={16} />
+          <span>{readerMode === 'page' ? '翻页' : '滚动'}</span>
+        </button>
         <div className={styles.fontSizeGroup}>
           <button
             className={styles.fontSizeBtn}
@@ -453,6 +601,10 @@ export default function Reader() {
         <button className={styles.settingsBtn} onClick={toggleBookmark}>
           <BookmarkIcon size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
           <span>{isBookmarked ? '已存' : '书签'}</span>
+        </button>
+        <button className={styles.settingsBtn} onClick={() => setShowTipModal(true)}>
+          <Heart size={16} />
+          <span>打赏</span>
         </button>
         <button className={styles.settingsBtn} onClick={() => navigate(`/book/${bookId}/comments`)}>
           <span>💬</span>
@@ -509,7 +661,7 @@ export default function Reader() {
                     >
                       <span className={styles.drawerItemTitle}>{b.chapterTitle}</span>
                       <span className={styles.drawerItemDate}>
-                        {new Date(b.timestamp).toLocaleDateString()}
+                        {b.createTime ? new Date(b.createTime).toLocaleDateString() : (b.timestamp ? new Date(b.timestamp).toLocaleDateString() : '')}
                       </span>
                     </div>
                   ))

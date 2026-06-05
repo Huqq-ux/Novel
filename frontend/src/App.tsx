@@ -23,6 +23,9 @@ const Recharge = lazy(() => import('./pages/Recharge'))
 const AuthorBooks = lazy(() => import('./pages/AuthorBooks'))
 const PaidBooks = lazy(() => import('./pages/PaidBooks'))
 const AuthorAudit = lazy(() => import('./pages/AuthorAudit'))
+const CustomerService = lazy(() => import('./pages/CustomerService'))
+const BookListSquare = lazy(() => import('./pages/BookListSquare'))
+const BookListDetail = lazy(() => import('./pages/BookListDetail'))
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
@@ -134,6 +137,9 @@ function AppContent() {
             <Route path="/author-books" element={<AuthorBooks />} />
             <Route path="/paid-books" element={<PaidBooks />} />
             <Route path="/author-audit" element={<AuthorAudit />} />
+            <Route path="/customer-service" element={<CustomerService />} />
+            <Route path="/book-lists" element={<BookListSquare />} />
+            <Route path="/book-lists/:id" element={<BookListDetail />} />
           </Routes>
         </Suspense>
       </div>

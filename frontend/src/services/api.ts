@@ -13,5 +13,8 @@ export {
   uploadApi,
   aiApi,
   signInApi,
+  bookmarkApi,
+  tipApi,
+  bookListApi,
 } from './api/index'
 export { default as api, default } from './api/client'

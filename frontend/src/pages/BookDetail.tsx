@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ArrowLeft, MessageCircle, Bookmark } from 'lucide-react'
-import { bookApi, bookshelfApi, commentApi } from '../services/api'
+import { ArrowLeft, MessageCircle, Bookmark, ListPlus } from 'lucide-react'
+import { bookApi, bookshelfApi, commentApi, bookListApi } from '../services/api'
 import { useBookshelfStore } from '../store/bookshelf'
-import type { Book, Chapter } from '../types'
+import type { Book, Chapter, BookList } from '../types'
 import BookRating from '../components/BookRating'
 import BookCover from '../components/BookCover'
 import Toast from '../components/Toast'
@@ -19,6 +19,8 @@ export default function BookDetail() {
   const [commentCount, setCommentCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
+  const [showBookListModal, setShowBookListModal] = useState(false)
+  const [myBookLists, setMyBookLists] = useState<BookList[]>([])
   const { isInBookshelf, addToBookshelf, getLastChapterId, setBookshelf } = useBookshelfStore()
 
   useEffect(() => {
@@ -111,6 +113,28 @@ export default function BookDetail() {
     }
   }
 
+  const openBookListModal = async () => {
+    const token = localStorage.getItem('accessToken')
+    if (!token) { Toast.info('请先登录'); return }
+    try {
+      const res: any = await bookListApi.getMyLists()
+      if (res?.code === 200) setMyBookLists(res.data || [])
+    } catch (_) {}
+    setShowBookListModal(true)
+  }
+
+  const handleAddToList = async (listId: number) => {
+    try {
+      const res: any = await bookListApi.addItem(listId, Number(id))
+      if (res?.code === 200) {
+        Toast.success('已加入书单')
+        setShowBookListModal(false)
+      } else {
+        Toast.error(res?.message || '添加失败')
+      }
+    } catch (_) { Toast.error('添加失败') }
+  }
+
   const handleChapterClick = (chapterId: number) => {
     navigate(`/read/${book?.id}/${chapterId}`, { state: { from: fromPath.current } })
   }
@@ -170,6 +194,9 @@ export default function BookDetail() {
         <div className={styles.iconAction} onClick={handleViewComments}>
           <MessageCircle size={20} color="var(--color-text-tertiary)" />
         </div>
+        <div className={styles.iconAction} onClick={openBookListModal}>
+          <ListPlus size={20} color="var(--color-text-tertiary)" />
+        </div>
       </div>
 
       {book.priceType === 1 && (
@@ -224,6 +251,25 @@ export default function BookDetail() {
               </span>
             </div>
           ))}
+        </div>
+      )}
+
+      {showBookListModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowBookListModal(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHandle} />
+            <h3 className={styles.modalTitle}>加入书单</h3>
+            {myBookLists.length === 0 ? (
+              <div className={styles.modalEmpty}>你还没有书单，去创建第一个吧</div>
+            ) : (
+              myBookLists.map(list => (
+                <div key={list.id} className={styles.modalItem} onClick={() => handleAddToList(list.id!)}>
+                  <span>{list.title}</span>
+                  <span className={styles.modalItemCount}>{list.bookCount || 0} 本</span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -30,7 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     );
 
     private static final Set<String> PUBLIC_PREFIXES = Set.of(
-            "/books", "/uploads", "/ratings", "/actuator"
+            "/books", "/uploads", "/ratings", "/actuator",
+            "/bookmarks", "/tips/book", "/book-lists"
     );
 
     @Autowired
