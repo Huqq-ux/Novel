@@ -25,10 +25,6 @@ spring:
           uri: lb://novel-user-service
           predicates:
             - Path=/api/notifications/**
-        - id: user-service-author
-          uri: lb://novel-user-service
-          predicates:
-            - Path=/api/author/**
         # Book Service
         - id: book-service
           uri: lb://novel-book-service
@@ -38,6 +34,10 @@ spring:
           uri: lb://novel-book-service
           predicates:
             - Path=/api/author/books/**
+        - id: user-service-author
+          uri: lb://novel-user-service
+          predicates:
+            - Path=/api/author/**
         - id: book-service-upload
           uri: lb://novel-book-service
           predicates:
