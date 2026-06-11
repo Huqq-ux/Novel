@@ -138,11 +138,29 @@ services:
       --requirepass ${REDIS_PASSWORD}
       --appendonly yes
 
+  # ========== Nacos 3.2.1 注册中心/配置中心 ==========
+  nacos:
+    image: nacos/nacos-server:v3.2.1
+    container_name: nacos-standalone
+    environment:
+      - MODE=standalone
+      - PREFER_HOST_MODE=hostname
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    volumes:
+      - nacos_data:/home/nacos/data
+    networks:
+      - novel-net
+    restart: unless-stopped
+
 volumes:
   mysql_data:
   redis_data:
   uploads_data:
   chroma_data:
+  nacos_data:
 
 networks:
   novel-net:
