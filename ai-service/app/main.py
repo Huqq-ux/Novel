@@ -29,7 +29,22 @@ async def lifespan(app: FastAPI):
         logger.info("Vector store indexing completed")
     except Exception as e:
         logger.warning(f"Vector store indexing failed (will work without vector search): {e}")
+    # Register as A2A Agent to Nacos
+    try:
+        from app.a2a.registry import registry
+        registry.register()
+    except Exception as e:
+        logger.warning(f"A2A Agent registration failed: {e}")
+
     yield
+
+    # Deregister from Nacos
+    try:
+        from app.a2a.registry import registry
+        registry.deregister()
+    except Exception:
+        pass
+
     logger.info("AI Service shutting down...")
 
 
