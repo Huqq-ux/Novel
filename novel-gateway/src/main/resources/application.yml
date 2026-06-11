@@ -1,0 +1,100 @@
+spring:
+  application:
+    name: novel-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # User Service
+        - id: user-service-auth
+          uri: lb://novel-user-service
+          predicates:
+            - Path=/api/auth/**
+        - id: user-service-user
+          uri: lb://novel-user-service
+          predicates:
+            - Path=/api/user/**
+        - id: user-service-notifications
+          uri: lb://novel-user-service
+          predicates:
+            - Path=/api/notifications/**
+        - id: user-service-author
+          uri: lb://novel-user-service
+          predicates:
+            - Path=/api/author/**
+        # Book Service
+        - id: book-service
+          uri: lb://novel-book-service
+          predicates:
+            - Path=/api/books/**
+        - id: book-service-author-books
+          uri: lb://novel-book-service
+          predicates:
+            - Path=/api/author/books/**
+        - id: book-service-upload
+          uri: lb://novel-book-service
+          predicates:
+            - Path=/api/upload/**
+        # Reading Service
+        - id: reading-service-bookshelf
+          uri: lb://novel-reading-service
+          predicates:
+            - Path=/api/bookshelf/**
+        - id: reading-service-bookmarks
+          uri: lb://novel-reading-service
+          predicates:
+            - Path=/api/bookmarks/**
+        - id: reading-service-unlock
+          uri: lb://novel-reading-service
+          predicates:
+            - Path=/api/unlock/**
+        # Interaction Service
+        - id: interaction-service-comments
+          uri: lb://novel-interaction-service
+          predicates:
+            - Path=/api/comments/**
+        - id: interaction-service-ratings
+          uri: lb://novel-interaction-service
+          predicates:
+            - Path=/api/ratings/**
+        - id: interaction-service-tips
+          uri: lb://novel-interaction-service
+          predicates:
+            - Path=/api/tips/**
+        - id: interaction-service-book-lists
+          uri: lb://novel-interaction-service
+          predicates:
+            - Path=/api/book-lists/**
+        # Payment Service
+        - id: payment-service-coin
+          uri: lb://novel-payment-service
+          predicates:
+            - Path=/api/coin/**
+        - id: payment-service-signin
+          uri: lb://novel-payment-service
+          predicates:
+            - Path=/api/signin/**
+        # Admin Service
+        - id: admin-service
+          uri: lb://novel-admin-service
+          predicates:
+            - Path=/api/admin/**
+        # AI Service (A2A Agent)
+        - id: ai-service
+          uri: lb://novel-ai-agent
+          predicates:
+            - Path=/api/ai/**
+
+server:
+  port: 8080
+
+jwt:
+  secret: ${JWT_SECRET:}
+  expiration: ${JWT_EXPIRATION:3600000}
