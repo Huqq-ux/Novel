@@ -97,7 +97,15 @@ Novel/
 │   │   └── utils/
 │   │       └── passwordValidation.ts
 │   └── vite.config.ts           # Vite 配置（代理 + 路径别名）
-├── backend/                     # Spring Boot 后端
+├── novel-gateway/                # Spring Cloud Gateway 网关
+├── novel-user-service/           # 用户微服务
+├── novel-book-service/           # 书籍微服务
+├── novel-reading-service/        # 阅读微服务
+├── novel-interaction-service/    # 交互微服务
+├── novel-payment-service/        # 支付微服务
+├── novel-admin-service/          # 管理后台微服务
+├── novel-common/                 # 公共模块（DTO/Entity/Util）
+├── backend/                      # 原 Spring Boot 单体（保留参考）
 │   ├── src/main/java/com/novel/
 │   │   ├── NovelApplication.java    # 启动类
 │   │   ├── config/                   # 配置类
@@ -153,28 +161,51 @@ Novel/
 └── novel_database.sql           # 完整数据库初始化脚本（16 张表 + 测试数据）
 ```
 
+## 架构
+
+微服务架构，基于 **Spring Cloud Alibaba + Nacos 3.2 A2A Registry**。
+
+| 服务 | 端口 | 技术栈 |
+|------|------|--------|
+| novel-gateway | 8080 | Spring Cloud Gateway + JWT 鉴权 |
+| novel-user-service | 8081 | Spring Boot 3.5 + MyBatis-Plus |
+| novel-book-service | 8082 | Spring Boot 3.5 + MyBatis-Plus |
+| novel-reading-service | 8083 | Spring Boot 3.5 + OpenFeign |
+| novel-interaction-service | 8084 | Spring Boot 3.5 + MyBatis-Plus |
+| novel-payment-service | 8085 | Spring Boot 3.5 + MyBatis-Plus |
+| novel-admin-service | 8086 | Spring Boot 3.5 + MyBatis-Plus |
+| novel-ai-service | 8001 | Python FastAPI + AgentScope (A2A Agent) |
+| Nacos Server | 8848 | Nacos 3.2.1 (注册中心 + 配置中心 + A2A Registry) |
+
 ## 开发命令
 
 ```bash
-# 前端
-cd frontend && npm install && npm run dev       # 开发服务器 :3000
-cd frontend && npm run build                     # 生产构建
+# 基础设施
+docker-compose up -d nacos                        # 启动 Nacos 3.2.1
 
-# 后端
-cd backend && mvn spring-boot:run                # 开发服务器 :8080
-cd backend && mvn clean install                  # 构建
+# 使用 Maven Wrapper（需要 Java 17+）
+./mvnw clean install -pl novel-common -DskipTests # 安装公共模块
+./mvnw spring-boot:run -pl novel-gateway          # 启动网关 :8080
+./mvnw spring-boot:run -pl novel-user-service     # 启动用户服务 :8081
+# ... 其余服务同理
 
 # AI 服务
-cd ai-service && pip install -r requirements.txt # 安装依赖
-cd ai-service && bash start.sh                   # 开发服务器 :8001
+cd ai-service && pip install -r requirements.txt  # 安装依赖
+cd ai-service && bash start.sh                    # 开发服务器 :8001
+
+# 前端
+cd frontend && npm install && npm run dev         # 开发服务器 :3000
+
+# 旧单体后端（保留作参考）
+cd backend && ./mvnw spring-boot:run              # 开发服务器 :8080
 ```
 
 ## Vite 代理配置
 
 | 前端路径 | 代理目标 | 说明 |
 |---|---|---|
-| `/api` | `http://localhost:8080`（去掉 `/api` 前缀） | Spring Boot 后端 |
-| `/api/ai` | `http://localhost:8001` | AI 服务，优先级高于 `/api` |
+| `/api` | `http://localhost:8080`（去掉 `/api` 前缀） | 统一 Gateway 入口 |
+| `/uploads` | `http://localhost:8080` | 文件上传代理 |
 
 ## 数据库
 
