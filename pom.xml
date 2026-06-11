@@ -38,6 +38,7 @@
         <module>novel-book-service</module>
         <module>novel-payment-service</module>
         <module>novel-reading-service</module>
+        <module>novel-interaction-service</module>
     </modules>
 
     <dependencyManagement>

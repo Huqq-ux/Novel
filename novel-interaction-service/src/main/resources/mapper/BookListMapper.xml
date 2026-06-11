@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.novel.interaction.mapper.BookListMapper">
+    <select id="selectPublicLists" resultType="com.novel.common.entity.BookList">
+        SELECT * FROM book_lists WHERE is_public = 1
+        <choose>
+            <when test="sort == 'newest'">ORDER BY create_time DESC</when>
+            <when test="sort == 'popular'">ORDER BY like_count DESC</when>
+            <otherwise>ORDER BY create_time DESC</otherwise>
+        </choose>
+        LIMIT #{offset}, #{size}
+    </select>
+    <select id="selectByUserId" resultType="com.novel.common.entity.BookList">
+        SELECT * FROM book_lists WHERE user_id = #{userId} ORDER BY create_time DESC
+    </select>
+</mapper>
