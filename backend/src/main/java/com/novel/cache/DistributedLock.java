@@ -18,7 +18,6 @@ public class DistributedLock {
 
     private static final String LOCK_PREFIX = "lock:";
     private static final long DEFAULT_EXPIRE_TIME = 30;
-    private static final long DEFAULT_WAIT_TIME = 5000;
     private static final long DEFAULT_RETRY_INTERVAL = 100;
 
     private static final String UNLOCK_SCRIPT =
