@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.novel.user.mapper.RefreshTokenMapper">
+
+    <select id="findByToken" resultType="com.novel.common.entity.RefreshToken">
+        SELECT * FROM refresh_tokens
+        WHERE token = #{token}
+    </select>
+
+    <update id="revokeByUserId">
+        UPDATE refresh_tokens
+        SET revoked = true
+        WHERE user_id = #{userId}
+    </update>
+
+    <delete id="deleteExpiredTokens">
+        DELETE FROM refresh_tokens
+        WHERE expires_at &lt; NOW() OR revoked = true
+    </delete>
+
+</mapper>
