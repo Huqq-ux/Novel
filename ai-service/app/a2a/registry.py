@@ -2,6 +2,7 @@
 import logging
 import socket
 import json
+import os
 from app.a2a.agent_card import build_agent_card
 
 logger = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ class NacosA2ARegistry:
 
 # Module-level singleton
 registry = NacosA2ARegistry(
-    nacos_addr="localhost:8848",
+    nacos_addr=os.environ.get("NACOS_ADDR", "localhost:8848"),
     service_name="novel-ai-agent",
-    service_port=8001,
+    service_port=int(os.environ.get("AI_SERVICE_PORT", "8001")),
 )

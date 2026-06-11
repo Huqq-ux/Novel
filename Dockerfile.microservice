@@ -1,0 +1,30 @@
+# 微服务通用 Dockerfile（Maven 多模块构建）
+# 使用方式: docker build --build-arg SERVICE_NAME=novel-user-service -t novel-user-service .
+# 或使用下面的子目录 Dockerfile
+
+FROM maven:3.9-eclipse-temurin-17-alpine AS build
+WORKDIR /app
+
+# 复制父 POM 和公共模块（Maven 依赖解析需要）
+COPY pom.xml .
+COPY novel-common/pom.xml novel-common/
+COPY novel-common/src novel-common/src/
+
+# 构建参数：服务模块名
+ARG SERVICE_NAME
+COPY ${SERVICE_NAME}/pom.xml ${SERVICE_NAME}/
+COPY ${SERVICE_NAME}/src ${SERVICE_NAME}/src/
+
+# 构建指定模块及其依赖
+RUN mvn package -pl ${SERVICE_NAME} -am -DskipTests -B -q
+
+FROM eclipse-temurin:17-jre-alpine
+RUN apk add --no-cache curl tzdata && \
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+
+ARG SERVICE_NAME
+COPY --from=build /app/${SERVICE_NAME}/target/*.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app.jar"]
