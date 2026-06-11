@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.novel.reading.mapper.BookshelfMapper">
+    <resultMap id="bookshelfResultMap" type="com.novel.common.entity.Bookshelf">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="lastChapterId" column="last_chapter_id"/>
+        <result property="lastReadTime" column="last_read_time"/>
+        <result property="progress" column="read_progress"/>
+        <association property="book" javaType="com.novel.common.entity.Book">
+            <id property="id" column="book_id"/>
+            <result property="title" column="book_title"/>
+            <result property="author" column="book_author"/>
+            <result property="cover" column="book_cover"/>
+            <result property="description" column="book_description"/>
+            <result property="category" column="book_category"/>
+            <result property="isFinished" column="book_is_finished"/>
+            <result property="chapterCount" column="book_chapter_count"/>
+            <result property="rating" column="book_rating"/>
+            <result property="clickCount" column="book_click_count"/>
+            <result property="collectCount" column="book_collect_count"/>
+        </association>
+    </resultMap>
+    <select id="selectByUserId" resultMap="bookshelfResultMap">
+        SELECT bs.id, bs.user_id, bs.book_id, bs.last_chapter_id, bs.last_read_time, bs.read_progress,
+               b.title as book_title, b.author as book_author, b.cover as book_cover, b.description as book_description,
+               b.category as book_category, b.is_finished as book_is_finished, b.chapter_count as book_chapter_count,
+               b.rating as book_rating, b.click_count as book_click_count, b.collect_count as book_collect_count
+        FROM bookshelf bs LEFT JOIN books b ON bs.book_id = b.id
+        WHERE bs.user_id = #{userId} ORDER BY bs.last_read_time DESC
+    </select>
+    <select id="selectByUserIdAndBookId" resultType="com.novel.common.entity.Bookshelf">
+        SELECT * FROM bookshelf WHERE user_id = #{userId} AND book_id = #{bookId}
+    </select>
+    <delete id="deleteByUserIdAndBookId">
+        DELETE FROM bookshelf WHERE user_id = #{userId} AND book_id = #{bookId}
+    </delete>
+</mapper>
