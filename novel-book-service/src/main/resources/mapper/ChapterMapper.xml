@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.novel.book.mapper.ChapterMapper">
+
+    <select id="selectByBookIdOrderByOrderNum" resultType="com.novel.common.entity.Chapter">
+        SELECT * FROM chapters
+        WHERE book_id = #{bookId}
+        ORDER BY order_num ASC
+    </select>
+
+    <select id="selectByBookIdAndOrderNum" resultType="com.novel.common.entity.Chapter">
+        SELECT * FROM chapters
+        WHERE book_id = #{bookId} AND order_num = #{orderNum}
+    </select>
+
+</mapper>

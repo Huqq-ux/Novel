@@ -35,6 +35,7 @@
         <module>novel-common</module>
         <module>novel-gateway</module>
         <module>novel-user-service</module>
+        <module>novel-book-service</module>
     </modules>
 
     <dependencyManagement>

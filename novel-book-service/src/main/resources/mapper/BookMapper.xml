@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.novel.book.mapper.BookMapper">
+
+    <select id="selectByCategory" resultType="com.novel.common.entity.Book">
+        SELECT * FROM books
+        WHERE category = #{category}
+        ORDER BY update_time DESC
+    </select>
+
+    <select id="selectByIsFinished" resultType="com.novel.common.entity.Book">
+        SELECT * FROM books
+        WHERE is_finished = #{isFinished}
+        ORDER BY update_time DESC
+    </select>
+
+    <select id="selectPageWithSort" resultType="com.novel.common.entity.Book">
+        SELECT * FROM books
+        <choose>
+            <when test="sort == 'clickCount'">
+                ORDER BY click_count DESC
+            </when>
+            <when test="sort == 'createTime'">
+                ORDER BY create_time DESC
+            </when>
+            <when test="sort == 'rating'">
+                ORDER BY rating DESC
+            </when>
+            <otherwise>
+                ORDER BY update_time DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="searchBooks" resultType="com.novel.common.entity.Book">
+        SELECT * FROM books
+        WHERE title LIKE CONCAT('%', #{keyword}, '%')
+        OR author LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY update_time DESC
+    </select>
+
+    <select id="findFinishedBooks" resultType="com.novel.common.entity.Book">
+        SELECT * FROM books
+        WHERE is_finished = true
+        ORDER BY rating DESC
+    </select>
+
+    <select id="findRecentBooks" resultType="com.novel.common.entity.Book">
+        SELECT * FROM books
+        ORDER BY update_time DESC
+    </select>
+
+</mapper>
