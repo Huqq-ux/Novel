@@ -1,5 +1,5 @@
 -- ============================================
--- 墨语小说 - 数据库初始化脚本
+-- 土豆小说 - 数据库初始化脚本
 -- 数据库: novel, 字符集: utf8mb4
 -- ============================================
 
@@ -333,7 +333,7 @@ INSERT INTO recharge_packages (coins, price, bonus, sort_order, is_active, creat
 -- 初始数据：示例书籍
 -- ============================================
 INSERT INTO books (title, author, cover, category, description, chapter_count, is_finished, rating, click_count, collect_count, status, price_type, author_id, free_chapter_count, total_words, create_time, update_time, latest_chapter_name, latest_chapter_update_time) VALUES
-('剑道独尊', '墨语作者', NULL, '玄幻', '一个少年持剑走天涯的故事...', 0, 0, 4.5, 1200, 350, 1, 0, 1, 30, 0, NOW(), NOW(), NULL, NULL),
-('都市修仙传', '墨语作者', NULL, '都市', '现代都市中的修仙传奇...', 0, 0, 4.2, 800, 220, 1, 1, 1, 20, 0, NOW(), NOW(), NULL, NULL),
-('星河战纪', '墨语作者', NULL, '科幻', '星际战争中的英雄史诗...', 0, 1, 4.8, 2500, 680, 1, 0, 1, 50, 0, NOW(), NOW(), NULL, NULL),
-('花间集', '墨语作者', NULL, '言情', '花开花落间的爱情故事...', 0, 0, 4.0, 600, 180, 1, 0, 1, 40, 0, NOW(), NOW(), NULL, NULL);
+('剑道独尊', '土豆作者', NULL, '玄幻', '一个少年持剑走天涯的故事...', 0, 0, 4.5, 1200, 350, 1, 0, 1, 30, 0, NOW(), NOW(), NULL, NULL),
+('都市修仙传', '土豆作者', NULL, '都市', '现代都市中的修仙传奇...', 0, 0, 4.2, 800, 220, 1, 1, 1, 20, 0, NOW(), NOW(), NULL, NULL),
+('星河战纪', '土豆作者', NULL, '科幻', '星际战争中的英雄史诗...', 0, 1, 4.8, 2500, 680, 1, 0, 1, 50, 0, NOW(), NOW(), NULL, NULL),
+('花间集', '土豆作者', NULL, '言情', '花开花落间的爱情故事...', 0, 0, 4.0, 600, 180, 1, 0, 1, 40, 0, NOW(), NOW(), NULL, NULL);

@@ -1,5 +1,5 @@
 # ============================================================
-# 墨语小说微服务 Docker Compose 配置
+# 土豆小说微服务 Docker Compose 配置
 # 启动: docker-compose up -d
 # 停止: docker-compose down
 # 日志: docker-compose logs -f [service-name]
@@ -149,6 +149,12 @@ services:
     networks:
       - novel-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--connect-timeout", "3", "--max-time", "5", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   # 支付服务 :8085
   novel-payment-service:
@@ -179,6 +185,12 @@ services:
     networks:
       - novel-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--connect-timeout", "3", "--max-time", "5", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   # 阅读服务 :8083
   novel-reading-service:
@@ -209,6 +221,12 @@ services:
     networks:
       - novel-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--connect-timeout", "3", "--max-time", "5", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   # 交互服务 :8084
   novel-interaction-service:
@@ -239,6 +257,12 @@ services:
     networks:
       - novel-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--connect-timeout", "3", "--max-time", "5", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   # 管理后台服务 :8086
   novel-admin-service:
@@ -272,6 +296,12 @@ services:
     networks:
       - novel-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--connect-timeout", "3", "--max-time", "5", "http://localhost:8086/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   # ========================================
   # 网关 :8080（最后启动，依赖基础服务）

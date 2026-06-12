@@ -4,7 +4,7 @@ def build_agent_card(host: str = "localhost", port: int = 8001) -> dict:
     """Build AgentCard as dict for Nacos metadata registration."""
     return {
         "name": "novel-ai-agent",
-        "description": "墨语小说 AI 智能助手，提供推荐、搜索、客服和封面生成能力",
+        "description": "土豆小说 AI 智能助手，提供推荐、搜索、客服和封面生成能力",
         "version": "1.0.0",
         "url": f"http://{host}:{port}",
         "capabilities": {

@@ -86,7 +86,7 @@ export default function Home() {
       <div className={styles.page}>
         <div className={styles.header}>
           <div className={styles.brand}>
-            <h1>墨语小说</h1>
+            <h1>土豆小说</h1>
             <p>好书如挚友，终身不相忘</p>
           </div>
           <div className={styles.notifyBtn} onClick={() => navigate('/notifications')}>

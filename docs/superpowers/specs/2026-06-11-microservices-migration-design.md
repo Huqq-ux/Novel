@@ -1,4 +1,4 @@
-# 墨语小说微服务架构迁移方案
+# 土豆小说微服务架构迁移方案
 
 ## 概述
 
@@ -246,7 +246,7 @@ from agentscope_runtime.engine.deployers.adapter.a2a.nacos_a2a_registry import N
 
 agent_card = AgentCard(
     name="novel-ai-agent",
-    description="墨语小说 AI 智能助手，提供推荐、搜索、客服和封面生成能力",
+    description="土豆小说 AI 智能助手，提供推荐、搜索、客服和封面生成能力",
     version="1.0.0",
     url="http://novel-ai-service:8001",
     capabilities=AgentCapabilities(

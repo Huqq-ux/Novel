@@ -1,4 +1,4 @@
-# 墨语小说微服务架构迁移实施计划
+# 土豆小说微服务架构迁移实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -1295,7 +1295,7 @@ from a2a.types import AgentCard, AgentCapabilities, AgentSkill
 def build_agent_card(host: str = "localhost", port: int = 8001) -> AgentCard:
     return AgentCard(
         name="novel-ai-agent",
-        description="墨语小说 AI 智能助手，提供推荐、搜索、客服和封面生成能力",
+        description="土豆小说 AI 智能助手，提供推荐、搜索、客服和封面生成能力",
         version="1.0.0",
         url=f"http://{host}:{port}",
         capabilities=AgentCapabilities(

@@ -369,7 +369,7 @@ export default function User() {
         <div className={styles.aboutContent}>
           <div className={styles.aboutVersion}>版本: 1.0.0</div>
           <div className={styles.aboutDesc}>
-            墨语小说 - 免费阅读平台
+            土豆小说 - 免费阅读平台
           </div>
         </div>
       </Card>
